@@ -1,0 +1,120 @@
+symbolPreset: nerd
+composer:
+  shape: band
+theme:
+  dark: titanium
+setupVersion: 2
+edit:
+  mode: hashline
+tools:
+  approvalMode: yolo
+  abortOnFabricatedResult: true
+defaultThinkingLevel: auto
+memory:
+  backend: local
+autolearn:
+  enabled: false
+plan:
+  defaultOnStartup: false
+  enabled: true
+task:
+  enableLsp: true
+  isolation:
+    mode: auto
+    commits: ai
+  softRequestBudget: 200
+  agentAdvisor:
+    designer: tailscale/gemini-flash-lite:high
+statusLine:
+  preset: full
+  separator: powerline-thin
+  transparent: false
+display:
+  showTokenUsage: true
+  showTurnTime: true
+secrets:
+  enabled: true
+retry:
+  modelFallback: true
+modelRoleStorage: global
+browser:
+  headless: true
+  relay: true
+personality: default
+providers:
+  fetch: auto
+  cacheRetention: auto
+  webSearchTimeoutSeconds: 60
+  autoThinkingMaxEffort: max
+exa:
+  enabled: true
+compaction:
+  asyncEnabled: true
+  autoContinue: true
+  keepRecentTokens: 20000
+modelRoles:
+  default: tailscale/gpt-5.6-sol:xhigh
+  smol: tailscale/deepseek-v4-flash:max
+  slow: tailscale/fable-5:max
+  tiny: tailscale/gpt-5.3-codex-spark:low
+  commit: tailscale/gpt-5.6-luna:low
+  vision: tailscale/gemini-flash
+  designer: tailscale/gemini-pro
+  task: tailscale/gpt-5.6-terra:max
+  advisor: tailscale/gpt-5.6-luna:max
+  plan: "@slow"
+advisor:
+  enabled: false
+  syncBacklog: "off"
+  immuneTurns: 3
+prewalk:
+  enabled: true
+model:
+  loopGuard:
+    enabled: true
+features:
+  unexpectedStopDetection: smart
+github:
+  enabled: true
+astGrep:
+  enabled: true
+checkpoint:
+  enabled: true
+tui:
+  hyperlinks: auto
+  renderMermaid: true
+  tight: false
+mcp:
+  enableProjectConfig: true
+  notifications: false
+lsp:
+  formatOnWrite: true
+  diagnosticsOnWrite: true
+  diagnosticsOnEdit: false
+git:
+  enabled: true
+commit:
+  mapReduceEnabled: true
+gc:
+  blobs: true
+  coldArchiveAfterDays: 30
+steeringMode: one-at-a-time
+doubleEscapeAction: rewind
+autoResume: false
+images:
+  describeForTextModels: true
+  autoResize: true
+terminal:
+  showImages: true
+speech:
+  enabled: false
+  enhanced: false
+python:
+  kernelMode: session
+power:
+  sleepPrevention: idle
+hideThinkingBlock: true
+disabledExtensions:
+  []
+tier:
+  openai: priority

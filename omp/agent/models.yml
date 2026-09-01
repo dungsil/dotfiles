@@ -1,0 +1,148 @@
+providers:
+  tailscale:
+    baseUrl: https://ai.gila-map.ts.net/v1
+    api: openai-completions
+    auth: none
+    models:
+      - id: gpt-5.6-sol
+        name: GPT 5.6 Sol
+        reasoning: true
+        maxTokens: 128000
+        contextWindow: 1050000
+        api: openai-responses
+        input: [text, image]
+      - id: gpt-5.6-terra
+        name: GPT 5.6 Terra
+        reasoning: true
+        maxTokens: 128000
+        contextWindow: 1050000
+        api: openai-responses
+        input: [text, image]
+      - id: gpt-5.6-luna
+        name: GPT 5.6 Luna
+        reasoning: true
+        maxTokens: 128000
+        contextWindow: 1050000
+        api: openai-responses
+        input: [text, image]
+      - id: fable-5
+        name: Fable 5
+        reasoning: true
+        maxTokens: 128000
+        contextWindow: 1000000
+        api: anthropic-messages
+        input: [text, image]
+      - id: opus-5
+        name: Opus 5
+        reasoning: true
+        maxTokens: 128000
+        contextWindow: 1000000
+        api: anthropic-messages
+        input: [text, image]
+      - id: sonnet-5
+        name: Sonnet 5
+        reasoning: true
+        maxTokens: 128000
+        contextWindow: 1000000
+        api: anthropic-messages
+        input: [text, image]
+      - id: haiku-4.5
+        name: Haiku 4.5
+        reasoning: true
+        maxTokens: 64000
+        contextWindow: 200000
+        api: anthropic-messages
+        input: [text, image]
+      - id: gemini-3.1-pro
+        name: Gemini Pro
+        reasoning: true
+        maxTokens: 65536
+        contextWindow: 1048576
+        input: [text, image]
+      - id: gemini-3.7-flash
+        name: Gemini Flash
+        reasoning: true
+        maxTokens: 65536
+        contextWindow: 1048576
+        input: [text, image]
+      - id: gemini-3.5-flash-lite
+        name: Gemini Flash Lite
+        reasoning: true
+        maxTokens: 65536
+        contextWindow: 1048576
+        input: [text, image]
+      - id: gemma-4-26b
+        name: Gemma 4 26B
+        reasoning: true
+        maxTokens: 32768
+        contextWindow: 262144
+        api: openai-responses
+        input: [text, image]
+      - id: gemma-4-31b
+        name: Gemma 4 26B
+        reasoning: true
+        maxTokens: 32768
+        contextWindow: 262144
+        api: openai-responses
+        input: [text, image]
+      - id: deepseek-v4-flash
+        name: DeepSeek V4 Flash
+        reasoning: true
+        maxTokens: 128000
+        contextWindow: 1048576
+        api: openai-completions
+        input: [text]
+      - id: deepseek-v4-pro
+        name: DeepSeek V4 Pro
+        reasoning: true
+        maxTokens: 128000
+        contextWindow: 1048576
+        api: openai-completions
+        input: [text]
+      - id: glm-5.3
+        name: GLM 5.3
+        reasoning: true
+        maxTokens: 128000
+        contextWindow: 1048576
+        api: openai-completions
+        input: [text]
+      - id: glm-5.3-flash
+        name: GLM 5.3 Flash
+        reasoning: true
+        maxTokens: 128000
+        contextWindow: 1048576
+        api: openai-completions
+        input: [text]
+      - id: gpt-5.3-codex-spark
+        name: GPT 5.3 Codex Spark
+        reasoning: true
+        maxTokens: 32768
+        contextWindow: 128000
+        api: openai-responses
+        input: [text]
+      - id: opus-4.6
+        name: Opus 4.6
+        reasoning: true
+        maxTokens: 128000
+        contextWindow: 1000000
+        api: anthropic-messages
+        input: [text, image]
+      - id: opus-4.8
+        name: Opus 4.8
+        reasoning: true
+        maxTokens: 128000
+        contextWindow: 1000000
+        api: anthropic-messages
+        input: [text, image]
+      - id: qwen3.8-flash-next
+        name: Qwen 3.8 Flash Next
+        reasoning: true
+        api: openai-completions
+        input: [text]
+      - id: solar-pro4
+        name: Solar Pro 4
+        reasoning: false
+        maxTokens: 65536
+        contextWindow: 524288
+        api: openai-completions
+        input: [text]
