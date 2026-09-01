@@ -33,6 +33,7 @@ $Links = @(
     @{ Source = 'omp\agent\config.yml';        Dest = '.omp\agent\config.yml' }
     @{ Source = 'omp\agent\models.yml';        Dest = '.omp\agent\models.yml' }
     @{ Source = 'omp\agent\mcp.json';         Dest = '.omp\agent\mcp.json' }
+    @{ Source = 'pwsh\Microsoft.PowerShell_profile.ps1';  Dest = 'Documents\PowerShell\Microsoft.PowerShell_profile.ps1' }
 )
 
 # 관리자 권한이 없으면 오류를 출력하고 종료합니다. 자동 승격은 수행하지 않습니다.
