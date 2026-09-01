@@ -2,6 +2,15 @@
 
 개인 설정 파일 저장소
 
+## 시작하기
+
+**윈도우:**
+```powershell
+sudo pwsh .\install.ps1 # 혹은 관리자 권한의 파워셀에서 실행
+
+sudo pwsh .\install.ps1 -Force # 강제 재생성
+```
+
 ## 라이선스
 이 프로젝트는 [MIT License](./LICENSE)에 따라 배포됩니다.
 
