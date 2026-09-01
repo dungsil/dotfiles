@@ -1,0 +1,7 @@
+{
+    "chat.agent.enabled": false,
+    "chat.disableAIFeatures": true,
+    "workbench.startupEditor": "none",
+    "editor.fontFamily": "Jetendard, Consolas, 'Courier New', monospace",
+    "explorer.confirmDragAndDrop": false
+}
