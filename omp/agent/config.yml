@@ -45,6 +45,8 @@ providers:
   fetch: auto
   cacheRetention: auto
   webSearchTimeoutSeconds: 60
+  webSearchOrder:
+    - kagi
   autoThinkingMaxEffort: max
 exa:
   enabled: true
