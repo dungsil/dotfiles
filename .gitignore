@@ -1,0 +1,39 @@
+### JetBrains ###
+.idea/
+out/
+*.iws
+*.iml
+
+### VS Code ###
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/
+*.vsix
+
+### macOS ###
+.DS_Store
+._*
+Icon
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+### Windows ###
+$RECYCLE.BIN/
+Thumbs.db
+[Dd]esktop.ini
+*.lnk
+
+### Linux ###
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+*~
