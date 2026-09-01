@@ -21,6 +21,8 @@ $DotfilesRoot = $PSScriptRoot
 
 # 저장소 파일 -> 실제 설치 경로 매핑
 $Links = @(
+    @{ Source = 'git\.gitconfig';               Dest = '.gitconfig' }
+    @{ Source = 'omp\agent\AGENTS.md';         Dest = '.omp\agent\AGENTS.md' }
     @{ Source = 'omp\agent\AGENTS.md';         Dest = '.omp\agent\AGENTS.md' }
     @{ Source = 'omp\agent\TITLE_SYSTEM.md';   Dest = '.omp\agent\TITLE_SYSTEM.md' }
     @{ Source = 'omp\agent\APPEND_SYSTEM.md';  Dest = '.omp\agent\APPEND_SYSTEM.md' }

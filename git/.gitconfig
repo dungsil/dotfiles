@@ -1,0 +1,19 @@
+[gpg]
+	format = ssh
+[gpg "ssh"]
+	program = ~/AppData/Local/Microsoft/WindowsApps/op-ssh-sign.exe
+[commit]
+	gpgsign = true
+[user]
+	signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILD9EPb3Rig1RT8qGRYNGCrW/r1G/nL7559izMExZ6Dt
+	name = 김용건 (Kim Younggeon)
+	email = git+commit@younggeon.kim
+[init]
+	defaultBranch = main
+[core]
+	eol = lf
+	autocrlf = input
+	longpaths = true
+	sshCommand = C:/Windows/System32/OpenSSH/ssh.exe
+[tag]
+	forcesignannotated = true
