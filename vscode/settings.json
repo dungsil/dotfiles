@@ -3,5 +3,9 @@
     "chat.disableAIFeatures": true,
     "workbench.startupEditor": "none",
     "editor.fontFamily": "Jetendard, Consolas, 'Courier New', monospace",
-    "explorer.confirmDragAndDrop": false
+    "explorer.confirmDragAndDrop": false,
+    "files.exclude": {
+        "*.iml": true,
+        "**/.idea": true
+    }
 }
