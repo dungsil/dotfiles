@@ -25,11 +25,11 @@ sudo pwsh .\install.ps1 -Force # 강제 재생성
 | [Conventional Commits] | CC BY 3.0 | [omp/agent/AGENTS.md#commit-message-convention] |
 
 
-<!-- 링크 --!>
+<!-- 링크 -->
 [snflkd/fluent-korean]: https://github.com/snflkd/fluent-korean
 [ayghri/i-have-adhd]: https://github.com/ayghri/i-have-adhd
 [Conventional Commits]: https://www.conventionalcommits.org/en/v1.0.0/
 
 [omp/agent/PERSONALITY.md]: ./omp/agent/PERSONALITY.md
-[omp/agent/APPEND_SYSTEM.md]: ./omp/agent/PERSONALITY.md
-[omp/agent/AGENTS.md#Commit-message-convention]: ./omp/agent/AGENTS.md#commit-message-convention
+[omp/agent/APPEND_SYSTEM.md]: ./omp/agent/APPEND_SYSTEM.md
+[omp/agent/AGENTS.md#commit-message-convention]: ./omp/agent/AGENTS.md#commit-message-convention
