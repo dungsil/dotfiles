@@ -1,5 +1,5 @@
-# dotfiles 저장소의 설정 파일을 $HOME 하위 실제 경로로 심볼릭 링크를 생성합니다.
-# 심볼릭 링크 생성에는 관리자 권한(또는 개발자 모드)이 필요하므로, 관리자 터미널에서 실행해야 합니다.
+# dotfiles 저장소의 설정 파일을 $HOME 하위 실제 경로로 심볼릭 링크 또는 정션으로 연결합니다.
+# 심볼릭 링크 생성에는 관리자 권한 또는 개발자 모드가 필요하며, 권한이 없으면 정션 항목만 생성하고 심볼릭 링크는 건너뜁니다.
 #
 # 사용법:
 #   scripts/install.ps1            # 누락되었거나 대상이 다른 링크만 (재)생성
@@ -23,8 +23,7 @@ $DotfilesRoot = $PSScriptRoot
 $Links = @(
     @{ Source = 'git\.gitconfig';               Dest = '.gitconfig' }
     @{ Source = 'vscode\settings.json';         Dest = 'AppData\Roaming\Code\User\settings.json' }
-    @{ Source = 'omp\agent\AGENTS.md';         Dest = '.omp\agent\AGENTS.md' }
-    @{ Source = 'omp\agent\AGENTS.md';         Dest = '.omp\agent\AGENTS.md' }
+    @{ Source = '.agents\skills';               Dest = '.agents\skills';                        Type = 'Junction' }
     @{ Source = 'omp\agent\TITLE_SYSTEM.md';   Dest = '.omp\agent\TITLE_SYSTEM.md' }
     @{ Source = 'omp\agent\APPEND_SYSTEM.md';  Dest = '.omp\agent\APPEND_SYSTEM.md' }
     @{ Source = 'omp\agent\PERSONALITY.md';    Dest = '.omp\agent\PERSONALITY.md' }
@@ -36,16 +35,34 @@ $Links = @(
     @{ Source = 'pwsh\Microsoft.PowerShell_profile.ps1';  Dest = 'Documents\PowerShell\Microsoft.PowerShell_profile.ps1' }
 )
 
-# 관리자 권한이 없으면 오류를 출력하고 종료합니다. 자동 승격은 수행하지 않습니다.
-$identity = [Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()
-if (-not $identity.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Write-Error '관리자 권한이 필요합니다. 관리자 터미널에서 다시 실행해 주세요.'
-    exit 1
+# 심볼릭 링크 생성이 가능한 환경(관리자 권한 또는 개발자 모드)인지 판정합니다.
+function Test-CanCreateSymbolicLink {
+    $identity = [Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()
+    if ($identity.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { return $true }
+
+    $devMode = Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock' -Name 'AllowDevelopmentWithoutDevLicense' -ErrorAction SilentlyContinue
+    if ($devMode -and $devMode.AllowDevelopmentWithoutDevLicense -eq 1) { return $true }
+
+    $probeDir = Join-Path ([System.IO.Path]::GetTempPath()) ("symlink-probe-" + [guid]::NewGuid())
+    try {
+        New-Item -ItemType Directory -Path $probeDir -Force | Out-Null
+        $targetFile = Join-Path $probeDir 'target.txt'
+        $linkFile = Join-Path $probeDir 'link.txt'
+        Set-Content -LiteralPath $targetFile -Value 'probe'
+        New-Item -ItemType SymbolicLink -Path $linkFile -Value $targetFile -ErrorAction Stop | Out-Null
+        return $true
+    } catch {
+        return $false
+    } finally {
+        if (Test-Path $probeDir) {
+            Remove-Item -LiteralPath $probeDir -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
 }
 
-# 심볼릭 링크가 가리키는 실제 대상 경로를 정규화해서 반환합니다.
+# 심볼릭 링크 또는 정션이 가리키는 실제 대상 경로를 정규화해서 반환합니다.
 function Resolve-LinkTarget([System.IO.FileSystemInfo]$Item) {
-    if ($Item.LinkType -ne 'SymbolicLink') { return $null }
+    if ($Item.LinkType -notin @('SymbolicLink', 'Junction')) { return $null }
     $target = $Item.Target
     if ($target -is [array]) { $target = $target[0] }
     if ([string]::IsNullOrEmpty($target)) { return $null }
@@ -53,15 +70,20 @@ function Resolve-LinkTarget([System.IO.FileSystemInfo]$Item) {
     return $Item.Directory.FullName + [System.IO.Path]::DirectorySeparatorChar + $target
 }
 
-# 기존 항목이 저장소 파일을 가리키는 유효한 심볼릭 링크인지 판정합니다.
-function Test-UpToDate([string]$SourcePath, [string]$DestPath) {
+# 기존 항목이 지정된 유형과 대상으로 연결된 유효한 링크인지 판정합니다.
+function Test-UpToDate([string]$SourcePath, [string]$DestPath, [string]$LinkType) {
     if (-not (Test-Path $DestPath)) { return $false }
     $item = Get-Item $DestPath -Force
-    if ($item.LinkType -ne 'SymbolicLink') { return $false }
+    if ($item.LinkType -ne $LinkType) { return $false }
     $resolved = Resolve-LinkTarget $item
     return ($resolved -and
-            [System.IO.Path]::GetFullPath($SourcePath) -ieq $resolved -and
+            [System.IO.Path]::GetFullPath($SourcePath) -ieq [System.IO.Path]::GetFullPath($resolved) -and
             (Test-Path $resolved))
+}
+
+$canCreateSymlinks = Test-CanCreateSymbolicLink
+if (-not $canCreateSymlinks) {
+    Write-Host '알림: 관리자 권한이나 개발자 모드가 아니므로 정션(Junction) 항목만 생성하고 심볼릭 링크는 건너뜁니다.' -ForegroundColor Yellow
 }
 
 $created = 0
@@ -71,8 +93,14 @@ $failed = 0
 foreach ($link in $Links) {
     $sourcePath = Join-Path $DotfilesRoot $link.Source
     $destPath = Join-Path $HOME $link.Dest
+    $linkType = if ($link.ContainsKey('Type')) { $link.Type } else { 'SymbolicLink' }
 
-    if (-not $Force -and (Test-UpToDate $sourcePath $destPath)) {
+    if ($linkType -eq 'SymbolicLink' -and -not $canCreateSymlinks) {
+        Write-Host "건너뜀 (권한 필요: SymbolicLink)  $($link.Dest)"
+        $skipped++
+        continue
+    }
+    if (-not $Force -and (Test-UpToDate $sourcePath $destPath $linkType)) {
         Write-Host "건너뜀 (이미 유효)  $($link.Dest)"
         $skipped++
         continue
@@ -94,7 +122,7 @@ foreach ($link in $Links) {
     }
 
     try {
-        New-Item -ItemType SymbolicLink -Path $destPath -Value $sourcePath | Out-Null
+        New-Item -ItemType $linkType -Path $destPath -Value $sourcePath | Out-Null
         Write-Host "생성됨          $($link.Dest) -> $($link.Source)"
         $created++
     } catch {

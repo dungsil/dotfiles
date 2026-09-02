@@ -18,11 +18,11 @@ sudo pwsh .\install.ps1 -Force # 강제 재생성
 
 이 프로젝트는 아래의 프로젝트에서 코드 혹은 문서 일부를 발췌했습니다.
 
-|     프로젝트 이름      | 라이선스  | 대상 파일                    |
-| :--------------------: | :-------: | ---------------------------- |
-| [snflkd/fluent-korean] | MIT       | [omp/agent/PERSONALITY.md]   |
-| [ayghri/i-have-adhd]   | MIT       | [omp/agent/APPEND_SYSTEM.md] |
-| [Conventional Commits] | CC BY 3.0 | [omp/agent/AGENTS.md#commit-message-convention] |
+| 프로젝트 이름          | 라이선스  | 대상 파일                                                |
+| ---------------------- | :-------: | -------------------------------------------------------- |
+| [snflkd/fluent-korean] | MIT       | [omp/agent/PERSONALITY.md]                               |
+| [ayghri/i-have-adhd]   | MIT       | [omp/agent/APPEND_SYSTEM.md]                             |
+| [Conventional Commits] | CC BY 3.0 | [skills-raw/duninit/assets/COMMIT_MESSAGE_CONVENTION.md] |
 
 
 <!-- 링크 -->
@@ -32,4 +32,4 @@ sudo pwsh .\install.ps1 -Force # 강제 재생성
 
 [omp/agent/PERSONALITY.md]: ./omp/agent/PERSONALITY.md
 [omp/agent/APPEND_SYSTEM.md]: ./omp/agent/APPEND_SYSTEM.md
-[omp/agent/AGENTS.md#commit-message-convention]: ./omp/agent/AGENTS.md#commit-message-convention
+[skills-raw/duninit/assets/COMMIT_MESSAGE_CONVENTION.md]: ./skills-raw/duninit/assets/COMMIT_MESSAGE_CONVENTION.md
