@@ -120,3 +120,21 @@ disabledExtensions:
   []
 tier:
   openai: priority
+bash:
+  autoBackground:
+    enabled: true
+  patterns:
+    - match: scoop install*
+      approval: deny
+    - match: scoop uninstall*
+      approval: deny
+    - match: scoop rm*
+      approval: deny
+    - match: winget install*
+      approval: deny
+    - match: winget.exe install*
+      approval: deny
+    - match: winget uninstall*
+      approval: deny
+    - match: winget.exe uninstall*
+      approval: deny
