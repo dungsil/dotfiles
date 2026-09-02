@@ -131,6 +131,74 @@ foreach ($link in $Links) {
     }
 }
 
+# 숨겨진 $HOME\Projects 폴더를 탐색기에서 "프로젝트" 이름으로 보이게 하는 정션과 desktop.ini를 관리합니다.
+$projectsPath = Join-Path $HOME 'Projects'
+$projectsJunctionPath = Join-Path $HOME '프로젝트'
+$projectsDesktopIniPath = Join-Path $projectsPath 'desktop.ini'
+$projectsDesktopIniLines = @(
+    '[.ShellClassInfo]'
+    'IconResource=%SystemRoot%\System32\imageres.dll,-1013'
+    'LocalizedResourceName=프로젝트'
+)
+
+function Test-ProjectsJunctionUpToDate {
+    if (-not (Test-Path $projectsJunctionPath)) { return $false }
+    $item = Get-Item $projectsJunctionPath -Force
+    if ($item.LinkType -ne 'Junction') { return $false }
+    $target = $item.Target
+    if ($target -is [array]) { $target = $target[0] }
+    return ($target -and [System.IO.Path]::GetFullPath($target) -ieq [System.IO.Path]::GetFullPath($projectsPath))
+}
+
+function Test-ProjectsDesktopIniUpToDate {
+    if (-not (Test-Path $projectsDesktopIniPath)) { return $false }
+    $existing = Get-Content -LiteralPath $projectsDesktopIniPath
+    return -not (Compare-Object $existing $projectsDesktopIniLines -SyncWindow 0)
+}
+
+if (-not $Force -and (Test-ProjectsJunctionUpToDate)) {
+    Write-Host '건너뜀 (이미 유효)  프로젝트 -> Projects'
+    $skipped++
+} else {
+    # rmdir은 정션 자체만 제거하므로 대상 폴더 내용은 유지됩니다.
+    if (Test-Path $projectsJunctionPath) {
+        cmd /c rmdir $projectsJunctionPath
+        if (Test-Path $projectsJunctionPath) {
+            Write-Warning '기존 항목 제거 실패: 프로젝트'
+            $failed++
+        }
+    }
+    if (-not (Test-Path $projectsJunctionPath)) {
+        try {
+            New-Item -ItemType Junction -Path $projectsJunctionPath -Value $projectsPath | Out-Null
+            Write-Host "생성됨          프로젝트 -> Projects"
+            $created++
+        } catch {
+            Write-Warning "생성 실패: 프로젝트 — $($_.Exception.Message)"
+            $failed++
+        }
+    }
+}
+
+if (-not $Force -and (Test-ProjectsDesktopIniUpToDate)) {
+    Write-Host '건너뜀 (이미 유효)  Projects\desktop.ini'
+    $skipped++
+} else {
+    try {
+        # LocalizedResourceName의 한글이 깨지지 않도록 desktop.ini는 UTF-16으로 기록해야 합니다.
+        Set-Content -LiteralPath $projectsDesktopIniPath -Value $projectsDesktopIniLines -Encoding Unicode
+        attrib +S +H $projectsDesktopIniPath
+        # 폴더의 ReadOnly 속성은 desktop.ini 적용을 탐색기에 알리는 신호입니다. Projects 폴더는 탐색기에서 숨겨집니다.
+        (Get-Item $projectsPath -Force).Attributes = 'ReadOnly,Hidden,System'
+        ie4uinit.exe -show
+        Write-Host '생성됨          Projects\desktop.ini'
+        $created++
+    } catch {
+        Write-Warning "생성 실패: Projects\desktop.ini — $($_.Exception.Message)"
+        $failed++
+    }
+}
+
 Write-Host ''
 Write-Host "완료: 생성 $created / 건너뜀 $skipped / 실패 $failed"
 if ($failed -gt 0) { exit 1 }

@@ -8,6 +8,7 @@ This repository manages personal dotfiles and settings for Windows. The executio
 
 - Settings are stored in tool-specific directories. `install.ps1` links them to their actual usage paths under `$HOME`.
 - General settings are installed as Symbolic Links, and `.agents/skills/` as a Directory Junction. Existing valid links are skipped, and `-Force` recreates them.
+- It also creates a `$HOME\프로젝트` junction to the hidden `$HOME\Projects` folder and writes its `desktop.ini` (localized name "프로젝트" and folder icon).
 - The original Korean skills in `skills-raw/` are translated into English distributions in `.agents/skills/`.
 
 ## Key Directories

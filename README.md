@@ -11,6 +11,10 @@ sudo pwsh .\install.ps1 # 혹은 관리자 권한의 파워셀에서 실행
 sudo pwsh .\install.ps1 -Force # 강제 재생성
 ```
 
+## Projects 폴더
+
+`install.ps1`은 숨겨진 `$HOME\Projects` 폴더를 가리키는 `$HOME\프로젝트` 정션을 만들고, `desktop.ini`로 탐색기 표시 이름을 "프로젝트"로 바꾸고 폴더 아이콘을 지정합니다.
+
 ## 라이선스
 이 프로젝트는 [MIT License](./LICENSE)에 따라 배포됩니다.
 
