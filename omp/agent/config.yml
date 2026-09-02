@@ -34,6 +34,7 @@ task:
       mode: auto
     agentAdvisor:
       task: "on"
+  showResolvedModelBadge: true
 statusLine:
   preset: full
   separator: powerline-thin
@@ -41,11 +42,65 @@ statusLine:
 display:
   showTokenUsage: true
   showTurnTime: true
+  hideToolActivity: false
+  cacheMissMarker: true
 secrets:
   enabled: true
 retry:
   modelFallback: true
   fallbackRevertPolicy: cooldown-expiry
+  fallbackChains:
+    default:
+      - tailscale/opus-4.6:max
+      - tailscale/gemini-3.7-flash:high
+      - tailscale/glm-5.3:max
+    smol:
+      - tailscale/glm-5.3-flash:max
+      - tailscale/sonnet-5:medium
+      - tailscale/deepseek-v4-flash:max
+      - tailscale/gpt-5.6-luna:max
+    slow:
+      - tailscale/fable-5:max
+      - tailscale/glm-5.3:max
+      - tailscale/deepseek-v4-pro:max
+    tiny:
+      - tailscale/gemini-3.5-flash-lite:minimal
+      - tailscale/haiku-4.5:minimal
+      - tailscale/glm-5.3-flash:low
+      - tailscale/deepseek-v4-flash:low
+    commit:
+      - tailscale/gpt-5.6-luna:medium
+      - tailscale/gemini-3.5-flash-lite:low
+      - tailscale/glm-5.3-flash:low
+    vision:
+      - tailscale/gemma-4-31b:xhigh
+      - tailscale/gpt-5.6-sol:high
+    designer:
+      - tailscale/sonnet-5:high
+      - tailscale/gemma-4-31b:xhigh
+      - tailscale/glm-5.3:max
+    task:
+      - tailscale/sonnet-5:high
+      - tailscale/gemini-3.7-flash:high
+      - tailscale/glm-5.3:max
+      - tailscale/deepseek-v4-pro:max
+    advisor:
+      - tailscale/gpt-5.6-luna:max
+      - tailscale/gemini-3.7-flash:high
+      - tailscale/deepseek-v4-pro:max
+    plan:
+      - tailscale/gpt-5.6-sol:max
+      - tailscale/glm-5.3:max
+      - tailscale/deepseek-v4-pro:max
+    scout:
+      - tailscale/gemini-3.7-flash:medium
+      - tailscale/glm-5.3-flash:high
+      - tailscale/sonnet-5:low
+    research:
+      - tailscale/gemini-3.5-flash-lite:low
+      - tailscale/haiku-4.5:low
+      - tailscale/gpt-5.6-luna:low
+      - tailscale/glm-5.3-flash:low
 modelRoleStorage: global
 browser:
   headless: true
@@ -58,6 +113,8 @@ providers:
   webSearchOrder:
     - kagi
   autoThinkingMaxEffort: max
+  webSearchExclude:
+    - mojeek
 exa:
   enabled: true
 compaction:
@@ -66,17 +123,17 @@ compaction:
   keepRecentTokens: 20000
 modelRoles:
   default: tailscale/gpt-5.6-sol:high
-  smol: tailscale/glm-5.3-flash:max
+  smol: tailscale/gemini-3.7-flash:high
   slow: tailscale/gpt-5.6-sol:max
   tiny: tailscale/gpt-5.3-codex-spark:low
-  commit: tailscale/gpt-5.6-luna:low
+  commit: tailscale/solar-pro4
   vision: tailscale/gemini-3.7-flash:high
-  designer: tailscale/gemini-3.1-pro
-  task: tailscale/gemini-3.7-flash:high
-  advisor: tailscale/gpt-5.6-luna:max
+  designer: tailscale/gemini-3.7-flash:high
+  task: tailscale/gpt-5.6-terra:max
+  advisor: tailscale/opus-4.6:high
   plan: tailscale/fable-5:max
-  scout: tailscale/gpt-5.6-luna:low
-  research: tailscale/gpt-5.6-sol:high
+  scout: tailscale/gpt-5.6-luna:medium
+  research: tailscale/gpt-5.3-codex-spark:low
 cycleOrder:
   - default
   - smol
@@ -154,3 +211,5 @@ bash:
       approval: deny
     - match: winget.exe uninstall*
       approval: deny
+dev:
+  autoqaConsent: granted
