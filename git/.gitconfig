@@ -17,3 +17,12 @@
 	sshCommand = C:/Windows/System32/OpenSSH/ssh.exe
 [tag]
 	forcesignannotated = true
+
+[credential "https://github.com"]
+	helper = gh auth git-credential
+
+[credential "https://gist.github.com"]
+	helper = gh auth git-credential
+
+[credential "https://gitlab.lsware.net"]
+	helper = glab auth git-credential
