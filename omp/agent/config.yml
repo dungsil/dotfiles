@@ -11,7 +11,9 @@ tools:
   abortOnFabricatedResult: true
 defaultThinkingLevel: auto
 memory:
-  backend: local
+  backend: mnemopi
+mnemopi:
+  embeddingVariant: multilingual
 autolearn:
   enabled: false
 plan:
@@ -25,6 +27,13 @@ task:
   softRequestBudget: 200
   agentAdvisor:
     designer: tailscale/gemini-flash-lite:high
+  agentModelOverrides:
+    scout: "@scout"
+    librarian: "@research"
+    isolation:
+      mode: auto
+    agentAdvisor:
+      task: "on"
 statusLine:
   preset: full
   separator: powerline-thin
@@ -36,6 +45,7 @@ secrets:
   enabled: true
 retry:
   modelFallback: true
+  fallbackRevertPolicy: cooldown-expiry
 modelRoleStorage: global
 browser:
   headless: true
@@ -56,15 +66,21 @@ compaction:
   keepRecentTokens: 20000
 modelRoles:
   default: tailscale/gpt-5.6-sol:high
-  smol: tailscale/deepseek-v4-flash:max
-  slow: tailscale/fable-5:max
+  smol: tailscale/glm-5.3-flash:max
+  slow: tailscale/gpt-5.6-sol:max
   tiny: tailscale/gpt-5.3-codex-spark:low
   commit: tailscale/gpt-5.6-luna:low
-  vision: tailscale/gemini-flash
-  designer: tailscale/gemini-pro
-  task: tailscale/gpt-5.6-terra:max
+  vision: tailscale/gemini-3.7-flash:high
+  designer: tailscale/gemini-3.1-pro
+  task: tailscale/gemini-3.7-flash:high
   advisor: tailscale/gpt-5.6-luna:max
-  plan: "@slow"
+  plan: tailscale/fable-5:max
+  scout: tailscale/gpt-5.6-luna:low
+  research: tailscale/gpt-5.6-sol:high
+cycleOrder:
+  - default
+  - smol
+  - plan
 advisor:
   enabled: false
   syncBacklog: "off"
