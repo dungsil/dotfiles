@@ -32,10 +32,36 @@ providers:
         contextWindow: 1000000
         api: anthropic-messages
         input: [text, image]
+        cost:
+          input: 10
+          output: 50
+          cacheRead: 1
+          cacheWrite: 12.5
         thinking:
           mode: anthropic-adaptive
           efforts: [low, medium, high, xhigh, max]
           supportsDisplay: true
+      - id: fable-5.1
+        name: Fable 5.1
+        reasoning: true
+        maxTokens: 128000
+        contextWindow: 1000000
+        api: anthropic-messages
+        input: [text, image]
+        tokenizer: claude-v5
+        compat:
+          supportsForcedToolChoice: false
+        cost:
+          input: 10
+          output: 50
+          cacheRead: 0.25
+          cacheWrite: 12.5
+        thinking:
+          mode: anthropic-adaptive
+          efforts: [low, medium, high, xhigh, max]
+          defaultLevel: high
+          supportsDisplay: true
+          requiresEffort: true
       - id: opus-5
         name: Opus 5
         reasoning: true
