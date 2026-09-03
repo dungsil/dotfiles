@@ -33,11 +33,20 @@ $Links = @(
     @{ Source = 'omp\agent\models.yml';             Dest = '.omp\agent\models.yml' }
     @{ Source = 'omp\agent\mcp.json';              Dest = '.omp\agent\mcp.json' }
     @{ Source = 'omp\agent\extensions\vibe-prompt.ts'; Dest = '.omp\agent\extensions\vibe-prompt.ts' }
+    @{ Source = 'omp\agent\i-have-adhd.json';          Dest = '.omp\agent\i-have-adhd.json' }
     @{ Source = 'pwsh\Microsoft.PowerShell_profile.ps1';  Dest = 'Documents\PowerShell\Microsoft.PowerShell_profile.ps1' }
     @{ Source = 'codex\models_tailscale.json';            Dest = '.codex\models_tailscale.json' }
     @{ Source = 'codex\tailscale.config.toml';             Dest = '.codex\tailscale.config.toml' }
     @{ Source = 'codex\config.toml';                       Dest = '.codex\config.toml'; Type = 'Patch' }
 )
+
+# OMP 마켓플레이스 및 플러그인 목록
+$OmpMarketplaces = @(
+    @{ Name = 'i-have-adhd'; Source = 'ayghri/i-have-adhd' }
+)
+
+$OmpPlugins = @(
+    @{ Target = 'i-have-adhd@i-have-adhd'; Scope = 'user' }
 )
 
 # 심볼릭 링크 생성이 가능한 환경(관리자 권한 또는 개발자 모드)인지 판정합니다.
@@ -271,3 +280,53 @@ foreach ($link in $Links) {
 Write-Host ''
 Write-Host "완료: 생성 $created / 건너뜀 $skipped / 실패 $failed"
 if ($failed -gt 0) { exit 1 }
+
+# OMP 플러그인 설치 및 등록 상태를 점검하여 미설치 항목을 설치합니다.
+function Install-OmpPlugins {
+    if (-not (Get-Command omp -ErrorAction SilentlyContinue)) {
+        Write-Host '건너뜀 (omp 명령어를 찾을 수 없음)  OMP 플러그인 설치' -ForegroundColor Yellow
+        return
+    }
+
+    Write-Host ''
+    Write-Host '--- OMP 플러그인 확인 및 설치 ---' -ForegroundColor Cyan
+
+    $mpFile = Join-Path $HOME '.omp\marketplaces.json'
+    $existingMarketplaces = @()
+    if (Test-Path $mpFile) {
+        try {
+            $existingMarketplaces = @((Get-Content -LiteralPath $mpFile -Raw -Encoding utf8 | ConvertFrom-Json).marketplaces.name)
+        } catch {}
+    }
+
+    foreach ($mp in $OmpMarketplaces) {
+        if ($existingMarketplaces -notcontains $mp.Name) {
+            Write-Host "마켓플레이스 추가: $($mp.Name) ($($mp.Source))"
+            omp plugin marketplace add $mp.Source
+        } else {
+            Write-Host "건너뜀 (이미 등록된 마켓플레이스)  $($mp.Name)"
+        }
+    }
+
+    $pluginsFile = Join-Path $HOME '.omp\plugins\installed_plugins.json'
+    $installedPlugins = @()
+    if (Test-Path $pluginsFile) {
+        try {
+            $json = Get-Content -LiteralPath $pluginsFile -Raw -Encoding utf8 | ConvertFrom-Json
+            if ($json.plugins) {
+                $installedPlugins = @($json.plugins.PSObject.Properties.Name)
+            }
+        } catch {}
+    }
+
+    foreach ($p in $OmpPlugins) {
+        if ($installedPlugins -notcontains $p.Target) {
+            Write-Host "플러그인 설치: $($p.Target) (Scope: $($p.Scope))"
+            omp plugin install --scope $p.Scope $p.Target
+        } else {
+            Write-Host "건너뜀 (이미 설치된 플러그인)  $($p.Target)"
+        }
+    }
+}
+
+Install-OmpPlugins

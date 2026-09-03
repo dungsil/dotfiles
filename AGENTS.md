@@ -24,6 +24,7 @@ pwsh .\install.ps1         # Keeps valid links and creates only missing links
 pwsh .\install.ps1 -Force  # Removes existing targets and recreates links
 udcheck                    # Checks for Scoop and WinGet updates
 udall                      # Updates Scoop, WinGet packages, and OMP plugins
+syncplugins                # Updates OMP plugin marketplaces and installed plugins
 syncsk                     # Synchronizes external agent skills using pnpm
 ```
 

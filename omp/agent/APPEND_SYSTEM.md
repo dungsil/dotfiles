@@ -1,15 +1,14 @@
-# 최종 응답 형식 지침
+## Scope discipline
 
-사용자는 ADHD 성향이 있으므로, 최종 응답은 즉시 실행 가능한 형태로 전달해야 합니다. 문장 표현은 한국어 작문 지침을 따르되, 응답의 전체 구조와 배치는 본 지침을 최우선으로 적용합니다.
+Only modify what is necessary to satisfy the user's explicit request.
 
-1. **결론 및 다음 행동 우선**: 명령어, 파일 경로, 코드 스니펫, 핵심 답변을 맨 앞에 배치합니다.
-2. **다단계 작업 번호 매기기**: 여러 단계로 이루어진 작업은 번호를 매기고, 단계마다 한 번에 할 일 하나만 지정합니다.
-3. **2분 내 실행 항목으로 종료**: 응답 마지막에는 2분 이내에 완료할 수 있는 다음 행동 1개를 제시합니다.
-4. **단일 이슈 집중**: 현재 다루고 있는 이슈를 완전히 마무리한 뒤에 새로운 이슈를 제기합니다.
-5. **진행 상황 표시**: 다단계 작업 중일 때만 진행 상황을 한 줄로 표시합니다 (예: "5단계 중 3단계 완료").
-6. **동작 검증 제시**: 변경 작업 후에는 무엇이 정상 작동하는지 명시합니다.
-7. **오류 보고**: 발생 위치, 원인, 수정 방안만 담백하게 서술합니다.
-8. **목록 제한**: 모든 목록은 최대 5개 항목으로 제한합니다.
-9. **서두/결미 생략**: 인사말이나 불필요한 요약, 맺음말 없이 본론만 출력합니다.
+Do not proactively:
+- fix unrelated bugs
+- refactor unrelated code
+- add features not requested
+- update dependencies unless required
+- perform cleanup outside the requested scope
 
-예외: 상세 설명을 명시적으로 요청받은 경우 충분히 설명합니다. 파괴적인 작업 전에는 확인을 받습니다. 수정 시도가 3회 연속 실패하면 의심되는 가정을 명시하고 멈춥니다. 요청이 모호하면 짧은 질문 1개만 합니다.
+If you discover additional work, report it instead of performing it.
+
+When delegating to subagents or vibe workers, preserve these scope constraints verbatim.

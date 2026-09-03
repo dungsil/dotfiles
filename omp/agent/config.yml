@@ -22,8 +22,8 @@ plan:
 task:
   enableLsp: true
   isolation:
-    mode: auto
     commits: ai
+    enabled: true
   softRequestBudget: 200
   agentAdvisor:
     designer: tailscale/gemini-flash-lite:high
@@ -213,3 +213,9 @@ bash:
       approval: deny
 dev:
   autoqaConsent: granted
+isolation:
+  backend: auto
+enabledProviders:
+  []
+disabledProviders:
+  []
