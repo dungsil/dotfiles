@@ -25,13 +25,14 @@ $Links = @(
     @{ Source = 'vscode\settings.json';         Dest = 'AppData\Roaming\Code\User\settings.json' }
     @{ Source = '.agents\skills';               Dest = '.agents\skills';                        Type = 'Junction' }
     @{ Source = 'omp\agent\TITLE_SYSTEM.md';   Dest = '.omp\agent\TITLE_SYSTEM.md' }
-    @{ Source = 'omp\agent\APPEND_SYSTEM.md';  Dest = '.omp\agent\APPEND_SYSTEM.md' }
-    @{ Source = 'omp\agent\PERSONALITY.md';    Dest = '.omp\agent\PERSONALITY.md' }
-    @{ Source = 'omp\agent\RULES.md';          Dest = '.omp\agent\RULES.md' }
-    @{ Source = 'omp\agent\WATCHDOG.yml';      Dest = '.omp\agent\WATCHDOG.yml' }
-    @{ Source = 'omp\agent\config.yml';        Dest = '.omp\agent\config.yml' }
-    @{ Source = 'omp\agent\models.yml';        Dest = '.omp\agent\models.yml' }
-    @{ Source = 'omp\agent\mcp.json';         Dest = '.omp\agent\mcp.json' }
+    @{ Source = 'omp\agent\APPEND_SYSTEM.md';       Dest = '.omp\agent\APPEND_SYSTEM.md' }
+    @{ Source = 'omp\agent\PERSONALITY.md';         Dest = '.omp\agent\PERSONALITY.md' }
+    @{ Source = 'omp\agent\RULES.md';               Dest = '.omp\agent\RULES.md' }
+    @{ Source = 'omp\agent\WATCHDOG.yml';           Dest = '.omp\agent\WATCHDOG.yml' }
+    @{ Source = 'omp\agent\config.yml';             Dest = '.omp\agent\config.yml' }
+    @{ Source = 'omp\agent\models.yml';             Dest = '.omp\agent\models.yml' }
+    @{ Source = 'omp\agent\mcp.json';              Dest = '.omp\agent\mcp.json' }
+    @{ Source = 'omp\agent\extensions\vibe-prompt.ts'; Dest = '.omp\agent\extensions\vibe-prompt.ts' }
     @{ Source = 'pwsh\Microsoft.PowerShell_profile.ps1';  Dest = 'Documents\PowerShell\Microsoft.PowerShell_profile.ps1' }
 )
 
