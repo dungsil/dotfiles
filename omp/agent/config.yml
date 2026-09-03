@@ -211,6 +211,8 @@ bash:
       approval: deny
     - match: winget.exe uninstall*
       approval: deny
+    - match: git config set*
+      approval: deny
 dev:
   autoqaConsent: granted
 isolation:
