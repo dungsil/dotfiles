@@ -103,6 +103,12 @@ providers:
         maxTokens: 65536
         contextWindow: 1048576
         input: [text, image]
+      - id: gemini-3.8-flash
+        name: Gemini 3.8 Flash
+        reasoning: true
+        maxTokens: 65536
+        contextWindow: 1048576
+        input: [text, image]
       - id: gemini-3.5-flash-lite
         name: Gemini Flash Lite
         reasoning: true
