@@ -123,12 +123,12 @@ compaction:
   keepRecentTokens: 20000
 modelRoles:
   default: tailscale/gpt-5.6-sol:high
-  smol: tailscale/gemini-3.7-flash:high
+  smol: tailscale/gemini-3.8-flash:high
   slow: tailscale/gpt-5.6-sol:max
   tiny: tailscale/gpt-5.3-codex-spark:low
   commit: tailscale/solar-pro4
-  vision: tailscale/gemini-3.7-flash:high
-  designer: tailscale/gemini-3.7-flash:high
+  vision: tailscale/gemini-3.8-flash:high
+  designer: tailscale/gemini-3.8-flash:high
   task: tailscale/gpt-5.6-terra:max
   advisor: tailscale/opus-4.6:high
   plan: tailscale/fable-5:max
