@@ -1,0 +1,3 @@
+model = "deepseek-v4-flash"
+model_provider = "tailscale"
+model_catalog_json = "~/.codex/models_tailscale.json"

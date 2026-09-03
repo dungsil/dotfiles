@@ -1,5 +1,5 @@
-# dotfiles 저장소의 설정 파일을 $HOME 하위 실제 경로로 심볼릭 링크 또는 정션으로 연결합니다.
-# 심볼릭 링크 생성에는 관리자 권한 또는 개발자 모드가 필요하며, 권한이 없으면 정션 항목만 생성하고 심볼릭 링크는 건너뜁니다.
+# dotfiles 저장소의 설정 파일을 $HOME 하위 실제 경로로 심볼릭 링크, 정션, 복사(Copy) 또는 설정 병합 패치(Patch)로 연결합니다.
+# 심볼릭 링크 생성에는 관리자 권한 또는 개발자 모드가 필요하며, 권한이 없으면 정션, 복사, 패치 항목만 처리하고 심볼릭 링크는 건너뜁니다.
 #
 # 사용법:
 #   scripts/install.ps1            # 누락되었거나 대상이 다른 링크만 (재)생성
@@ -34,6 +34,10 @@ $Links = @(
     @{ Source = 'omp\agent\mcp.json';              Dest = '.omp\agent\mcp.json' }
     @{ Source = 'omp\agent\extensions\vibe-prompt.ts'; Dest = '.omp\agent\extensions\vibe-prompt.ts' }
     @{ Source = 'pwsh\Microsoft.PowerShell_profile.ps1';  Dest = 'Documents\PowerShell\Microsoft.PowerShell_profile.ps1' }
+    @{ Source = 'codex\models_tailscale.json';            Dest = '.codex\models_tailscale.json' }
+    @{ Source = 'codex\tailscale.config.toml';             Dest = '.codex\tailscale.config.toml' }
+    @{ Source = 'codex\config.toml';                       Dest = '.codex\config.toml'; Type = 'Patch' }
+)
 )
 
 # 심볼릭 링크 생성이 가능한 환경(관리자 권한 또는 개발자 모드)인지 판정합니다.
@@ -61,6 +65,115 @@ function Test-CanCreateSymbolicLink {
     }
 }
 
+# TOML 병합 함수: SourceText에 정의된 키 및 섹션을 TargetText에 패치합니다.
+# TargetText에만 존재하는 키/섹션(예: 로컬 머신의 [projects])은 그대로 보존됩니다.
+function Merge-TomlContent([string]$SourceText, [string]$TargetText) {
+    $headerPattern = '^\s*(\[+[^\]]+\]+)\s*$'
+    $keyPattern = '^\s*([a-zA-Z0-9_\-\.]+)\s*=\s*(.*)$'
+
+    function Parse-Blocks([string]$text) {
+        $lines = $text -split '\r?\n'
+        $rootLines = [System.Collections.Generic.List[string]]::new()
+        $sections = [System.Collections.Generic.List[psobject]]::new()
+        $currentHeader = $null
+        $currentLines = [System.Collections.Generic.List[string]]::new()
+
+        foreach ($line in $lines) {
+            if ($line -match $headerPattern) {
+                if ($null -eq $currentHeader) {
+                    $rootLines.AddRange($currentLines)
+                } else {
+                    $sections.Add([PSCustomObject]@{ Header = $currentHeader; Lines = [string[]]$currentLines })
+                }
+                $currentHeader = $Matches[1].Trim()
+                $currentLines = [System.Collections.Generic.List[string]]::new()
+                $currentLines.Add($line)
+            } else {
+                $currentLines.Add($line)
+            }
+        }
+        if ($null -eq $currentHeader) {
+            $rootLines.AddRange($currentLines)
+        } else {
+            $sections.Add([PSCustomObject]@{ Header = $currentHeader; Lines = [string[]]$currentLines })
+        }
+        return @{ Root = $rootLines; Sections = $sections }
+    }
+
+    $src = Parse-Blocks $SourceText
+    $tgt = Parse-Blocks $TargetText
+
+    $srcRootKeys = [ordered]@{}
+    foreach ($line in $src.Root) {
+        if ($line -match $keyPattern) {
+            $srcRootKeys[$Matches[1]] = $line
+        }
+    }
+
+    $newTgtRoot = [System.Collections.Generic.List[string]]::new()
+    $updatedKeys = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+
+    foreach ($line in $tgt.Root) {
+        if ($line -match $keyPattern -and $srcRootKeys.Contains($Matches[1])) {
+            $newTgtRoot.Add($srcRootKeys[$Matches[1]])
+            [void]$updatedKeys.Add($Matches[1])
+        } else {
+            $newTgtRoot.Add($line)
+        }
+    }
+
+    $missingKeys = [System.Collections.Generic.List[string]]::new()
+    foreach ($k in $srcRootKeys.Keys) {
+        if (-not $updatedKeys.Contains($k)) {
+            $missingKeys.Add($k)
+        }
+    }
+    if ($missingKeys.Count -gt 0) {
+        while ($newTgtRoot.Count -gt 0 -and [string]::IsNullOrWhiteSpace($newTgtRoot[$newTgtRoot.Count - 1])) {
+            $newTgtRoot.RemoveAt($newTgtRoot.Count - 1)
+        }
+        foreach ($k in $missingKeys) {
+            $newTgtRoot.Add($srcRootKeys[$k])
+        }
+        $newTgtRoot.Add('')
+    }
+
+    $srcSecMap = [ordered]@{}
+    foreach ($sec in $src.Sections) {
+        $srcSecMap[$sec.Header] = $sec.Lines
+    }
+
+    $newSecs = [System.Collections.Generic.List[psobject]]::new()
+    $handledSrcSecs = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+
+    foreach ($sec in $tgt.Sections) {
+        if ($srcSecMap.Contains($sec.Header)) {
+            $newSecs.Add([PSCustomObject]@{ Header = $sec.Header; Lines = $srcSecMap[$sec.Header] })
+            [void]$handledSrcSecs.Add($sec.Header)
+        } else {
+            $newSecs.Add($sec)
+        }
+    }
+
+    foreach ($hdr in $srcSecMap.Keys) {
+        if (-not $handledSrcSecs.Contains($hdr)) {
+            $newSecs.Add([PSCustomObject]@{ Header = $hdr; Lines = $srcSecMap[$hdr] })
+        }
+    }
+
+    $resultLines = [System.Collections.Generic.List[string]]::new()
+    $resultLines.AddRange($newTgtRoot)
+
+    foreach ($sec in $newSecs) {
+        if ($resultLines.Count -gt 0 -and -not [string]::IsNullOrWhiteSpace($resultLines[$resultLines.Count - 1])) {
+            $resultLines.Add('')
+        }
+        $resultLines.AddRange($sec.Lines)
+    }
+
+    return ($resultLines -join [System.Environment]::NewLine).Trim() + [System.Environment]::NewLine
+}
+
 # 심볼릭 링크 또는 정션이 가리키는 실제 대상 경로를 정규화해서 반환합니다.
 function Resolve-LinkTarget([System.IO.FileSystemInfo]$Item) {
     if ($Item.LinkType -notin @('SymbolicLink', 'Junction')) { return $null }
@@ -74,6 +187,13 @@ function Resolve-LinkTarget([System.IO.FileSystemInfo]$Item) {
 # 기존 항목이 지정된 유형과 대상으로 연결된 유효한 링크인지 판정합니다.
 function Test-UpToDate([string]$SourcePath, [string]$DestPath, [string]$LinkType) {
     if (-not (Test-Path $DestPath)) { return $false }
+    if ($LinkType -eq 'Copy') { return $true }
+    if ($LinkType -eq 'Patch') {
+        $srcText = Get-Content -LiteralPath $SourcePath -Raw -Encoding utf8
+        $tgtText = Get-Content -LiteralPath $DestPath -Raw -Encoding utf8
+        $merged = Merge-TomlContent -SourceText $srcText -TargetText $tgtText
+        return ($merged.Trim() -eq $tgtText.Trim())
+    }
     $item = Get-Item $DestPath -Force
     if ($item.LinkType -ne $LinkType) { return $false }
     $resolved = Resolve-LinkTarget $item
@@ -107,8 +227,8 @@ foreach ($link in $Links) {
         continue
     }
 
-    # 기존 항목 제거 (실패해도 계속 진행)
-    if (Test-Path $destPath) {
+    # 기존 항목 제거 (Patch 타입이 아닌 경우에만 삭제 후 재생성)
+    if ($linkType -ne 'Patch' -and (Test-Path $destPath)) {
         Remove-Item -LiteralPath $destPath -Force -ErrorAction SilentlyContinue
         if (Test-Path $destPath) {
             Write-Warning "기존 항목 제거 실패: $destPath"
@@ -123,8 +243,24 @@ foreach ($link in $Links) {
     }
 
     try {
-        New-Item -ItemType $linkType -Path $destPath -Value $sourcePath | Out-Null
-        Write-Host "생성됨          $($link.Dest) -> $($link.Source)"
+        if ($linkType -eq 'Patch') {
+            if (-not (Test-Path $destPath)) {
+                Copy-Item -Path $sourcePath -Destination $destPath -Force
+                Write-Host "생성됨          $($link.Dest) <- $($link.Source)"
+            } else {
+                $srcText = Get-Content -LiteralPath $sourcePath -Raw -Encoding utf8
+                $tgtText = Get-Content -LiteralPath $destPath -Raw -Encoding utf8
+                $merged = Merge-TomlContent -SourceText $srcText -TargetText $tgtText
+                [System.IO.File]::WriteAllText($destPath, $merged, [System.Text.Encoding]::UTF8)
+                Write-Host "패치됨          $($link.Dest) (로컬 설정 보존 및 변경점 반영)"
+            }
+        } elseif ($linkType -eq 'Copy') {
+            Copy-Item -Path $sourcePath -Destination $destPath -Force
+            Write-Host "복사됨          $($link.Dest) <- $($link.Source)"
+        } else {
+            New-Item -ItemType $linkType -Path $destPath -Value $sourcePath | Out-Null
+            Write-Host "생성됨          $($link.Dest) -> $($link.Source)"
+        }
         $created++
     } catch {
         Write-Warning "생성 실패: $($link.Dest) — $($_.Exception.Message)"

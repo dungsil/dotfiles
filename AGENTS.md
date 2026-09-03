@@ -2,17 +2,17 @@
 
 ## Project Overview
 
-This repository manages personal dotfiles and settings for Windows. The execution script is `install.ps1`, and it includes Git, VS Code, PowerShell, OMP, and agent skills.
+This repository manages personal dotfiles and settings for Windows. The execution script is `install.ps1`, and it includes Git, VS Code, PowerShell, OMP, Codex, and agent skills.
 
 ## Architecture & Data Flow
 
 - Settings are stored in tool-specific directories. `install.ps1` links them to their actual usage paths under `$HOME`.
-- General settings are installed as Symbolic Links, and `.agents/skills/` as a Directory Junction. Existing valid links are skipped, and `-Force` recreates them.
+- General settings are installed as Symbolic Links, `.agents/skills/` as a Directory Junction, and machine-dependent settings (such as `codex/config.toml`) as Patches (merging dotfiles changes while preserving local settings like `[projects]`). Existing valid targets are skipped, and `-Force` recreates them.
 - The original Korean skills in `skills-raw/` are translated into English distributions in `.agents/skills/`.
 
 ## Key Directories
 
-- `git/`, `vscode/`, `pwsh/`: User settings for each tool.
+- `git/`, `vscode/`, `pwsh/`, `codex/`: User settings for each tool.
 - `omp/agent/`: Defines OMP behavior, models, MCP, language, and response rules.
 - `skills-raw/`: Stores the original Korean skills and translation guidelines.
 - `.agents/skills/`: Stores the English-translated skills for installation.
@@ -23,7 +23,7 @@ This repository manages personal dotfiles and settings for Windows. The executio
 pwsh .\install.ps1         # Keeps valid links and creates only missing links
 pwsh .\install.ps1 -Force  # Removes existing targets and recreates links
 udcheck                    # Checks for Scoop and WinGet updates
-udall                      # Updates Scoop and WinGet packages
+udall                      # Updates Scoop, WinGet packages, and OMP plugins
 syncsk                     # Synchronizes external agent skills using pnpm
 ```
 

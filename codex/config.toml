@@ -1,0 +1,13 @@
+# 기본 모델 및 프로바이더
+model = "deepseek-v4-flash"
+model_provider = "tailscale"
+model_catalog_json = "~/.codex/models_tailscale.json"
+
+[model_providers.tailscale]
+name = "Tailscale AI Gateway"
+base_url = "https://ai.gila-map.ts.net/v1"
+wire_api = "responses"
+requires_openai_auth = false
+
+[windows]
+sandbox = "elevated"
