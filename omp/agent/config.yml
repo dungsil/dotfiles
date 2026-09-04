@@ -42,7 +42,7 @@ statusLine:
 display:
   showTokenUsage: true
   showTurnTime: true
-  hideToolActivity: false
+  hideToolActivity: true
   cacheMissMarker: true
 secrets:
   enabled: true
