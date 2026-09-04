@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "skills": {
+    "orca-cli": {
+      "source": "stablyai/orca",
+      "sourceType": "github",
+      "skillPath": "skills/orca-cli/SKILL.md",
+      "computedHash": "83ece910d035d0684195095bb9df5911a028002b2efba1ebbeb4ae66de5e0903"
+    },
+    "orca-per-workspace-env": {
+      "source": "stablyai/orca",
+      "sourceType": "github",
+      "skillPath": "skills/orca-per-workspace-env/SKILL.md",
+      "computedHash": "0c4642c02480ed6219e3427475b5654fc6c06a84f2ce33fb8d7223baf2bdb17f"
+    },
+    "orchestration": {
+      "source": "stablyai/orca",
+      "sourceType": "github",
+      "skillPath": "skills/orchestration/SKILL.md",
+      "computedHash": "e611e8065f08f308823d063bb3cd8d4e283242202456b8a3e80058b2f59f0c3a"
+    }
+  }
+}
