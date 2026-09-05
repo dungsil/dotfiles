@@ -1,13 +1,14 @@
-# 기본 값은 codex 기본 프로바이더를 그대로 사용합니다.
-# Tailscale AI Gateway는 `codex --profile tailscale`로 사용합니다. (tailscale.config.toml)
+[windows]
+sandbox = "elevated"
+
+[features.context_management]
+experimental_mode = true
+
+[mcp_servers.aperture]
+url = "https://ai.gila-map.ts.net/v1/mcp"
+
 [model_providers.tailscale]
 name = "Tailscale AI Gateway"
 base_url = "https://ai.gila-map.ts.net/v1"
 wire_api = "responses"
 requires_openai_auth = false
-
-[windows]
-sandbox = "elevated"
-
-[mcp_servers.aperture]
-url = "https://ai.gila-map.ts.net/v1/mcp"
