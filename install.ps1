@@ -34,6 +34,7 @@ $Links = @(
     @{ Source = 'omp\agent\mcp.json';              Dest = '.omp\agent\mcp.json' }
     @{ Source = 'omp\agent\extensions\vibe-prompt.ts'; Dest = '.omp\agent\extensions\vibe-prompt.ts' }
     @{ Source = 'omp\agent\extensions\session-header.ts'; Dest = '.omp\agent\extensions\session-header.ts' }
+    @{ Source = 'omp\agent\extensions\eval-guard.ts'; Dest = '.omp\agent\extensions\eval-guard.ts' }
     @{ Source = 'omp\agent\i-have-adhd.json';          Dest = '.omp\agent\i-have-adhd.json' }
     @{ Source = 'pwsh\Microsoft.PowerShell_profile.ps1';  Dest = 'Documents\PowerShell\Microsoft.PowerShell_profile.ps1' }
     @{ Source = 'codex\models_tailscale.json';            Dest = '.codex\models_tailscale.json' }
