@@ -8,3 +8,6 @@ requires_openai_auth = false
 
 [windows]
 sandbox = "elevated"
+
+[mcp_servers.aperture]
+url = "https://ai.gila-map.ts.net/v1/mcp"
