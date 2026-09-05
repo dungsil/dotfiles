@@ -74,7 +74,7 @@ retry:
       - tailscale/glm-5.3-flash:low
     vision:
       - tailscale/gemma-4-31b:xhigh
-      - tailscale/gpt-5.6-sol:high
+      - tailscale/gpt-6-astra:medium
     designer:
       - tailscale/sonnet-5:high
       - tailscale/gemma-4-31b:xhigh
@@ -89,7 +89,7 @@ retry:
       - tailscale/gemini-3.7-flash:high
       - tailscale/deepseek-v4-pro:max
     plan:
-      - tailscale/gpt-5.6-sol:max
+      - tailscale/gpt-6-astra:high
       - tailscale/glm-5.3:max
       - tailscale/deepseek-v4-pro:max
     scout:
@@ -122,9 +122,9 @@ compaction:
   autoContinue: true
   keepRecentTokens: 20000
 modelRoles:
-  default: tailscale/gpt-5.6-sol:high
+  default: tailscale/gpt-6-astra:medium
   smol: tailscale/gemini-3.8-flash:high
-  slow: tailscale/gpt-5.6-sol:max
+  slow: tailscale/gpt-6-astra:high
   tiny: tailscale/gpt-5.3-codex-spark:low
   commit: tailscale/solar-pro4
   vision: tailscale/gemini-3.8-flash:high
