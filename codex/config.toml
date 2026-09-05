@@ -1,8 +1,5 @@
-# 기본 모델 및 프로바이더
-model = "deepseek-v4-flash"
-model_provider = "tailscale"
-model_catalog_json = "~/.codex/models_tailscale.json"
-
+# 기본 값은 codex 기본 프로바이더를 그대로 사용합니다.
+# Tailscale AI Gateway는 `codex --profile tailscale`로 사용합니다. (tailscale.config.toml)
 [model_providers.tailscale]
 name = "Tailscale AI Gateway"
 base_url = "https://ai.gila-map.ts.net/v1"
