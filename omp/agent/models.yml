@@ -27,6 +27,13 @@ providers:
         contextWindow: 1050000
         api: openai-responses
         input: [text, image]
+      - id: gpt-6-astra
+        name: GPT-6 Astra
+        reasoning: true
+        maxTokens: 128000
+        contextWindow: 1050000
+        api: openai-responses
+        input: [text, image]
       - id: fable-5
         name: Fable 5
         reasoning: true
@@ -148,7 +155,7 @@ providers:
       - id: glm-5.3
         name: GLM 5.3
         reasoning: true
-        maxTokens: 131072
+        maxTokens: 262144
         contextWindow: 1310720
         api: openai-completions
         input: [text]
@@ -211,7 +218,7 @@ providers:
       - id: ling-3.0-flash-fin
         name: Ling 3.0 Flash
         reasoning: true
-        maxTokens: 32768
+        maxTokens: 235929
         contextWindow: 262144
         api: openai-completions
         input: [text, image]
