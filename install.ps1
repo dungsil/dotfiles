@@ -37,6 +37,8 @@ $Links = @(
     @{ Source = 'omp\agent\extensions\eval-guard.ts'; Dest = '.omp\agent\extensions\eval-guard.ts' }
     @{ Source = 'omp\agent\i-have-adhd.json';          Dest = '.omp\agent\i-have-adhd.json' }
     @{ Source = 'pwsh\Microsoft.PowerShell_profile.ps1';  Dest = 'Documents\PowerShell\Microsoft.PowerShell_profile.ps1' }
+    @{ Source = 'codex\AGENTS.md';                       Dest = '.codex\AGENTS.md' }
+    @{ Source = 'codex\agents\researcher.toml';          Dest = '.codex\agents\researcher.toml' }
     @{ Source = 'codex\models_tailscale.json';            Dest = '.codex\models_tailscale.json' }
     @{ Source = 'codex\tailscale.config.toml';             Dest = '.codex\tailscale.config.toml' }
     @{ Source = 'codex\config.toml';                       Dest = '.codex\config.toml'; Type = 'Patch' }
