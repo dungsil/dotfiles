@@ -79,7 +79,8 @@ function Test-CanCreateSymbolicLink {
 }
 
 # TOML 병합 함수: SourceText에 정의된 키 및 섹션을 TargetText에 패치합니다.
-# TargetText에만 존재하는 키/섹션(예: 로컬 머신의 [projects])은 그대로 보존됩니다.
+# 같은 섹션 안에서도 TargetText에만 존재하는 키는 보존합니다.
+# 관리 대상 값은 한 줄 스칼라로 제한하며 배열 테이블은 로컬에만 둡니다.
 function Merge-TomlContent([string]$SourceText, [string]$TargetText) {
     $headerPattern = '^\s*(\[+[^\]]+\]+)\s*$'
     $keyPattern = '^\s*([a-zA-Z0-9_\-\.]+)\s*=\s*(.*)$'
@@ -116,18 +117,24 @@ function Merge-TomlContent([string]$SourceText, [string]$TargetText) {
     $src = Parse-Blocks $SourceText
     $tgt = Parse-Blocks $TargetText
 
-    $srcRootKeys = [ordered]@{}
+    $srcRootKeys = [System.Collections.Specialized.OrderedDictionary]::new([System.StringComparer]::Ordinal)
     foreach ($line in $src.Root) {
         if ($line -match $keyPattern) {
+            if ($Matches[2].TrimStart() -match '^(\[|\{|"{3}|''{3})') {
+                throw 'TOML 패치는 한 줄 스칼라 값만 지원합니다.'
+            }
             $srcRootKeys[$Matches[1]] = $line
         }
     }
 
     $newTgtRoot = [System.Collections.Generic.List[string]]::new()
-    $updatedKeys = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+    $updatedKeys = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
 
     foreach ($line in $tgt.Root) {
         if ($line -match $keyPattern -and $srcRootKeys.Contains($Matches[1])) {
+            if ($Matches[2].TrimStart() -match '^(\[|\{|"{3}|''{3})') {
+                throw '배열, 인라인 테이블 또는 여러 줄 문자열은 스칼라로 교체할 수 없습니다.'
+            }
             $newTgtRoot.Add($srcRootKeys[$Matches[1]])
             [void]$updatedKeys.Add($Matches[1])
         } else {
@@ -151,17 +158,23 @@ function Merge-TomlContent([string]$SourceText, [string]$TargetText) {
         $newTgtRoot.Add('')
     }
 
-    $srcSecMap = [ordered]@{}
+    $srcSecMap = [System.Collections.Specialized.OrderedDictionary]::new([System.StringComparer]::Ordinal)
     foreach ($sec in $src.Sections) {
+        if ($sec.Header.StartsWith('[[')) {
+            throw '배열 테이블은 TOML 패치의 관리 대상으로 지원하지 않습니다.'
+        }
         $srcSecMap[$sec.Header] = $sec.Lines
     }
 
     $newSecs = [System.Collections.Generic.List[psobject]]::new()
-    $handledSrcSecs = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+    $handledSrcSecs = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
 
     foreach ($sec in $tgt.Sections) {
         if ($srcSecMap.Contains($sec.Header)) {
-            $newSecs.Add([PSCustomObject]@{ Header = $sec.Header; Lines = $srcSecMap[$sec.Header] })
+            $sourceBody = ($srcSecMap[$sec.Header] | Select-Object -Skip 1) -join "`n"
+            $targetBody = ($sec.Lines | Select-Object -Skip 1) -join "`n"
+            $mergedBody = Merge-TomlContent -SourceText $sourceBody -TargetText $targetBody
+            $newSecs.Add([PSCustomObject]@{ Header = $sec.Header; Lines = [string[]](@($sec.Lines[0]) + ($mergedBody.TrimEnd() -split '\r?\n')) })
             [void]$handledSrcSecs.Add($sec.Header)
         } else {
             $newSecs.Add($sec)
