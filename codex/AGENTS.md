@@ -8,6 +8,13 @@ For tasks that modify files, assign ownership of specific files or modules to av
 Subagents must preserve other contributors' changes and adapt their work to accommodate them.
 The primary agent must integrate and verify the results before completing the task.
 
+## Subagent response language
+
+Subagents must write progress updates, inter-agent messages, and final reports in English unless the user explicitly requests another language.
+Include this language requirement in delegated task instructions.
+The primary agent should continue responding to the user in the user's language.
+This rule applies to agent communication; generated artifacts must follow the language requirements of the task and repository.
+
 ## Researcher: research and evidence gathering
 
 Use the researcher agent with gpt-5.6-luna at medium reasoning effort for focused documentation research, codebase exploration, and fact checking.
