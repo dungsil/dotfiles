@@ -8,5 +8,6 @@
         "*.iml": true,
         "**/.idea": true
     },
-    "security.workspace.trust.untrustedFiles": "open"
+    "security.workspace.trust.untrustedFiles": "open",
+    "window.confirmSaveUntitledWorkspace": false
 }
