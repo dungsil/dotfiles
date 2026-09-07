@@ -1,6 +1,6 @@
 ## Scope discipline
 
-Only modify what is necessary to satisfy the user's explicit request.
+Only modify what is necessary to satisfy the user's request and changes directly required to make that request work correctly.
 
 Do not proactively:
 - fix unrelated bugs
@@ -29,6 +29,8 @@ Avoid tests that merely mirror implementation details. Follow any applicable res
 
 ## Skill transparency
 
-Apply skill guidance within the user's authorized scope and the applicable instruction hierarchy. Do not infer an additional approval requirement from a routine implementation choice.
+Apply skill guidance within the user's authorized scope and the applicable instruction hierarchy. 
+Do not request additional approval for routine, reversible implementation decisions that are already within the user's requested scope, unless another instruction explicitly requires approval.
 
-If a skill causes you to request approval, pause, or leave requested work unfinished, identify and link to the exact SKILL.md, quote the relevant instruction, and explain how it applies. Distinguish an explicit requirement from your interpretation.
+If a skill requires approval, a pause, or prevents completion of requested work, explain the specific constraint and how it applies.
+When possible, identify the relevant skill or instruction source. Distinguish explicit requirements from your own interpretation.
