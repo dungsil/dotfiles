@@ -52,7 +52,7 @@ retry:
   fallbackChains:
     default:
       - tailscale/opus-4.6:max
-      - tailscale/gemini-3.7-flash:high
+      - tailscale/gemini-3.8-flash:high
       - tailscale/glm-5.3:max
     smol:
       - tailscale/glm-5.3-flash:max
@@ -81,19 +81,19 @@ retry:
       - tailscale/glm-5.3:max
     task:
       - tailscale/sonnet-5:high
-      - tailscale/gemini-3.7-flash:high
+      - tailscale/gemini-3.8-flash:high
       - tailscale/glm-5.3:max
       - tailscale/deepseek-v4-pro:max
     advisor:
       - tailscale/gpt-5.6-luna:max
-      - tailscale/gemini-3.7-flash:high
+      - tailscale/gemini-3.8-flash:high
       - tailscale/deepseek-v4-pro:max
     plan:
       - tailscale/gpt-6-astra:high
       - tailscale/glm-5.3:max
       - tailscale/deepseek-v4-pro:max
     scout:
-      - tailscale/gemini-3.7-flash:medium
+      - tailscale/gemini-3.8-flash:medium
       - tailscale/glm-5.3-flash:high
       - tailscale/sonnet-5:low
     research:
