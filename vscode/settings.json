@@ -9,5 +9,6 @@
         "**/.idea": true
     },
     "security.workspace.trust.untrustedFiles": "open",
-    "window.confirmSaveUntitledWorkspace": false
+    "window.confirmSaveUntitledWorkspace": false,
+    "editor.unicodeHighlight.nonBasicASCII": false
 }
