@@ -2,8 +2,9 @@
 # 심볼릭 링크 생성에는 관리자 권한 또는 개발자 모드가 필요하며, 권한이 없으면 정션, 복사, 패치 항목만 처리하고 심볼릭 링크는 건너뜁니다.
 #
 # 사용법:
-#   scripts/install.ps1            # 누락되었거나 대상이 다른 링크만 (재)생성
-#   scripts/install.ps1 -Force     # 기존 링크/파일을 모두 지우고 다시 생성
+#   ./install.ps1                 # 스킬 동기화 및 누락되었거나 대상이 다른 링크 (재)생성
+#   ./install.ps1 -Force          # 기존 링크/파일을 모두 지우고 다시 생성
+#   ./install.ps1 -SkillsOnly     # 스킬만 동기화
 #
 # 주의: -Force로 다시 생성하면 omp가 쓴 최신 설정(.omp 쪽)이 저장소 파일로 덮어쓰기 전에 유실될 수 있으니
 #       커밋 후에 실행하는 것을 권장합니다.
@@ -11,7 +12,8 @@
 [CmdletBinding()]
 param(
     # 기존 링크가 올바르더라도 전부 지우고 다시 생성합니다.
-    [switch]$Force
+    [switch]$Force,
+    [switch]$SkillsOnly
 )
 
 $ErrorActionPreference = 'Stop'
@@ -228,6 +230,93 @@ function Test-UpToDate([string]$SourcePath, [string]$DestPath, [string]$LinkType
             [System.IO.Path]::GetFullPath($SourcePath) -ieq [System.IO.Path]::GetFullPath($resolved) -and
             (Test-Path $resolved))
 }
+
+# 외부 스킬은 잠금 파일에서 복원하고 로컬 스킬은 한국어 원본 그대로 배포합니다.
+# 임시 디렉터리에서 복원을 검증한 뒤 설치하므로 다운로드 실패 시 기존 스킬을 보존합니다.
+function Sync-AgentSkills([string]$RepositoryRoot) {
+    $repositoryPath = [System.IO.Path]::GetFullPath($RepositoryRoot)
+    $lockPath = Join-Path $repositoryPath 'skills-lock.json'
+    $lock = Get-Content -LiteralPath $lockPath -Raw -Encoding utf8 | ConvertFrom-Json -AsHashtable
+    if ($lock.version -ne 1 -or $lock.skills -isnot [System.Collections.IDictionary]) {
+        throw '지원하지 않는 skills-lock.json 형식입니다.'
+    }
+
+    $localSkills = @(Get-ChildItem -LiteralPath (Join-Path $repositoryPath 'skills-raw') -Directory |
+        Where-Object { Test-Path -LiteralPath (Join-Path $_.FullName 'SKILL.md') -PathType Leaf })
+    $skillNames = @($lock.skills.Keys) + @($localSkills.Name)
+    foreach ($name in $skillNames) {
+        if ($name -cnotmatch '^[a-z0-9][a-z0-9-]*$') { throw "잘못된 스킬 디렉터리 이름: $name" }
+    }
+    foreach ($skill in $localSkills) {
+        if ($lock.skills.Contains($skill.Name)) { throw "외부 스킬과 로컬 스킬 이름이 중복됩니다: $($skill.Name)" }
+    }
+    if ($lock.skills.Count -gt 0 -and -not (Get-Command pnpm -ErrorAction SilentlyContinue)) {
+        throw '스킬을 복원하려면 pnpm이 필요합니다.'
+    }
+
+    $agentsPath = Join-Path $repositoryPath '.agents'
+    $destination = Join-Path $agentsPath 'skills'
+    foreach ($path in @($agentsPath, $destination)) {
+        $item = Get-Item -LiteralPath $path -Force -ErrorAction SilentlyContinue
+        if ($item -and (-not $item.PSIsContainer -or $item.LinkType)) {
+            throw "스킬 배포 경로는 일반 디렉터리여야 합니다: $path"
+        }
+    }
+
+    $tempRoot = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath())
+    $staging = Join-Path $tempRoot ('dotfiles-skills-' + [guid]::NewGuid())
+    New-Item -ItemType Directory -Path $staging | Out-Null
+    try {
+        Copy-Item -LiteralPath $lockPath -Destination (Join-Path $staging 'skills-lock.json')
+        $stagedSkills = Join-Path $staging '.agents/skills'
+        if ($lock.skills.Count -gt 0) {
+            Push-Location -LiteralPath $staging
+            try {
+                pnpm dlx skills experimental_install
+                if ($LASTEXITCODE -ne 0) { throw "스킬 복원 명령이 실패했습니다: 종료 코드 $LASTEXITCODE" }
+            } finally {
+                Pop-Location
+            }
+            # CLI가 일부 설치 실패에도 종료 코드 0을 반환할 수 있으므로 결과를 확인합니다.
+            foreach ($name in $lock.skills.Keys) {
+                if (-not (Test-Path -LiteralPath (Join-Path $stagedSkills "$name/SKILL.md") -PathType Leaf)) {
+                    throw "잠금 파일에 등록된 스킬을 복원하지 못했습니다: $name"
+                }
+            }
+        }
+        New-Item -ItemType Directory -Path $stagedSkills -Force | Out-Null
+        foreach ($skill in $localSkills) {
+            Copy-Item -LiteralPath $skill.FullName -Destination (Join-Path $stagedSkills $skill.Name) -Recurse
+        }
+
+        # 배포 대상 전체를 먼저 확인합니다. 별도로 설치된 다른 스킬은 건드리지 않습니다.
+        foreach ($name in $skillNames) {
+            $target = [System.IO.Path]::GetFullPath((Join-Path $destination $name))
+            if (-not $target.StartsWith($destination + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase)) {
+                throw "스킬 배포 범위를 벗어난 경로입니다: $target"
+            }
+            $item = Get-Item -LiteralPath $target -Force -ErrorAction SilentlyContinue
+            if ($item -and (-not $item.PSIsContainer -or $item.LinkType)) {
+                throw "기존 스킬 경로는 일반 디렉터리여야 합니다: $target"
+            }
+        }
+        New-Item -ItemType Directory -Path $destination -Force | Out-Null
+        foreach ($name in $skillNames) {
+            $target = Join-Path $destination $name
+            if (Test-Path -LiteralPath $target) { Remove-Item -LiteralPath $target -Recurse -Force }
+            Copy-Item -LiteralPath (Join-Path $stagedSkills $name) -Destination $target -Recurse
+        }
+        Write-Host "스킬 동기화 완료: 외부 $($lock.skills.Count) / 로컬 $($localSkills.Count)"
+    } finally {
+        $stagingPath = [System.IO.Path]::GetFullPath($staging)
+        if ($stagingPath.StartsWith($tempRoot.TrimEnd('\', '/') + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase)) {
+            Remove-Item -LiteralPath $stagingPath -Recurse -Force
+        }
+    }
+}
+
+Sync-AgentSkills -RepositoryRoot $DotfilesRoot
+if ($SkillsOnly) { return }
 
 $canCreateSymlinks = Test-CanCreateSymbolicLink
 if (-not $canCreateSymlinks) {

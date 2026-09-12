@@ -1,12 +1,12 @@
 # Skill Sources
 
-This directory contains the canonical Korean source files for skills. 
-Translate each skill into English and place the translated output under `.agents/skills/<skill-name>/` at the repository root.
+This directory contains the canonical Korean source files for locally maintained skills.
+`install.ps1` copies each skill unchanged into the ignored `.agents/skills/<skill-name>/` installation directory. Do not translate the source for installation.
 
-Review and edit locally maintained skills here. `.agents/skills/` contains generated distributions and vendored third-party skills; do not treat those files as locally authored sources.
+Review and edit locally maintained skills here. `.agents/skills/` contains generated copies and external skills restored from `skills-lock.json`; do not edit or commit those files as sources.
 
 ## Create Skills
-Generate the canonical Korean source for an [Agent Skill](https://agentskills.io/home) under `skills-raw/<skill-name>/` from project documentation. Then translate it into `.agents/skills/<skill-name>/`.
+Generate the canonical Korean source for an [Agent Skill](https://agentskills.io/home) under `skills-raw/<skill-name>/` from project documentation. Keep the skill and its assets together in that directory.
 
 Strictly follow the [skill authoring best practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices).
 
@@ -16,17 +16,14 @@ Strictly follow the [skill authoring best practices](https://platform.claude.com
 - Keep the description short: state what the skill does and the concrete conditions for using it. Put workflow steps and tool-selection details in the body instead of the description, and avoid broad keyword lists that could trigger unrelated tasks.
 - Keep `SKILL.md` concise. For multiple workflows, keep shared guidance and routing in `SKILL.md` and place workflow-specific details in supporting files that are read only when relevant. Do not split a short, focused skill merely to create reference files.
 
-## Translation Guidelines
+## Source Guidelines
 
-- Treat the Korean source as canonical. Preserve its meaning, requirements, ordering, and level of detail without adding or omitting behavior.
-- Whenever a canonical source under `skills-raw/<skill-name>/` is created or modified, create or update the corresponding English distribution under `.agents/skills/<skill-name>/` in the same task. Do not leave the source and translated output out of sync.
-- Preserve the directory structure, filenames, frontmatter keys, skill `name`, code blocks, commands, identifiers, paths, URLs, syntax examples, and management markers. Translate frontmatter descriptions and explanatory prose unless a rule below requires preserving the original language.
-- If the frontmatter contains `disable-model-invocation: true`, preserve its `description` exactly as written instead of translating it because the skill is intended for manual user invocation.
-- Write document-structure Markdown headings in the canonical source using the exact English text required in the translated output. Do not translate those headings during distribution. This rule does not override language requirements for headings or content inside examples and templates, including fenced code blocks. Translate instructions, examples, and text-based assets into clear, natural English unless another rule requires preserving their language. Copy non-text assets unchanged.
-- Preserve intentional language requirements. For example, if a source rule requires a commit subject to be written in Korean, the English translation must retain that requirement rather than translating it into an English-only policy.
-- Keep relative links valid in the translated directory. Translate every text file belonging to the skill so that the output does not contain stale or unintentionally mixed-language content.
-- When text fragments will be merged into a single document, reference sections with final English heading anchors (for example, `[Commit Message Convention](#commit-message-convention)`) instead of links to source asset files. Verify that every anchor remains valid after translation and concatenation.
+- Write descriptions and explanatory prose in Korean. Preserve code, commands, identifiers, paths, URLs, frontmatter keys, and management markers in their required form.
+- Preserve intentional language requirements in instructions, examples, and templates.
+- Keep asset references relative to the skill directory so that the source and installed copies both work.
+- When text fragments will be merged into a single document, reference sections using the final document's heading anchors instead of links to source asset files.
+- Use `pwsh ./install.ps1 -SkillsOnly` from the repository root to refresh installed copies after source changes. External skill selection is managed separately in `skills-lock.json`.
 
 ## Verification
 
-After creating or translating a skill, verify the applicable source and translated output. Confirm that the frontmatter is valid, every referenced asset exists, relative links resolve, and every text file ends with a trailing newline. For the translated output, also confirm that no unintended Korean prose remains, excluding a `description` preserved for a skill with `disable-model-invocation: true`.
+After creating or editing a skill, confirm that the frontmatter is valid, every referenced asset exists, relative links resolve, and every text file ends with a trailing newline. When verifying installation, confirm that local skill files match their Korean sources without translation.

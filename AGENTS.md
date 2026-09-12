@@ -7,30 +7,32 @@ This repository manages personal dotfiles and settings for Windows. The executio
 ## Architecture & Data Flow
 
 - Settings are stored in tool-specific directories. `install.ps1` links them to their actual usage paths under `$HOME`.
-- General settings are installed as Symbolic Links, `.agents/skills/` as a Directory Junction, and machine-dependent settings (such as `codex/config.toml`) as Patches (merging dotfiles changes while preserving local settings like `[projects]`). Existing valid targets are skipped, and `-Force` recreates them.
-- The original Korean skills in `skills-raw/` are translated into English distributions in `.agents/skills/`.
+- General settings are installed as Symbolic Links, generated `.agents/skills/` as a Directory Junction, and machine-dependent settings (such as `codex/config.toml`) as Patches (merging dotfiles changes while preserving local settings like `[projects]`). Existing valid targets are skipped, and `-Force` recreates them.
+- Before linking settings, `install.ps1` restores external skills from `skills-lock.json` and copies locally maintained skills from `skills-raw/` without translation into the ignored `.agents/skills/` directory.
 
 ## Key Directories
 
 - `git/`, `vscode/`, `pwsh/`, `codex/`: User settings for each tool.
 - `omp/agent/`: Defines OMP behavior, models, MCP, language, and response rules.
-- `skills-raw/`: Stores the original Korean skills and translation guidelines.
-- `.agents/skills/`: Stores the English-translated skills for installation.
+- `skills-raw/`: Stores the canonical Korean skills and authoring guidelines.
+- `skills-lock.json`: Records external skill sources and selected skills.
+- `.agents/skills/`: Generated installation output, excluded from Git. Do not edit it as source.
 
 ## Development Commands
 
 ```powershell
 pwsh .\install.ps1         # Keeps valid links and creates only missing links
 pwsh .\install.ps1 -Force  # Removes existing targets and recreates links
+pwsh .\install.ps1 -SkillsOnly # Synchronizes external and local skills only
 udcheck                    # Checks for Scoop and WinGet updates
 udall                      # Updates Scoop, WinGet packages, and OMP plugins
 syncplugins                # Updates OMP plugin marketplaces and installed plugins
-syncsk                     # Synchronizes external agent skills using pnpm
+syncsk                     # Runs install.ps1 -SkillsOnly from the installed profile
 ```
 
 ## Testing & QA
 
-- After translating agent skills, check the frontmatter, asset paths, relative links, unintended mixed languages, and the trailing newline.
+- After editing local skills, check the frontmatter, asset paths, relative links, and trailing newlines. Keep Korean source text unchanged during installation.
 
 ## Commit Message Convention
 

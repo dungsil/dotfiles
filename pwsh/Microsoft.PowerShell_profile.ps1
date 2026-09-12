@@ -21,6 +21,7 @@ function syncplugins {
 }
 
 function syncsk() {
-  pnpm dlx skills add dungsil/skills -g -y -a universal --skill *
-  pnpm dlx skills add dungsil-ai/vibe -g -y -a universal --skill *
+  $profileSource = Get-Item -LiteralPath $PSCommandPath
+  if ($profileSource.LinkType) { $profileSource = $profileSource.ResolveLinkTarget($true) }
+  & (Join-Path $profileSource.Directory.Parent.FullName 'install.ps1') -SkillsOnly
 }
