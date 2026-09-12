@@ -18,13 +18,13 @@ function Assert-Result($Condition, [string]$Message) {
 }
 
 $fixture = Join-Path ([IO.Path]::GetTempPath()) ('dotfiles-skills-test-' + [guid]::NewGuid())
-New-Item -ItemType Directory -Path (Join-Path $fixture 'skills-raw/local/assets'),
+New-Item -ItemType Directory -Path (Join-Path $fixture 'skills/skills/category/local/assets'),
     (Join-Path $fixture '.agents/skills/remote'), (Join-Path $fixture '.agents/skills/manual') -Force | Out-Null
 $lockPath = Join-Path $fixture 'skills-lock.json'
 $originalLock = '{"version":1,"skills":{"remote":{"source":"owner/repo","sourceType":"github","skillPath":"skills/remote/SKILL.md","computedHash":"original"}}}'
 [IO.File]::WriteAllText($lockPath, $originalLock)
-[IO.File]::WriteAllText((Join-Path $fixture 'skills-raw/local/SKILL.md'), "---`nname: local`ndescription: 한국어 스킬`n---`n한국어 원본을 유지합니다.`n")
-[IO.File]::WriteAllBytes((Join-Path $fixture 'skills-raw/local/assets/data.bin'), [byte[]](0, 1, 2, 255))
+[IO.File]::WriteAllText((Join-Path $fixture 'skills/skills/category/local/SKILL.md'), "---`nname: local`ndescription: 한국어 스킬`n---`n한국어 원본을 유지합니다.`n")
+[IO.File]::WriteAllBytes((Join-Path $fixture 'skills/skills/category/local/assets/data.bin'), [byte[]](0, 1, 2, 255))
 [IO.File]::WriteAllText((Join-Path $fixture '.agents/skills/remote/stale.txt'), 'stale')
 [IO.File]::WriteAllText((Join-Path $fixture '.agents/skills/manual/SKILL.md'), 'manual')
 
@@ -48,7 +48,7 @@ Assert-Result ((Get-Content -LiteralPath $lockPath -Raw) -ceq $originalLock) 'Re
 Assert-Result (-not (Test-Path -LiteralPath (Join-Path $fixture '.agents/skills/remote/stale.txt'))) 'Stale managed file remains.'
 Assert-Result ((Get-Content -LiteralPath (Join-Path $fixture '.agents/skills/manual/SKILL.md') -Raw) -ceq 'manual') 'Unmanaged skill changed.'
 foreach ($relativePath in @('SKILL.md', 'assets/data.bin')) {
-    $sourceHash = (Get-FileHash -LiteralPath (Join-Path $fixture "skills-raw/local/$relativePath")).Hash
+    $sourceHash = (Get-FileHash -LiteralPath (Join-Path $fixture "skills/skills/category/local/$relativePath")).Hash
     $installedHash = (Get-FileHash -LiteralPath (Join-Path $fixture ".agents/skills/local/$relativePath")).Hash
     Assert-Result ($sourceHash -ceq $installedHash) 'Local source bytes changed.'
 }
@@ -76,4 +76,31 @@ foreach ($invalidLock in @('{"version":1,"skills":{"../outside":{}}}',
 [IO.File]::WriteAllText($lockPath, '{"version":1,"skills":{}}')
 Sync-AgentSkills $fixture
 Assert-Result ($script:cliCalls -eq 4) 'Local-only synchronization unexpectedly used the CLI.'
-'PASS: installation, repeated sync, local byte parity, lock preservation, unmanaged skills, stale files, CLI failures, partial restores, invalid inputs, local-only sync'
+
+New-Item -ItemType Directory -Path (Join-Path $fixture 'skills/skills/duplicate/local') -Force | Out-Null
+Set-Content -LiteralPath (Join-Path $fixture 'skills/skills/duplicate/local/SKILL.md') -Value 'duplicate'
+$rejected = $false
+try { Sync-AgentSkills $fixture } catch { $rejected = $true }
+Assert-Result $rejected 'Duplicate nested skill names were accepted.'
+
+$bootstrapFixture = Join-Path $fixture 'bootstrap'
+New-Item -ItemType Directory -Path $bootstrapFixture | Out-Null
+[IO.File]::WriteAllText((Join-Path $bootstrapFixture 'skills-lock.json'), '{"version":1,"skills":{}}')
+$script:gitFails = $true
+function git {
+    $commandTail = @($args | Select-Object -Skip 2 | Where-Object { $_ -ne '--' })
+    Assert-Result (($args[0] -eq '-C') -and (($commandTail -join ' ') -eq 'submodule update --init --recursive skills')) 'Unexpected submodule command.'
+    $global:LASTEXITCODE = 1
+    if ($script:gitFails) { return }
+    $global:LASTEXITCODE = 0
+    $skillDirectory = Join-Path $args[1] 'skills/skills/bootstrap-skill'
+    New-Item -ItemType Directory -Path $skillDirectory -Force | Out-Null
+    Set-Content -LiteralPath (Join-Path $skillDirectory 'SKILL.md') -Value 'bootstrapped'
+}
+$rejected = $false
+try { Sync-AgentSkills $bootstrapFixture } catch { $rejected = $true }
+Assert-Result $rejected 'Submodule initialization failure was ignored.'
+$script:gitFails = $false
+Sync-AgentSkills $bootstrapFixture
+Assert-Result (Test-Path -LiteralPath (Join-Path $bootstrapFixture '.agents/skills/bootstrap-skill/SKILL.md')) 'Initialized submodule was not installed.'
+'PASS: nested skills, installation, repeated sync, local byte parity, lock preservation, unmanaged skills, stale files, CLI failures, partial restores, invalid inputs, local-only sync, submodule bootstrap and failure'

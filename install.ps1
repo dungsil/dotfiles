@@ -241,8 +241,18 @@ function Sync-AgentSkills([string]$RepositoryRoot) {
         throw '지원하지 않는 skills-lock.json 형식입니다.'
     }
 
-    $localSkills = @(Get-ChildItem -LiteralPath (Join-Path $repositoryPath 'skills-raw') -Directory |
-        Where-Object { Test-Path -LiteralPath (Join-Path $_.FullName 'SKILL.md') -PathType Leaf })
+    $localSkillsRoot = Join-Path $repositoryPath 'skills/skills'
+    if (-not (Test-Path -LiteralPath $localSkillsRoot -PathType Container)) {
+        git -C $repositoryPath submodule update --init --recursive -- skills
+        if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $localSkillsRoot -PathType Container)) {
+            throw 'skills 서브모듈을 초기화하지 못했습니다.'
+        }
+    }
+    $localSkills = @(Get-ChildItem -LiteralPath $localSkillsRoot -Filter SKILL.md -File -Recurse |
+        ForEach-Object { $_.Directory })
+    if (@($localSkills | Group-Object Name | Where-Object Count -gt 1).Count -gt 0) {
+        throw '서브모듈에 같은 디렉터리 이름을 가진 스킬이 여러 개 있습니다.'
+    }
     $skillNames = @($lock.skills.Keys) + @($localSkills.Name)
     foreach ($name in $skillNames) {
         if ($name -cnotmatch '^[a-z0-9][a-z0-9-]*$') { throw "잘못된 스킬 디렉터리 이름: $name" }

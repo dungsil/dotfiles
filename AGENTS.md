@@ -8,13 +8,13 @@ This repository manages personal dotfiles and settings for Windows. The executio
 
 - Settings are stored in tool-specific directories. `install.ps1` links them to their actual usage paths under `$HOME`.
 - General settings are installed as Symbolic Links, generated `.agents/skills/` as a Directory Junction, and machine-dependent settings (such as `codex/config.toml`) as Patches (merging dotfiles changes while preserving local settings like `[projects]`). Existing valid targets are skipped, and `-Force` recreates them.
-- Before linking settings, `install.ps1` restores external skills from `skills-lock.json` and copies locally maintained skills from `skills-raw/` without translation into the ignored `.agents/skills/` directory.
+- Before linking settings, `install.ps1` initializes the `skills/` Git submodule when missing, restores external skills from `skills-lock.json`, and copies skills from `skills/skills/` without translation into the ignored `.agents/skills/` directory. It discovers nested language-specific skill folders as well.
 
 ## Key Directories
 
 - `git/`, `vscode/`, `pwsh/`, `codex/`: User settings for each tool.
 - `omp/agent/`: Defines OMP behavior, models, MCP, language, and response rules.
-- `skills-raw/`: Stores the canonical Korean skills and authoring guidelines.
+- `skills/`: Git submodule for `dungsil/skills`; edit skill sources under `skills/skills/` and follow that repository's instructions. Keep `duninit` and its assets in Korean. Push submodule commits before pushing the parent repository's updated reference.
 - `skills-lock.json`: Records external skill sources and selected skills.
 - `.agents/skills/`: Generated installation output, excluded from Git. Do not edit it as source.
 

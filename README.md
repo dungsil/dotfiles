@@ -13,8 +13,10 @@ sudo pwsh .\install.ps1 -Force # 강제 재생성
 
 ## 스킬 관리
 
-외부 스킬은 `skills-lock.json`으로 관리하고, 직접 작성하는 스킬은 `skills-raw/<skill-name>/`에 한국어로 저장합니다.
+외부 스킬은 `skills-lock.json`으로 관리하고, 직접 작성하는 스킬은 `skills/`에 연결한 [dungsil/skills](https://github.com/dungsil/skills) Git 서브모듈에서 관리합니다.
+`duninit`의 한국어 원본은 `skills/skills/duninit/`에 있습니다.
 `install.ps1`은 `pnpm dlx skills experimental_install`로 외부 스킬을 복원하고 로컬 스킬을 번역 없이 복사합니다.
+서브모듈이 없으면 부모 저장소에 기록된 커밋으로 초기화하고, `skills/skills/` 아래의 언어별 하위 디렉터리까지 스킬을 탐색합니다.
 복원 결과를 확인한 뒤 `.agents/skills/`에 배포하며, 이 디렉터리는 Git으로 추적하지 않습니다.
 사용자 경로인 `$HOME/.agents/skills`는 전체 설치 시 생성하는 정션으로 연결합니다.
 
@@ -30,6 +32,8 @@ syncsk                        # 설치된 PowerShell 프로필에서 같은 동�
 변경된 `skills-lock.json`을 커밋합니다. 로컬 스킬과 외부 스킬에는 서로 다른 이름을 사용합니다.
 목록에 없는 기존 스킬은 자동 삭제하지 않습니다.
 
+스킬을 수정한 뒤에는 `skills/` 저장소에서 먼저 커밋하고 푸시합니다. 그다음 이 저장소에서 변경된 서브모듈 커밋 참조를 커밋하고 푸시합니다.
+
 ## 라이선스
 이 프로젝트는 [MIT License](./LICENSE)에 따라 배포됩니다.
 
@@ -41,7 +45,7 @@ syncsk                        # 설치된 PowerShell 프로필에서 같은 동�
 | ---------------------- | :-------: | -------------------------------------------------------- |
 | [snflkd/fluent-korean] | MIT       | [omp/agent/PERSONALITY.md]                               |
 | [ayghri/i-have-adhd]   | MIT       | [omp/agent/APPEND_SYSTEM.md]                             |
-| [Conventional Commits] | CC BY 3.0 | [skills-raw/duninit/assets/COMMIT_MESSAGE_CONVENTION.md] |
+| [Conventional Commits] | CC BY 3.0 | [skills/skills/duninit/assets/COMMIT_MESSAGE_CONVENTION.md] |
 
 
 <!-- 링크 -->
@@ -51,4 +55,4 @@ syncsk                        # 설치된 PowerShell 프로필에서 같은 동�
 
 [omp/agent/PERSONALITY.md]: ./omp/agent/PERSONALITY.md
 [omp/agent/APPEND_SYSTEM.md]: ./omp/agent/APPEND_SYSTEM.md
-[skills-raw/duninit/assets/COMMIT_MESSAGE_CONVENTION.md]: ./skills-raw/duninit/assets/COMMIT_MESSAGE_CONVENTION.md
+[skills/skills/duninit/assets/COMMIT_MESSAGE_CONVENTION.md]: ./skills/skills/duninit/assets/COMMIT_MESSAGE_CONVENTION.md
