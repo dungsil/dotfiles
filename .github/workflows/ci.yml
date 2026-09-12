@@ -1,0 +1,20 @@
+name: ci
+
+on:
+  push:
+    branches: [gibon]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install powershell-yaml
+        shell: pwsh
+        run: Install-Module powershell-yaml -Force -Scope CurrentUser
+      - name: Validate repo
+        shell: pwsh
+        run: pwsh -NoProfile -File scripts/validate.ps1
