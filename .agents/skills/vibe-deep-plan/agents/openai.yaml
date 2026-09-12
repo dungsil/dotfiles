@@ -1,0 +1,6 @@
+interface:
+  display_name: "Vibe Deep Plan"
+  short_description: "Chart large tasks as a decision ticket map"
+  default_prompt: "Use $vibe-deep-plan to create and advance a decision ticket map for this large effort."
+policy:
+  allow_implicit_invocation: false

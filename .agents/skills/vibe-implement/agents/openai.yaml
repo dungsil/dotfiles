@@ -1,0 +1,7 @@
+interface:
+  display_name: "Vibe Implement"
+  short_description: "Implement spec and ticket based tasks through testing and review"
+  default_prompt: "Use $vibe-implement to implement this task from the provided spec or ticket."
+
+policy:
+  allow_implicit_invocation: false

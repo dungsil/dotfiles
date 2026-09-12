@@ -1,0 +1,7 @@
+interface:
+  display_name: "Vibe Goal"
+  short_description: "Drive from plan through implementation and review in one go"
+  default_prompt: "Use $vibe-goal to drive this goal from planning through published tickets to implemented, reviewed code in one go."
+
+policy:
+  allow_implicit_invocation: false

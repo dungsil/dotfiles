@@ -1,0 +1,7 @@
+interface:
+  display_name: "Vibe Docs"
+  short_description: "Write clear Korean text for Agent Skill repository work"
+  default_prompt: "Use $vibe-docs to write and review this Korean Agent Skill document or repository text."
+
+policy:
+  allow_implicit_invocation: true

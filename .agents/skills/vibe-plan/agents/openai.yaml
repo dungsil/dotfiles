@@ -1,0 +1,7 @@
+interface:
+  display_name: "Vibe Plan"
+  short_description: "Plan through interview, spec, and tickets in one flow"
+  default_prompt: "Use $vibe-plan to take this idea from interview through spec to published tickets."
+
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Vibe Refactor"
+  short_description: "Propose codebase deepening opportunities as a visual report"
+  default_prompt: "Use $vibe-refactor to find deepening opportunities and generate a visual architecture report."
+
+policy:
+  allow_implicit_invocation: false

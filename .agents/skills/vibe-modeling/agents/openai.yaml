@@ -1,0 +1,7 @@
+interface:
+  display_name: "Vibe Modeling"
+  short_description: "Record project domain terms and architectural decisions"
+  default_prompt: "Use $vibe-modeling to organize and record domain terms and key decisions for this project."
+
+policy:
+  allow_implicit_invocation: true

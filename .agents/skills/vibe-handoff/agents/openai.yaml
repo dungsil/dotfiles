@@ -1,0 +1,7 @@
+interface:
+  display_name: "Vibe Handoff"
+  short_description: "Compress conversation into a secure temporary handoff document"
+  default_prompt: "Use $vibe-handoff to create a redacted handoff document for the next agent session."
+
+policy:
+  allow_implicit_invocation: false

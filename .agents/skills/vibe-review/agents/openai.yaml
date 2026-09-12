@@ -1,0 +1,7 @@
+interface:
+  display_name: "Vibe Review"
+  short_description: "Review diffs by standards, spec, and conditional risk axes"
+  default_prompt: "Use $vibe-review to review changes after a fixed point against standards, spec, and risk when enabled."
+
+policy:
+  allow_implicit_invocation: true

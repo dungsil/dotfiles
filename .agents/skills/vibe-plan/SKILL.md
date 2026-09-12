@@ -1,0 +1,344 @@
+---
+name: vibe-plan
+description: Triages incoming requests, records glossaries and ADRs, refines ideas through interviews into synthesized specs, and breaks work into tracer-bullet tickets published with blocking edges to configured trackers. Use when triaging issues or external PRs, planning features, drafting specs/PRDs, or splitting work into tickets.
+disable-model-invocation: true
+---
+
+# Planning Work
+
+Moves from a request or loose idea to agent-executable tickets in one flow. Four stages: **Triage** (judges incoming external requests; can end execution), **Grill** (sharpens through interviews, recording decisions into docs), **Spec** (synthesizes established decisions), and **Tickets** (slices into tracer-bullet units with blocking edges).
+
+Issue tracker and triage label vocabularies must already be provided — run `/vibe-init` if missing.
+
+## Enter at the Correct Stage
+
+**Do not ask what can be inferred from what the user brought.** Read arguments and dialogue, then enter at the earliest stage lacking complete input:
+
+| What user brought | Entry Stage |
+| --- | --- |
+| External request — bug report you didn't write, feature request, issue link/number, or external PR | **Stage 0 — Triage** |
+| Loose idea, or plan with open questions | **Stage 1 — Grill** |
+| Resolved dialogue, no open decisions | **Stage 2 — Spec** |
+| Preexisting spec, PRD, plan, issue number, or URL authored by you | **Stage 3 — Tickets** |
+
+**Treat as external if the author is not you.** Bare links, issue numbers, pasted reports, "someone filed this", or collaborator PRs — anything you and the user did not create directly in this repository's planning goes through Stage 0 first. Tickets published by this skill are already `ready-for-agent` by construction: **never triage your own output.** If ambiguous, state which interpretation you took and allow the user to correct with one word.
+
+**Decision maps are not requests.** Issues labeled `상태:초안`, or decision tickets labeled `유형:조사`, `유형:프로토타입`, `유형:인터뷰`, or `유형:작업`, belong to `/vibe-deep-plan` — they are in-progress planning artifacts rather than triage targets. `유형:계획` identifies a spec/plan issue published by this skill, so do not classify it as a decision ticket. If pointed at a decision map or one of its tickets, state so and recommend `/vibe-deep-plan`. Once such maps clear, their Destination and Decisions-so-far serve as valid input for **Stage 2 — Spec**. Resolve actual decision-ticket strings from `docs/agents/triage-labels.md`; never invent English stand-ins such as `status:draft`.
+
+When entering Stage 3 with a reference (spec path, issue number, or URL), fetch and read the entire body and comments. Do not re-interview decisions already recorded in the source or re-synthesize existing specs — skipping ahead is the point of this table.
+
+State entry stage and rationale in one line, then begin.
+
+Before entering a stage that may change local planning documents, record `git status`, the current branch, its upstream difference, and any commits that are already unpushed. Use this baseline to separate this plan's changes from preexisting user work.
+
+## Context Hygiene
+
+Maintain executed stages in a **single unbroken context window** — never compressing or clearing until tickets are published — so triage findings, grilling, specs, and tickets build upon the same foundation. Each ticket is subsequently implemented in a fresh session focused on that ticket alone.
+
+If the session degrades before tickets are produced, do not force through: hand off the thread (see `/vibe-handoff`) to continue in a fresh session.
+
+## Output Language
+
+Template headings below are placeholders, not literal output. Write every published artifact — titles, headings, and body — in the language this repository's documentation uses, reusing the heading vocabulary already present on existing issues rather than translating afresh. Mixed-language output (English headings over translated body) means the template was copied verbatim.
+
+---
+
+## Stage 0 — Triage
+
+Directs incoming requests through a state machine of triage roles. **This stage can end execution** — `wontfix` and `needs-info` are successful terminal outcomes, not failures. Only requests reaching `ready-for-agent` or `ready-for-human` proceed; where they proceed depends on what triage established:
+
+- Fully specified with no open decisions → **Stage 3 — Tickets** (or leave the issue as-is if a single ticket suffices).
+- Open decisions remain after triage → **Stage 1 — Grill**, carrying triage notes forward.
+
+If this repo treats external PRs as request surfaces (see tracker config), this stage includes them: **PRs are issues with attached code** — same roles, same states, same mechanics, with minor differences noted under "For PRs" below. Bare `#42` resolves to issue or PR per tracker config.
+
+All comments or issues posted during triage **must** begin with this notice:
+
+```
+> *This was generated by AI during triage.*
+```
+
+Reference docs for this stage:
+
+- [AGENT-BRIEF.md](AGENT-BRIEF.md) — How to write durable agent briefs
+- [OUT-OF-SCOPE.md](OUT-OF-SCOPE.md) — How the `docs/agents/out-of-scope/` knowledge base operates
+
+### Roles
+
+Two **category** roles:
+
+- `bug` — Something is broken
+- `enhancement` — New feature or improvement
+
+Five **state** roles:
+
+- `needs-triage` — Maintainer must evaluate
+- `needs-info` — Awaiting additional info from reporter
+- `ready-for-agent` — Fully specified, ready for AFK agent
+- `ready-for-human` — Human must implement
+- `wontfix` — Will not be addressed
+
+For PRs, states apply to the attached code: `ready-for-agent` means brief is attached and agent should take next steps on the diff; `ready-for-human` means ready for human merge.
+
+Every triaged issue must have exactly one category role and one state role. Flag conflicting state roles and ask the maintainer before proceeding.
+
+These are canonical role names — actual label strings used in tracker may differ. Resolve via `docs/agents/triage-labels.md`.
+
+State transitions: unlabeled issues typically move to `needs-triage` first, then to `needs-info`, `ready-for-agent`, `ready-for-human`, or `wontfix`. `needs-info` returns to `needs-triage` once reporter replies. Maintainers may override anytime — flag unusual transitions and confirm before acting.
+
+### Invocation
+
+Explain-then-act: interpret maintainer requests and execute. Examples:
+
+- "Show me what needs attention"
+- "Look at #42" (issue or PR)
+- "Move #42 to ready-for-agent"
+- "What is ready for an agent to pick up?"
+
+### Showing What Needs Attention
+
+Query issue tracker and present three buckets, oldest first:
+
+1. **Unlabeled** — Never triaged.
+2. **`needs-triage`** — Evaluation in progress.
+3. **`needs-info` with reporter activity since last triage note** — Needs re-evaluation.
+
+If PRs are in scope, include external PRs in these buckets, marking lines with `[PR]` or `[issue]`. Discovery surfaces *external* PRs only (per tracker definition) — collaborator in-progress PRs are not triage tasks. This filter applies to discovery only; explicitly named PRs are always triaged regardless of author.
+
+Display counts and one-line summaries per item. Let maintainer choose.
+
+### Triaging a Specific Issue or PR
+
+1. **Gather Context.** Read full issue or PR (body, comments, labels, author, date; diff for PRs). Parse prior triage notes to avoid re-asking resolved questions. Explore codebase using domain glossary, respecting ADRs in the area. Run two codebase checks: (a) **Duplicates** — search for existing implementations using domain concepts (not request phrasing) and report findings. If found, this is an already-implemented `wontfix` (Step 5). (b) **Prior Rejections** — read `docs/agents/out-of-scope/*.md` and surface similarities.
+
+2. **Recommend.** Provide category and state recommendations with rationale to maintainer, plus codebase summary related to the request (including existing implementations). Await instructions.
+
+3. **Verify Claims.** Confirm claims hold before grilling. For bugs, reproduce using reporter's steps. **For external PRs:**
+   - **Static Review First.** Review diff and repo context before checkout or command execution. Evaluate all core PR claims as statically supported, refuted, or unverified, identifying runtime evidence needed for unverified claims.
+   - **Propose, Then Await.** Execute only when resolving key unverified claims is necessary for triage recommendations. Present rationale, exact commands, expected side effects, and sandbox guarantees (disposable, no secrets, no write credentials, network blocked by default). Await separate explicit approval — initial requests to triage or test are not approvals.
+   - **Execute in Security Sandbox Only.** After approval, run untrusted code only in disposable sandboxes matching those guarantees. Dedicated worktrees provide checkout isolation only; they are not security sandboxes and do not constitute goal integration workspaces. Never treat worktrees as meeting this requirement.
+   - **Safe Stop.** If suitable sandboxes are unavailable or approval is absent/declined, do not checkout or execute anything. Finish static review, stating unverified claims and verification limits.
+
+   Report outcomes: confirmed (with code paths or run evidence), failed, statically supported but runtime unverified, or lacking detail (strong `needs-info` signal). Confirmed verification yields stronger agent briefs.
+
+4. **Grill (if needed).** If request needs fleshing out, run **Stage 1 — Grill** now and apply results upon return. Resolved items feed briefs or triage notes.
+
+5. **Apply Outcome:**
+   - `ready-for-agent` — Post agent brief comment ([AGENT-BRIEF.md](AGENT-BRIEF.md)).
+   - `ready-for-human` — Match agent brief structure, stating reasons preventing delegation (judgment, external access, architectural decisions, manual testing).
+   - `needs-info` — Post triage notes (template below).
+   - `wontfix` — Close; comments depend on *why*:
+     - **Already Implemented** — Point to existing code; do **not** write to `docs/agents/out-of-scope/` (that KB is for *rejected* requests).
+     - **Rejected (Bug)** — Polite explanation, then close.
+     - **Rejected (Enhancement)** — Write to `docs/agents/out-of-scope/`, link from comment, then close ([OUT-OF-SCOPE.md](OUT-OF-SCOPE.md)).
+   - `needs-triage` — Apply role. Comments optional if partial progress was made.
+
+### Fast State Overrides
+
+When maintainers say "Move #42 to ready-for-agent", trust them and apply roles directly. Confirm planned actions (role change, comments, close) then execute. Skip grilling. When moving to `ready-for-agent` without grilling, ask whether to author an agent brief.
+
+### Needs-Info Template
+
+```markdown
+## Triage Notes
+
+**Confirmed So Far:**
+
+- Point 1
+- Point 2
+
+**Needed From You (@reporter):**
+
+- Question 1
+- Question 2
+```
+
+Capture everything resolved during grilling under "Confirmed So Far" so work is not lost. Questions must be specific and actionable, not "please provide more info".
+
+### Resuming Prior Sessions
+
+When prior triage notes exist on an issue/PR, read them, check if reporter answered open questions, and present updated picture before continuing. Never re-ask resolved questions.
+
+---
+
+## Stage 1 — Grill
+
+Run a `/vibe-grilling` session using `/vibe-modeling`: interview one question at a time until reaching shared understanding, sharpening domain terms and writing `CONTEXT.md` / ADR updates immediately as decisions solidify.
+
+Do not proceed to Stage 2 until the user confirms shared understanding.
+
+---
+
+## Stage 2 — Spec
+
+Synthesize a spec (also known as a PRD) from established decisions. Do **not** interview the user here — questioning belongs to Stage 1; this stage is purely synthesis.
+When Stage 2 receives a cleared decision map from `/vibe-deep-plan`, read the map and follow all resolved records or ticket links in `Decisions so far` before synthesizing. First load each linked decision's question and final answer: `## Question` and `## Answer` in local Markdown, or issue body/question and final decision comment/note in hosted trackers. Follow raw `## Research`, comments, attachments, or prototype artifacts only when final answers reference them or spec requires evidence. Maps are indexes, not replacements for linked decisions. In local Markdown, if the map is at `.agents/plans/<effort>/map.md`, reuse `.agents/plans/<effort>/` and write `spec.md` there; do not create a new `<feature-slug>` directory. Hosted trackers use provided map URLs/numbers and configured spec publishing surfaces.
+
+### Local Decision Gate
+
+However Stage 2 was entered, review established decisions against `/vibe-modeling` before writing the spec. Do not reopen settled choices. Record new domain terms in `CONTEXT.md`, and write any decision that meets all three ADR conditions but is not yet recorded. Do not duplicate an existing decision record.
+
+Before the first hosted-tracker spec, label, or ticket is published or edited, commit `CONTEXT.md` and ADR changes made by this planning run, then push the current branch normally. Never use `git add .`; stage only exact paths from this run and do not mix preexisting user changes. Review the staged diff and commit SHA, then verify that the remote branch contains that SHA after the push. Never force-push. If commits were already unpushed at the start, show every commit that would be published and ask the user first. If existing changes cannot be separated safely, commit or push fails, or remote-SHA verification fails, stop without mutating the remote tracker. If no local modeling document changed, do not create a new commit or push.
+
+1. Explore repository to understand current codebase state (if not already done). Use domain glossary vocabulary throughout the spec, respecting ADRs in touched areas.
+
+2. Sketch boundaries for testing the feature. Prefer existing boundaries over new ones. Use the outermost boundary you can. Propose a new boundary at the outermost level if needed. Fewer boundaries across the codebase are better — ideal count is one.
+
+Confirm that boundary with the user.
+
+3. Author the spec using the template below, then post it to the issue tracker. On hosted trackers, apply both `유형:계획` and the `ready-for-agent` triage label to the spec/plan issue — no further triage is needed. Do not apply hosted labels to local Markdown specs.
+
+<spec-template>
+
+## Problem Definition
+
+The problem faced by the user, from the user's perspective.
+
+## Solution
+
+The solution to the problem, from the user's perspective.
+
+## User Stories
+
+A long, numbered list of user stories. Each user story must follow this format:
+
+1. As a <actor>, I want <capability>, so that <benefit>
+
+<user-story-example>
+1. As a mobile banking customer, I want to see my account balance, so that I can make better spending decisions
+</user-story-example>
+
+This user story list must be comprehensive, covering all aspects of the feature.
+
+## Implementation Decisions
+
+List of implementation decisions made. May include:
+
+- Modules to build/modify
+- Interfaces of modified modules
+- Developer technical clarifications
+- Architectural decisions
+- Schema changes
+- API contracts
+- Concrete interactions
+
+Do **not** include specific file paths or code snippets — they quickly become stale.
+
+Exception: If prototypes created snippets encoding decisions more accurately than prose (state machines, reducers, schemas, type shapes), inline within that decision and briefly note provenance. Retain decision-rich fragments only — essential logic, not full working demos.
+
+## Testing Decisions
+
+List of testing decisions made. Including:
+
+- Criteria for good tests (testing observable behavior only, not implementation details)
+- Modules to test
+- Testing precedents (similar tests in codebase)
+
+## Out of Scope
+
+Explicit description of what is out of scope for this spec.
+
+## Additional Notes
+
+Additional notes regarding the feature.
+
+</spec-template>
+
+---
+
+## Stage 3 — Tickets
+
+Break down the spec — or incoming plan/dialogue — into **tickets**: tracer-bullet vertical slices, each declaring tickets that **block** it.
+
+Before drafting, explore codebase if not done already. Ticket titles and descriptions must use domain glossary vocabulary and respect ADRs in touched areas. Identify preparatory refactoring opportunities that simplify implementation: "make the change easy, then make the easy change."
+
+### 1. Draft Vertical Slices
+
+Decompose work into **tracer bullet** tickets.
+
+<vertical-slice-rules>
+
+- Each slice cuts a narrow but complete path across all layers (schema, API, UI, tests) — vertical, not horizontal single-layer slices
+- Completed slices are independently demonstrable or verifiable
+- Slices are sized to fit within a single fresh context window
+- Preparatory refactoring, if present, comes first
+
+</vertical-slice-rules>
+
+Attach **blocking edges** to each ticket — other tickets that must complete before this one starts. Tickets without blockers can start immediately.
+
+**Broad refactorings are exceptions to vertical slicing.** A **broad refactoring** is a single mechanical change — renaming columns, changing shared symbol types — whose **blast radius** spans the codebase, where a single edit breaks thousands of call sites and no vertical slice can land green. Do not force into tracer bullets; order via **expand–contract**. First expand: add new shapes alongside old without breaking existing callers. Then migrate call sites in batches scoped by blast radius (per package/directory), each batch as its own ticket blocked by expand, keeping CI green per batch because old shapes remain. Finally contract: delete old shapes once no callers remain, in a ticket blocked by all migration batches. If batches cannot remain independently green, retain ordering while sharing an integration branch — ending in a final integrate-and-verify ticket blocking on all batches, where green is promised only at the end.
+
+### 2. Confirm with User
+
+Present proposed decomposition as a numbered list. For each ticket:
+
+- **Title**: Short descriptive name
+- **Blockers**: Other tickets that must complete first (if any)
+- **Delivers**: End-to-end behavior made functional by this ticket
+
+Ask user:
+
+- Is granularity appropriate? (Too large / too fine)
+- Are blocking edges accurate — does each ticket depend only on what truly blocks it?
+- Should any tickets be merged or further split?
+
+Iterate until user approves decomposition.
+
+### 3. Publish Tickets to Configured Tracker
+
+Publish approved tickets in dependency order (blockers first) so ticket blocking edges reference actual identifiers. **How** this happens depends on the tracker configured via `/vibe-init` — tickets are identical either way; only parent links and blocking edge representations change. Apply `ready-for-agent` triage labels unless directed otherwise (see `docs/agents/triage-labels.md`) — tickets are structured for agent pickup.
+For cleared local Markdown maps, retain the map's existing `<effort>` directory as output root for implementation tickets. Do not create a second feature directory or rewrite the map's `spec.md` in Stage 3.
+
+**Hosted tracker + one ticket.** If the approved decomposition is exactly one ticket and the tracker is GitHub, GitLab, or another remote, do not split spec and plan. Do not create a child (sub-issue / task / linked issue). Fold **What to Implement** and **Acceptance Criteria** into the spec issue body — that issue is both spec and the sole ticket. If Stage 2 already posted the spec, update that body; do not post a second issue, and keep its existing `유형:계획` and `ready-for-agent` labels. Local Markdown does not use this fold: keep `spec.md` and `issues/01-*.md` separate.
+
+- **Local Files** → If input was a cleared map `.agents/plans/<effort>/map.md`, write one implementation issue per ticket under `.agents/plans/<effort>/issues/<NN>-<slug>.md`; if input was a spec at `.agents/plans/<effort>/spec.md`, write under the same effort's `issues/`; otherwise, for other local spec paths, write `.agents/plans/<feature-slug>/issues/<NN>-<slug>.md`. Number tickets from `01` in dependency order (blockers first). List depending numbers/titles under "Prerequisites" in each file. Use per-ticket file template below — one file per ticket, never combined.
+- **GitHub** → When two or more tickets: make each ticket a **sub-issue** of the spec issue so parents render progress and children are navigable in UI. Create issue first (`gh issue create`), then link via `gh api --method POST repos/<owner>/<repo>/issues/<parent>/sub_issues -F sub_issue_id=<child-db-id>`, where `<child-db-id>` is child's numeric **database id** (`gh api repos/<owner>/<repo>/issues/<n> --jq .id`, not `#number` or `node_id`). Where sub-issues are unavailable, fall back to task lists in parent body and `Parent Issue: #<parent>` at top of child body. Use GitHub **native issue dependencies** for blocking edges: `gh api --method POST repos/<owner>/<repo>/issues/<child>/dependencies/blocked_by -F issue_id=<blocker-db-id>`.
+- **GitLab** → When two or more tickets: make each ticket a **task** (GitLab child work item type) of the spec issue so parents track real work item checklists rather than plain text. **Never use quick actions to build structure** — `/parent` does not exist, `/set_parent` and `/blocked_by` fail to apply on some instances, and unrecognized quick actions post **as literal comments** instead of failing. Use these API paths only:
+  - **Create**: `glab api --method POST "projects/:id/issues" -F "title=<title>" -F "issue_type=task" -F "description=<body>"`.
+  - **Parent link**: resolve child and parent work item global IDs via GraphQL (`workItems { nodes { id iid } }`), then call `workItemUpdate(input: { id: <child-gid>, hierarchyWidget: { parentId: <parent-gid> } })`.
+  - **Blocking edges**: attempt once with `glab api --method POST "projects/:id/issues/<child>/links" -F target_project_id=<id> -F target_issue_iid=<blocker> -F link_type=is_blocked_by`. `HTTP 400 link_type does not have a valid value` means the tier lacks native blocking (Free/CE) — then record blockers only in the ticket's own "Prerequisites" section, never appending a separate `Prerequisites:` line at the top of the description (it duplicates the section).
+  - **Verify**: after publishing, re-query hierarchy and links, and treat any remaining comment starting with `/` as a failed structure attempt on that ticket.
+- **Other Trackers (Linear, Jira, ...)** → When two or more tickets: publish one issue per ticket using native parent/sub-issue relations and native blocking relations where available; otherwise set "Prerequisites" on each ticket to blocking issues.
+
+Work the **frontier**: tickets whose blockers are all completed. Top-to-bottom for purely linear chains.
+
+Do **not** close parent issues. Do not modify parent issues — except the single-ticket fold above.
+
+<local-ticket-template>
+
+# <NN> — <Ticket Title>
+
+**What to Implement:** End-to-end behavior made functional by this ticket, from user perspective — not a layer-by-layer task list.
+
+**Prerequisites:** Numbers/titles of tickets blocking this ticket, or "None — ready to start immediately".
+
+**Status:** ready-for-agent
+
+- [ ] Acceptance condition 1
+- [ ] Acceptance condition 2
+
+</local-ticket-template>
+
+<issue-template>
+
+## Parent Issue
+
+Reference to parent issue in tracker. Omit this section if natively linked — GitHub sub-issues and GitLab tasks link parents in tracker UI, making body references redundant. Retain only as fallback when native relations are unavailable.
+
+## What to Implement
+
+End-to-end behavior made functional by this ticket, from user perspective — not layer-by-layer tasks.
+
+## Acceptance Criteria
+
+- [ ] Condition 1
+- [ ] Condition 2
+
+## Prerequisites
+
+- Reference to each blocking ticket, or "None — ready to start immediately".
+
+</issue-template>
+
+Avoid specific file paths or code snippets in either format — they quickly become stale. Exception: inline decision-rich fragments (state machines, reducers, schemas, types) from prototypes, noting provenance.

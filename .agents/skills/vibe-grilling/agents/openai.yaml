@@ -1,0 +1,7 @@
+interface:
+  display_name: "Vibe Grilling"
+  short_description: "Vet plans one question at a time"
+  default_prompt: "Use $vibe-grilling to vet my plan one question at a time."
+
+policy:
+  allow_implicit_invocation: true

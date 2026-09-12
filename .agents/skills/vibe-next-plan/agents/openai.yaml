@@ -1,0 +1,7 @@
+interface:
+  display_name: "Vibe Next Plan"
+  short_description: "Explore what to build next through codebase direction investigation"
+  default_prompt: "Use $vibe-next-plan to investigate the codebase and find grounded directions on what to build next."
+
+policy:
+  allow_implicit_invocation: false

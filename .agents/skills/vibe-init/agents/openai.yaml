@@ -1,0 +1,7 @@
+interface:
+  display_name: "Vibe Init"
+  short_description: "Define base configuration for vibe coding project"
+  default_prompt: "Use $vibe-init to scaffold issue tracker, triage labels, and domain doc configurations in AGENTS.md for this repository."
+
+policy:
+  allow_implicit_invocation: false

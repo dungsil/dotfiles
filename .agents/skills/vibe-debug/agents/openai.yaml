@@ -1,0 +1,7 @@
+interface:
+  display_name: "Vibe Debug"
+  short_description: "Diagnose difficult bugs with a tight feedback loop"
+  default_prompt: "Use $vibe-debug to diagnose bugs with a red-capable feedback loop."
+
+policy:
+  allow_implicit_invocation: true
