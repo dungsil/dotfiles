@@ -1,8 +1,130 @@
-model = "gpt-6-astra"
-model_reasoning_effort = "medium"
+﻿model_reasoning_effort = "xhigh"
 service_tier = "default"
 approvals_reviewer = "user"
+model = "gpt-6-astra"
+
 sandbox_mode = "workspace-write"
+
+
+
+notify = [ "C:\\Users\\younggeon\\AppData\\Local\\OpenAI\\Codex\\runtimes\\cua_node\\a708e72b10c27b59\\bin\\node_modules\\@oai\\sky\\bin\\windows\\codex-computer-use.exe", "turn-ended" ]
+[model_providers.tailscale]
+name = "Tailscale AI Gateway"
+base_url = "https://ai.gila-map.ts.net/v1"
+wire_api = "responses"
+requires_openai_auth = false
+
+[projects.'c:\users\younggeon\projects\dungsil\dotfiles']
+trust_level = "trusted"
+
+[projects.'c:\users\younggeon\projects\dungsil\cordis-chat']
+trust_level = "trusted"
+
+[windows]
+sandbox = "elevated"
+
+[tui.model_availability_nux]
+gpt-6-astra = 4
+
+[[skills.config]]
+path = 'C:\Users\younggeon\Projects\dungsil\dotfiles\.agents\skills\orca-cli\SKILL.md'
+enabled = false
+
+[[skills.config]]
+path = 'C:\Users\younggeon\Projects\dungsil\dotfiles\.agents\skills\orca-per-workspace-env\SKILL.md'
+enabled = false
+
+[[skills.config]]
+path = 'C:\Users\younggeon\Projects\dungsil\dotfiles\.agents\skills\orchestration\SKILL.md'
+enabled = false
+
+[mcp_servers.aperture]
+url = "https://ai.gila-map.ts.net/v1/mcp"
+
+[mcp_servers.node_repl]
+args = []
+command = 'C:\Users\younggeon\AppData\Local\OpenAI\Codex\runtimes\cua_node\a708e72b10c27b59\bin\node_repl.exe'
+startup_timeout_sec = 120
+
+[mcp_servers.node_repl.env]
+NODE_REPL_NATIVE_PIPE_CONNECT_TIMEOUT_MS = "1000"
+NODE_REPL_NODE_MODULE_DIRS = 'C:\Users\younggeon\AppData\Local\OpenAI\Codex\runtimes\cua_node\a708e72b10c27b59\bin\node_modules'
+NODE_REPL_NODE_PATH = 'C:\Users\younggeon\AppData\Local\OpenAI\Codex\runtimes\cua_node\a708e72b10c27b59\bin\node.exe'
+NODE_REPL_TRUSTED_CODE_PATHS = 'C:\Users\younggeon\.codex;C:\Users\younggeon\AppData\Local\OpenAI\Codex\runtimes\cua_node\a708e72b10c27b59\bin\node_modules'
+CODEX_HOME = 'C:\Users\younggeon\.codex'
+BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
+BROWSER_USE_TINYSKY_ENABLED = "0"
+NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = "Control the in-app browser in conjunction with the Browser Plugin."
+NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = "Control the Chrome browser in conjunction with the Chrome Plugin. Prefer this method of controlling Chrome over alternatives (such as Computer Use) unless the user explicitly mentions an alternative."
+BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
+BROWSER_USE_CODEX_APP_VERSION = "26.908.40834"
+NODE_REPL_TRUSTED_SERVICES = '{"browser":"C:/Users/younggeon/.codex/plugins/cache/openai-bundled/browser/26.908.40834/scripts/browser-service.mjs","sky":"@oai/sky/service"}'
+SKY_CUA_NATIVE_PIPE = "1"
+SKY_CUA_NATIVE_PIPE_DIRECTORY = '\\.\pipe\codex-computer-use-8c76fc9d-9d78-4592-8d1e-dc33c3d73f0b'
+CODEX_CLI_PATH = 'C:\Users\younggeon\AppData\Local\OpenAI\Codex\bin\bffc5354119c8421\codex.exe'
+
+[mcp_servers.cua_repl]
+command = 'C:\Program Files\WindowsApps\OpenAI.Codex_26.908.4834.0_x64__2p2nqsd0c76g0\app\ChatGPT.exe'
+enabled = false
+
+[desktop]
+followUpQueueMode = "steer"
+projectlessWorkspaceRoot = 'C:\Users\younggeon\프로젝트\codex'
+show-context-window-usage = true
+toys-confetti-enabled = true
+external-agent-import-sync-enabled = false
+sansFontSize = 15
+codeFontSize = 14
+open-link-in-target-preference = "external-browser"
+open-local-url-in-target-preference = "in-app-browser"
+browser-show-full-url = false
+git-pull-request-merge-method = "squash"
+worktree-upstream-refresh-mode = "best-effort"
+conversationDetailMode = "STEPS_COMMANDS"
+enabled-reasoning-efforts = ["low", "medium", "high", "xhigh", "ultra", "persistent", "max"]
+git-pr-watch-auto-merge = true
+git-pr-watch-instructions = "Follow the repository's AGENTS.md. Repeat monitoring, fixes, and verification until all required CI checks pass on the latest PR HEAD and no unresolved review threads remain. Address CI failures and actionable review feedback within the PR's scope, push changes, and recheck the new HEAD. Reply to and resolve review threads only after actually addressing the feedback. Do not treat queued, in-progress, or cancelled checks as successful. Once these conditions and the repository's merge requirements are satisfied, confirm that the verified HEAD is still current and merge the PR. Stop when the PR is merged or closed. If permissions or external approvals block progress, tell the user what action is needed."
+
+[marketplaces.openai-bundled]
+source_type = "local"
+source = '\\?\C:\Users\younggeon\.codex\.tmp\bundled-marketplaces\openai-bundled'
+
+[marketplaces.openai-primary-runtime]
+source_type = "local"
+source = '\\?\C:\Users\younggeon\.cache\codex-runtimes\codex-primary-runtime\plugins\openai-primary-runtime'
+
+[plugins."codex-app-tools@openai-bundled"]
+enabled = true
+
+[plugins."sites@openai-bundled"]
+enabled = true
+
+[plugins."browser@openai-bundled"]
+enabled = true
+
+[plugins."visualize@openai-bundled"]
+enabled = true
+
+[plugins."computer-use@openai-bundled"]
+enabled = true
+
+[plugins."documents@openai-primary-runtime"]
+enabled = true
+
+[plugins."pdf@openai-primary-runtime"]
+enabled = true
+
+[plugins."spreadsheets@openai-primary-runtime"]
+enabled = true
+
+[plugins."presentations@openai-primary-runtime"]
+enabled = true
+
+[plugins."template-creator@openai-primary-runtime"]
+enabled = true
+
+[plugins."chrome@openai-bundled"]
+enabled = true
 
 [sandbox_workspace_write]
 network_access = true
@@ -14,33 +136,47 @@ memories = true
 generate_memories = true
 use_memories = true
 
-[desktop]
-followUpQueueMode = "steer"
-show-context-window-usage = true
-toys-confetti-enabled = true
-external-agent-import-sync-enabled = false
-sansFontSize = 15
-codeFontSize = 14
-open-link-in-target-preference = "external-browser"
-open-local-url-in-target-preference = "in-app-browser"
-browser-show-full-url = false
-git-pull-request-merge-method = "squash"
-git-pr-watch-auto-merge = true
-git-pr-watch-instructions = "Follow the repository's AGENTS.md. Repeat monitoring, fixes, and verification until all required CI checks pass on the latest PR HEAD and no unresolved review threads remain. Address CI failures and actionable review feedback within the PR's scope, push changes, and recheck the new HEAD. Reply to and resolve review threads only after actually addressing the feedback. Do not treat queued, in-progress, or cancelled checks as successful. Once these conditions and the repository's merge requirements are satisfied, confirm that the verified HEAD is still current and merge the PR. Stop when the PR is merged or closed. If permissions or external approvals block progress, tell the user what action is needed."
-worktree-upstream-refresh-mode = "best-effort"
-conversationDetailMode = "STEPS_COMMANDS"
+[apps.connector_openai_codex_document_control]
+enabled = false
 
-[windows]
-sandbox = "elevated"
+[apps.connector_76869538009648d5b282a4bb21c3d157]
+enabled = false
+
+[projects."C:\\Users\\younggeon"]
+trust_level = "trusted"
+
+[projects.'c:\users\younggeon\projects\dungsil\kyog.net']
+trust_level = "trusted"
+
+[projects.'c:\users\younggeon\projects\codex\2026-09-05\new-chat']
+trust_level = "trusted"
+
+[projects.'c:\users\younggeon\projects\codex\2026-09-05\pc-x20']
+trust_level = "trusted"
+
+[projects.'c:\users\younggeon\projects\dungsil\otd']
+trust_level = "trusted"
+
+[projects.'c:\users\younggeon\projects\codex\2026-09-06\https-game-naver-com-lounge-hunter']
+trust_level = "trusted"
+
+[projects.'c:\users\younggeon\projects\codex\2026-09-09\new-chat']
+trust_level = "trusted"
+
+[projects.'c:\users\younggeon\projects\codex\2026-09-09\openai-docs-c-users-younggeon-codex']
+trust_level = "trusted"
+
+[projects.'c:\users\younggeon\projects\codex\2026-09-10\https-arca-live-b-characterai-180403518']
+trust_level = "trusted"
+
+[projects.'c:\users\younggeon\projects\codex\2026-09-10\https-arca-live-b-characterai-180403518-2']
+trust_level = "trusted"
+
+[projects.'d:\risu\characters']
+trust_level = "trusted"
+
+[projects.'c:\users\younggeon\projects\dungsil\gg']
+trust_level = "trusted"
 
 [features.context_management]
 experimental_mode = true
-
-[mcp_servers.aperture]
-url = "https://ai.gila-map.ts.net/v1/mcp"
-
-[model_providers.tailscale]
-name = "Tailscale AI Gateway"
-base_url = "https://ai.gila-map.ts.net/v1"
-wire_api = "responses"
-requires_openai_auth = false

@@ -1,0 +1,14 @@
+﻿{
+  "marketplaces": [
+    {
+      "name": "i-have-adhd",
+      "source": "ayghri/i-have-adhd"
+    }
+  ],
+  "plugins": [
+    {
+      "target": "i-have-adhd@i-have-adhd",
+      "scope": "user"
+    }
+  ]
+}
