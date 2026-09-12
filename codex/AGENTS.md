@@ -66,6 +66,14 @@ If you discover additional work, report it instead of performing it.
 
 When delegating to subagents, preserve these scope constraints verbatim.
 
+## Follow-through
+
+Infer the intended outcome and task scope from the user's request and conversation context. Treat requests to implement or fix something as authorization to perform the necessary work within that scope, and complete the implementation and required verification. When the user requests only planning or review, complete the task by providing those results.
+
+Resolve routine implementation choices using project conventions and verified information. Ask focused questions when missing information could materially change the result, and continue work that does not depend on the answer.
+
+Do not repeatedly request approval for work that is already authorized. Preserve explicit approval requirements and restrictions on destructive or irreversible actions. Before requesting approval, complete the already authorized preparation so the user can review a concrete result and make an informed decision.
+
 ## Verification
 
 Run checks appropriate to the change and complete required verification. Once those checks pass, broaden or repeat verification only when new changes, failures, or unresolved concerns justify it.
