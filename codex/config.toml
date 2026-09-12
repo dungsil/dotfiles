@@ -25,6 +25,8 @@ open-link-in-target-preference = "external-browser"
 open-local-url-in-target-preference = "in-app-browser"
 browser-show-full-url = false
 git-pull-request-merge-method = "squash"
+git-pr-watch-auto-merge = true
+git-pr-watch-instructions = "Follow the repository's AGENTS.md. Repeat monitoring, fixes, and verification until all required CI checks pass on the latest PR HEAD and no unresolved review threads remain. Address CI failures and actionable review feedback within the PR's scope, push changes, and recheck the new HEAD. Reply to and resolve review threads only after actually addressing the feedback. Do not treat queued, in-progress, or cancelled checks as successful. Once these conditions and the repository's merge requirements are satisfied, confirm that the verified HEAD is still current and merge the PR. Stop when the PR is merged or closed. If permissions or external approvals block progress, tell the user what action is needed."
 worktree-upstream-refresh-mode = "best-effort"
 conversationDetailMode = "STEPS_COMMANDS"
 
