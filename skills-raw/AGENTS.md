@@ -3,15 +3,18 @@
 This directory contains the canonical Korean source files for skills. 
 Translate each skill into English and place the translated output under `.agents/skills/<skill-name>/` at the repository root.
 
+Review and edit locally maintained skills here. `.agents/skills/` contains generated distributions and vendored third-party skills; do not treat those files as locally authored sources.
+
 ## Create Skills
 Generate the canonical Korean source for an [Agent Skill](https://agentskills.io/home) under `skills-raw/<skill-name>/` from project documentation. Then translate it into `.agents/skills/<skill-name>/`.
 
 Strictly follow the [skill authoring best practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices).
 
 - Focus on agent capabilities and practical usage patterns.
-- Ignore user-facing guides, introductions, getting-started guides, installation guides, and similar content.
+- Omit generic introductions and user-facing walkthroughs, but retain installation, authentication, and environment prerequisites needed to perform the skill's task.
 - Ignore content that LLM agents are likely to know from their training data.
-- Keep the skill as concise as possible and avoid creating unnecessary reference files.
+- Keep the description short: state what the skill does and the concrete conditions for using it. Put workflow steps and tool-selection details in the body instead of the description, and avoid broad keyword lists that could trigger unrelated tasks.
+- Keep `SKILL.md` concise. For multiple workflows, keep shared guidance and routing in `SKILL.md` and place workflow-specific details in supporting files that are read only when relevant. Do not split a short, focused skill merely to create reference files.
 
 ## Translation Guidelines
 
