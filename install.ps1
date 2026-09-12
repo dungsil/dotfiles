@@ -5,6 +5,7 @@
 #   ./install.ps1                 # 스킬 동기화 및 누락되었거나 대상이 다른 링크 (재)생성
 #   ./install.ps1 -Force          # 기존 링크/파일을 모두 지우고 다시 생성
 #   ./install.ps1 -SkillsOnly     # 스킬만 동기화
+#   ./install.ps1 -Capture        # 도구가 쓴 설정과 OMP 플러그인 의도를 저장소에 캡처
 #
 # 주의: -Force로 다시 생성하면 omp가 쓴 최신 설정(.omp 쪽)이 저장소 파일로 덮어쓰기 전에 유실될 수 있으니
 #       커밋 후에 실행하는 것을 권장합니다.
@@ -13,10 +14,16 @@
 param(
     # 기존 링크가 올바르더라도 전부 지우고 다시 생성합니다.
     [switch]$Force,
-    [switch]$SkillsOnly
+    [switch]$SkillsOnly,
+    [switch]$Capture
 )
 
 $ErrorActionPreference = 'Stop'
+
+if ($Capture -and $Force) {
+    Write-Error '오류: -Capture와 -Force는 함께 사용할 수 없습니다.' -ErrorAction Continue
+    exit 1
+}
 
 # 저장소 기준 경로
 $DotfilesRoot = $PSScriptRoot
@@ -325,6 +332,83 @@ function Sync-AgentSkills([string]$RepositoryRoot) {
     }
 }
 
+if ($Capture) {
+    $CapturePairs = @(
+        @{ Repo = 'omp\agent\config.yml'; Live = Join-Path $HOME '.omp\agent\config.yml' }
+        @{ Repo = 'codex\config.toml';     Live = Join-Path $HOME '.codex\config.toml' }
+    )
+
+    $captured = 0
+    $skipped = 0
+    foreach ($pair in $CapturePairs) {
+        $repoPath = Join-Path $DotfilesRoot $pair.Repo
+        if (Test-Path -LiteralPath $pair.Live -PathType Leaf) {
+            [System.IO.Directory]::CreateDirectory((Split-Path -Parent $repoPath)) | Out-Null
+            $liveText = Get-Content -LiteralPath $pair.Live -Raw -Encoding utf8
+            [System.IO.File]::WriteAllText($repoPath, $liveText, [System.Text.Encoding]::UTF8)
+            Write-Host "캡처됨          $($pair.Repo) <- $($pair.Live)"
+            $captured++
+        } else {
+            Write-Host "건너뜀 (라이브 파일 없음)  $($pair.Repo)"
+            $skipped++
+        }
+    }
+
+    $marketplaces = @()
+    $marketplacesPath = Join-Path $HOME '.omp\marketplaces.json'
+    if (Test-Path -LiteralPath $marketplacesPath -PathType Leaf) {
+        $marketplacesText = Get-Content -LiteralPath $marketplacesPath -Raw -Encoding utf8
+        if (-not [string]::IsNullOrWhiteSpace($marketplacesText)) {
+            $marketplacesJson = $marketplacesText | ConvertFrom-Json
+            $marketplaces = @(
+                $marketplacesJson.marketplaces | ForEach-Object {
+                    [ordered]@{
+                        name = $_.name
+                        source = $_.sourceUri
+                    }
+                }
+            )
+        }
+    }
+
+    $plugins = @()
+    $installedPluginsPath = Join-Path $HOME '.omp\plugins\installed_plugins.json'
+    if (Test-Path -LiteralPath $installedPluginsPath -PathType Leaf) {
+        $installedPluginsText = Get-Content -LiteralPath $installedPluginsPath -Raw -Encoding utf8
+        if (-not [string]::IsNullOrWhiteSpace($installedPluginsText)) {
+            $installedPluginsJson = $installedPluginsText | ConvertFrom-Json
+            if ($null -ne $installedPluginsJson.plugins) {
+                $plugins = @(
+                    foreach ($property in $installedPluginsJson.plugins.PSObject.Properties) {
+                        $entries = @($property.Value)
+                        if ($entries.Count -gt 0 -and $null -ne $entries[0]) {
+                            [ordered]@{
+                                target = $property.Name
+                                scope = $entries[0].scope
+                            }
+                        }
+                    }
+                )
+            }
+        }
+    }
+
+    $pluginsCapturePath = Join-Path $DotfilesRoot 'omp\plugins.json'
+    [System.IO.Directory]::CreateDirectory((Split-Path -Parent $pluginsCapturePath)) | Out-Null
+    $pluginsCapture = [ordered]@{
+        marketplaces = @($marketplaces)
+        plugins = @($plugins)
+    }
+    $pluginsText = $pluginsCapture | ConvertTo-Json -Depth 5
+    [System.IO.File]::WriteAllText($pluginsCapturePath, $pluginsText, [System.Text.Encoding]::UTF8)
+    Write-Host '캡처됨          omp\plugins.json <- OMP 플러그인 메타데이터'
+    $captured++
+
+    Write-Host ''
+    Write-Host "캡처 완료: 반영 $captured / 건너뜀 $skipped"
+    exit 0
+}
+
 Sync-AgentSkills -RepositoryRoot $DotfilesRoot
 if ($SkillsOnly) { return }
 
@@ -336,6 +420,9 @@ if (-not $canCreateSymlinks) {
 $created = 0
 $skipped = 0
 $failed = 0
+$backupDir = $null
+$backedUp = 0
+
 
 foreach ($link in $Links) {
     $sourcePath = Join-Path $DotfilesRoot $link.Source
@@ -355,6 +442,16 @@ foreach ($link in $Links) {
 
     # 기존 항목 제거 (Patch 타입이 아닌 경우에만 삭제 후 재생성)
     if ($linkType -ne 'Patch' -and (Test-Path $destPath)) {
+        if ($Force) {
+            if ($null -eq $backupDir) {
+                $runTimestamp = Get-Date -Format 'yyyyMMdd-HHmmss'
+                $backupDir = Join-Path ([System.IO.Path]::GetTempPath()) ("dotfiles-backup-" + $runTimestamp)
+                [System.IO.Directory]::CreateDirectory($backupDir) | Out-Null
+            }
+            $backupPath = Join-Path $backupDir ($link.Dest -replace '[:/\\]', '_')
+            Copy-Item -LiteralPath $destPath -Destination $backupPath -Recurse -Force
+            $backedUp++
+        }
         Remove-Item -LiteralPath $destPath -Force -ErrorAction SilentlyContinue
         if (Test-Path $destPath) {
             Write-Warning "기존 항목 제거 실패: $destPath"
@@ -396,13 +493,29 @@ foreach ($link in $Links) {
 
 Write-Host ''
 Write-Host "완료: 생성 $created / 건너뜀 $skipped / 실패 $failed"
-if ($failed -gt 0) { exit 1 }
 
 # OMP 플러그인 설치 및 등록 상태를 점검하여 미설치 항목을 설치합니다.
 function Install-OmpPlugins {
     if (-not (Get-Command omp -ErrorAction SilentlyContinue)) {
         Write-Host '건너뜀 (omp 명령어를 찾을 수 없음)  OMP 플러그인 설치' -ForegroundColor Yellow
         return
+    }
+
+    $marketplaces = @($OmpMarketplaces)
+    $plugins = @($OmpPlugins)
+    $pluginsConfigPath = Join-Path $DotfilesRoot 'omp\plugins.json'
+    if (Test-Path -LiteralPath $pluginsConfigPath -PathType Leaf) {
+        $pluginsConfig = Get-Content -LiteralPath $pluginsConfigPath -Raw -Encoding utf8 | ConvertFrom-Json
+        $marketplaces = @(
+            $pluginsConfig.marketplaces | ForEach-Object {
+                @{ Name = $_.name; Source = $_.source }
+            }
+        )
+        $plugins = @(
+            $pluginsConfig.plugins | ForEach-Object {
+                @{ Target = $_.target; Scope = $_.scope }
+            }
+        )
     }
 
     Write-Host ''
@@ -416,7 +529,7 @@ function Install-OmpPlugins {
         } catch {}
     }
 
-    foreach ($mp in $OmpMarketplaces) {
+    foreach ($mp in $marketplaces) {
         if ($existingMarketplaces -notcontains $mp.Name) {
             Write-Host "마켓플레이스 추가: $($mp.Name) ($($mp.Source))"
             omp plugin marketplace add $mp.Source
@@ -436,7 +549,7 @@ function Install-OmpPlugins {
         } catch {}
     }
 
-    foreach ($p in $OmpPlugins) {
+    foreach ($p in $plugins) {
         if ($installedPlugins -notcontains $p.Target) {
             Write-Host "플러그인 설치: $($p.Target) (Scope: $($p.Scope))"
             omp plugin install --scope $p.Scope $p.Target
@@ -446,4 +559,10 @@ function Install-OmpPlugins {
     }
 }
 
-Install-OmpPlugins
+if ($failed -eq 0) {
+    Install-OmpPlugins
+}
+if ($backedUp -gt 0) {
+    Write-Host "백업 위치: $backupDir"
+}
+if ($failed -gt 0) { exit 1 }
