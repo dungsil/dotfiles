@@ -246,6 +246,8 @@ function Test-UpToDate([string]$SourcePath, [string]$DestPath, [string]$LinkType
 }
 
 # 외부 스킬은 잠금 파일에서 복원하고 로컬 스킬은 한국어 원본 그대로 배포합니다.
+# 복원 결과는 잠금 파일 해시로 관리되는 캐시에 보관하며, 잠금 파일이 변하지 않고 캐시에
+# 필요한 스킬이 모두 있으면 네트워크 복원을 건너뛴 뒤 캐시에서 복제합니다.
 # 임시 디렉터리에서 복원을 검증한 뒤 설치하므로 다운로드 실패 시 기존 스킬을 보존합니다.
 function Sync-AgentSkills([string]$RepositoryRoot) {
     $repositoryPath = [System.IO.Path]::GetFullPath($RepositoryRoot)
@@ -293,7 +295,24 @@ function Sync-AgentSkills([string]$RepositoryRoot) {
     try {
         Copy-Item -LiteralPath $lockPath -Destination (Join-Path $staging 'skills-lock.json')
         $stagedSkills = Join-Path $staging '.agents/skills'
-        if ($lock.skills.Count -gt 0) {
+        New-Item -ItemType Directory -Path $stagedSkills -Force | Out-Null
+        $lockHash = (Get-FileHash -LiteralPath $lockPath -Algorithm SHA256).Hash
+        $cacheRoot = Join-Path $tempRoot 'dotfiles-external-skills-cache'
+        if ($lock.skills.Count -eq 0) {
+            Write-Host '외부 스킬이 없어 네트워크 복원을 건너뜁니다.'
+        } elseif ((Test-Path -LiteralPath (Join-Path $cacheRoot $lockHash)) -and
+            (@($lock.skills.Keys | Where-Object {
+                    $cachedSkillPath = Join-Path $cacheRoot $lockHash "$_"
+                    (-not (Test-Path -LiteralPath $cachedSkillPath -PathType Container)) -or
+                    (-not (Test-Path -LiteralPath (Join-Path $cachedSkillPath 'SKILL.md') -PathType Leaf))
+                })).Count -eq 0) {
+            $cachedSkills = Join-Path $cacheRoot $lockHash
+            foreach ($name in $lock.skills.Keys) {
+                Copy-Item -LiteralPath (Join-Path $cachedSkills $name) -Destination (Join-Path $stagedSkills $name) -Recurse
+            }
+            Write-Host ('외부 스킬 캐시를 사용합니다 (네트워크 복원 건너뜀): ' + $lockHash)
+        }
+        else {
             Push-Location -LiteralPath $staging
             try {
                 pnpm dlx skills experimental_install
@@ -307,8 +326,20 @@ function Sync-AgentSkills([string]$RepositoryRoot) {
                     throw "잠금 파일에 등록된 스킬을 복원하지 못했습니다: $name"
                 }
             }
+            New-Item -ItemType Directory -Path (Join-Path $cacheRoot $lockHash) -Force | Out-Null
+            foreach ($name in $lock.skills.Keys) {
+                $cachedSkill = Join-Path $cacheRoot $lockHash $name
+                $item = Get-Item -LiteralPath $cachedSkill -Force -ErrorAction SilentlyContinue
+                if ($item -and (-not $item.PSIsContainer -or $item.LinkType)) {
+                    Remove-Item -LiteralPath $cachedSkill -Recurse -Force
+                }
+                Copy-Item -LiteralPath (Join-Path $stagedSkills $name) -Destination $cachedSkill -Recurse
+            }
+            foreach ($stale in (Get-ChildItem -LiteralPath $cacheRoot -Directory -ErrorAction SilentlyContinue)) {
+                if ($stale.Name -cne $lockHash) { Remove-Item -LiteralPath $stale.FullName -Recurse -Force }
+            }
+            Write-Host ('외부 스킬을 복원했습니다 (캐시 기록 완료): ' + $lockHash)
         }
-        New-Item -ItemType Directory -Path $stagedSkills -Force | Out-Null
         foreach ($skill in $localSkills) {
             Copy-Item -LiteralPath $skill.FullName -Destination (Join-Path $stagedSkills $skill.Name) -Recurse
         }

@@ -8,7 +8,7 @@ This repository manages personal dotfiles and settings for Windows. The executio
 
 - Settings are stored in tool-specific directories. `install.ps1` links them to their actual usage paths under `$HOME`.
 - General settings are installed as Symbolic Links, generated `.agents/skills/` as a Directory Junction, and machine-dependent settings (such as `codex/config.toml`) as Patches (merging dotfiles changes while preserving local settings like `[projects]`). Existing valid targets are skipped, and `-Force` recreates them.
-- Before linking settings, `install.ps1` initializes the `skills/` Git submodule when missing, restores external skills from `skills-lock.json`, and copies skills from `skills/skills/` without translation into the ignored `.agents/skills/` directory. It discovers nested language-specific skill folders as well.
+- Before linking settings, `install.ps1` initializes the `skills/` Git submodule when missing, restores external skills from `skills-lock.json` into a per-lock-hash cache under the temp directory, and copies skills from `skills/skills/` without translation into the ignored `.agents/skills/` directory. A changed lock file or an incomplete cache re-runs the network restore; it discovers nested language-specific skill folders as well.
 
 ## Key Directories
 
