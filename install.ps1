@@ -90,7 +90,14 @@ function Test-CanCreateSymbolicLink {
 
 # TOML 병합 함수: SourceText에 정의된 키 및 섹션을 TargetText에 패치합니다.
 # 같은 섹션 안에서도 TargetText에만 존재하는 키는 보존합니다.
-# 관리 대상 값은 한 줄 스칼라로 제한하며 배열 테이블은 로컬에만 둡니다.
+# 관리 대상 값은 한 줄 값(스칼라, 배열, 인라인 테이블)으로 제한하며 배열 테이블은 로컬에만 둡니다.
+function Test-TomlSingleLineValue([string]$valueText) {
+    $v = $valueText.TrimStart()
+    if ($v -match '^("{3}|''{3})') { return $false }
+    if ($v.StartsWith('[')) { return $v.Contains(']') }
+    if ($v.StartsWith('{')) { return $v.Contains('}') }
+    return $true
+}
 function Merge-TomlContent([string]$SourceText, [string]$TargetText) {
     $headerPattern = '^\s*(\[+[^\]]+\]+)\s*$'
     $keyPattern = '^\s*([a-zA-Z0-9_\-\.]+)\s*=\s*(.*)$'
@@ -130,8 +137,8 @@ function Merge-TomlContent([string]$SourceText, [string]$TargetText) {
     $srcRootKeys = [System.Collections.Specialized.OrderedDictionary]::new([System.StringComparer]::Ordinal)
     foreach ($line in $src.Root) {
         if ($line -match $keyPattern) {
-            if ($Matches[2].TrimStart() -match '^(\[|\{|"{3}|''{3})') {
-                throw 'TOML 패치는 한 줄 스칼라 값만 지원합니다.'
+            if (-not (Test-TomlSingleLineValue $Matches[2])) {
+                throw 'TOML 패치는 한 줄 값(스칼라, 배열, 인라인 테이블)만 지원합니다.'
             }
             $srcRootKeys[$Matches[1]] = $line
         }
@@ -142,8 +149,8 @@ function Merge-TomlContent([string]$SourceText, [string]$TargetText) {
 
     foreach ($line in $tgt.Root) {
         if ($line -match $keyPattern -and $srcRootKeys.Contains($Matches[1])) {
-            if ($Matches[2].TrimStart() -match '^(\[|\{|"{3}|''{3})') {
-                throw '배열, 인라인 테이블 또는 여러 줄 문자열은 스칼라로 교체할 수 없습니다.'
+            if (-not (Test-TomlSingleLineValue $Matches[2])) {
+                throw '여러 줄 값은 한 줄 값으로 교체할 수 없습니다.'
             }
             $newTgtRoot.Add($srcRootKeys[$Matches[1]])
             [void]$updatedKeys.Add($Matches[1])
