@@ -199,6 +199,13 @@ providers:
         contextWindow: 1048576
         api: openai-completions
         input: [text]
+      - id: qwen3.8-27b-reasoning
+        name: Qwen 3.8 27B Reasoning
+        reasoning: true
+        maxTokens: 131072
+        contextWindow: 1000000
+        api: openai-completions
+        input: [text]
       - id: solar-pro4
         name: Solar Pro 4
         reasoning: false
@@ -253,5 +260,47 @@ providers:
         reasoning: true
         maxTokens: 131072
         contextWindow: 262144
+        api: openai-completions
+        input: [text, image]
+      - id: gpt-5.5
+        name: GPT 5.5
+        reasoning: true
+        maxTokens: 128000
+        contextWindow: 1050000
+        api: openai-responses
+        input: [text, image]
+      - id: glm-5.2
+        name: GLM 5.2
+        reasoning: true
+        maxTokens: 131072
+        contextWindow: 1000000
+        api: openai-responses
+        input: [text]
+      - id: qwen3.8-flash
+        name: Qwen 3.8 Flash
+        reasoning: true
+        maxTokens: 131072
+        contextWindow: 1000000
+        api: openai-responses
+        input: [text, image]
+      - id: qwen3.8-27b
+        name: Qwen 3.8 27B
+        reasoning: true
+        maxTokens: 32768
+        contextWindow: 262144
+        api: openai-responses
+        input: [text, image]
+      - id: gemini-3.1-pro-preview
+        name: Gemini 3.1 Pro Preview
+        reasoning: true
+        maxTokens: 65536
+        contextWindow: 1048576
+        api: openai-responses
+        input: [text, image]
+      - id: deepseek-v4.1-flash
+        name: DeepSeek V4.1 Flash
+        reasoning: true
+        maxTokens: 384000
+        contextWindow: 1000000
         api: openai-completions
         input: [text, image]
