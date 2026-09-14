@@ -42,7 +42,7 @@ statusLine:
 display:
   showTokenUsage: true
   showTurnTime: true
-  hideToolActivity: true
+  hideToolActivity: false
   cacheMissMarker: true
 secrets:
   enabled: true
@@ -143,7 +143,7 @@ advisor:
   syncBacklog: "off"
   immuneTurns: 3
 prewalk:
-  enabled: true
+  enabled: false
 model:
   loopGuard:
     enabled: true
@@ -192,7 +192,7 @@ hideThinkingBlock: true
 disabledExtensions:
   []
 tier:
-  openai: priority
+  openai: none
 bash:
   autoBackground:
     enabled: true
