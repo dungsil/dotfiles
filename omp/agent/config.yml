@@ -55,10 +55,11 @@ retry:
       - tailscale/gemini-3.8-flash:high
       - tailscale/glm-5.3:max
     smol:
-      - tailscale/glm-5.3-flash:max
-      - tailscale/sonnet-5:medium
-      - tailscale/deepseek-v4-flash:max
+      - tailscale/gemini-3.8-flash:high
+      - tailscale/opus-4.6:max
       - tailscale/gpt-5.6-luna:max
+      - tailscale/deepseek-v4.1-flash:max
+      - tailscale/glm-5.3-flash:max
     slow:
       - tailscale/fable-5.1:max
       - tailscale/glm-5.3:max
@@ -67,7 +68,7 @@ retry:
       - tailscale/gemini-3.5-flash-lite:minimal
       - tailscale/haiku-4.5:minimal
       - tailscale/glm-5.3-flash:low
-      - tailscale/deepseek-v4-flash:low
+      - tailscale/deepseek-v4.1-flash:low
     commit:
       - tailscale/gpt-5.6-luna:medium
       - tailscale/gemini-3.5-flash-lite:low
