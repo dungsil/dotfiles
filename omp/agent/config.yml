@@ -126,7 +126,7 @@ modelRoles:
   default: tailscale/gpt-6-astra:medium
   smol: tailscale/gemini-3.8-flash:high
   slow: tailscale/gpt-6-astra:high
-  tiny: tailscale/gpt-5.3-codex-spark:low
+  tiny: tailscale/gpt-5.6-luna:low
   commit: tailscale/solar-pro4
   vision: tailscale/gemini-3.8-flash:high
   designer: tailscale/gemini-3.8-flash:high
@@ -134,7 +134,7 @@ modelRoles:
   advisor: tailscale/opus-4.6:high
   plan: tailscale/fable-5.1:max
   scout: tailscale/gpt-5.6-luna:medium
-  research: tailscale/gpt-5.3-codex-spark:low
+  research: tailscale/gpt-5.6-luna:low
 cycleOrder:
   - default
   - smol
