@@ -1,0 +1,12 @@
+{
+  "marketplaces": [
+    {
+      "name": "i-have-adhd",
+      "source": "ayghri/i-have-adhd",
+      "ref": "main"
+    }
+  ],
+  "plugins": [
+    "i-have-adhd@i-have-adhd"
+  ]
+}

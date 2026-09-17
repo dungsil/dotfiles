@@ -597,8 +597,45 @@ function Install-OmpPlugins {
     }
 }
 
+function Install-CodexPlugins {
+    $pluginsConfigPath = Join-Path $DotfilesRoot 'codex\plugins.json'
+    if (-not (Test-Path -LiteralPath $pluginsConfigPath -PathType Leaf)) { return }
+    if (-not (Get-Command codex -ErrorAction SilentlyContinue)) {
+        Write-Host '건너뜀 (codex 명령어를 찾을 수 없음)  Codex 플러그인 설치' -ForegroundColor Yellow
+        return
+    }
+
+    Write-Host ''
+    Write-Host '--- Codex 플러그인 확인 및 설치 ---' -ForegroundColor Cyan
+
+    $config = Get-Content -LiteralPath $pluginsConfigPath -Raw -Encoding utf8 | ConvertFrom-Json
+    $marketplaceText = codex plugin marketplace list --json
+    if ($LASTEXITCODE -ne 0) { throw 'Codex 마켓플레이스 조회에 실패했습니다.' }
+    $marketplaces = ($marketplaceText -join "`n") | ConvertFrom-Json
+    foreach ($marketplace in $config.marketplaces) {
+        if (@($marketplaces.marketplaces.name) -contains $marketplace.name) { continue }
+        $arguments = @('plugin', 'marketplace', 'add', $marketplace.source)
+        if ($marketplace.ref) { $arguments += @('--ref', $marketplace.ref) }
+        & codex @arguments
+        if ($LASTEXITCODE -ne 0) { throw "Codex 마켓플레이스 등록에 실패했습니다: $($marketplace.name)" }
+    }
+
+    $pluginsText = codex plugin list --json
+    if ($LASTEXITCODE -ne 0) { throw 'Codex 플러그인 조회에 실패했습니다.' }
+    $plugins = ($pluginsText -join "`n") | ConvertFrom-Json
+    foreach ($plugin in $config.plugins) {
+        if (@($plugins.installed.pluginId) -contains $plugin) {
+            Write-Host "건너뜀 (이미 설치된 플러그인)  $plugin"
+            continue
+        }
+        codex plugin add $plugin
+        if ($LASTEXITCODE -ne 0) { throw "Codex 플러그인 설치에 실패했습니다: $plugin" }
+    }
+}
+
 if ($failed -eq 0) {
     Install-OmpPlugins
+    Install-CodexPlugins
 }
 if ($backedUp -gt 0) {
     Write-Host "백업 위치: $backupDir"
