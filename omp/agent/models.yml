@@ -304,3 +304,7 @@ providers:
         contextWindow: 1000000
         api: openai-completions
         input: [text, image]
+      - id: union-alpha-free
+        name: Union Alpha
+        api: openai-completions
+        input: [text]
