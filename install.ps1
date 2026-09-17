@@ -437,7 +437,7 @@ if ($Capture) {
         marketplaces = @($marketplaces)
         plugins = @($plugins)
     }
-    $pluginsText = $pluginsCapture | ConvertTo-Json -Depth 5
+    $pluginsText = ($pluginsCapture | ConvertTo-Json -Depth 5).TrimEnd() + "`n"
     [System.IO.File]::WriteAllText($pluginsCapturePath, $pluginsText, [System.Text.Encoding]::UTF8)
     Write-Host '캡처됨          omp\plugins.json <- OMP 플러그인 메타데이터'
     $captured++
