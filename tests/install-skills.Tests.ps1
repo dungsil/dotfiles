@@ -42,7 +42,11 @@ function pnpm {
 }
 
 $originalLocation = (Get-Location).Path
+$testCacheRoot = Join-Path ([IO.Path]::GetTempPath()) 'dotfiles-external-skills-cache'
+$testCacheEntry = Join-Path $testCacheRoot ((Get-FileHash -LiteralPath $lockPath -Algorithm SHA256).Hash)
+if (Test-Path -LiteralPath $testCacheEntry) { Remove-Item -LiteralPath $testCacheEntry -Recurse -Force }
 Sync-AgentSkills $fixture
+Assert-Result ($script:cliCalls -eq 1) 'First synchronization did not restore external skills.'
 Assert-Result ((Get-Location).Path -eq $originalLocation) 'Working directory changed.'
 Assert-Result ((Get-Content -LiteralPath $lockPath -Raw) -ceq $originalLock) 'Repository lock changed.'
 Assert-Result (-not (Test-Path -LiteralPath (Join-Path $fixture '.agents/skills/remote/stale.txt'))) 'Stale managed file remains.'
@@ -53,7 +57,9 @@ foreach ($relativePath in @('SKILL.md', 'assets/data.bin')) {
     Assert-Result ($sourceHash -ceq $installedHash) 'Local source bytes changed.'
 }
 Sync-AgentSkills $fixture
-Assert-Result ($script:cliCalls -eq 2) 'Repeated synchronization failed.'
+Assert-Result ($script:cliCalls -eq 1) 'Repeated synchronization did not reuse the cache.'
+Assert-Result ((Get-Content -LiteralPath (Join-Path $fixture '.agents/skills/remote/SKILL.md') -Raw) -ceq 'restored') 'Cached skill was not deployed.'
+if (Test-Path -LiteralPath $testCacheEntry) { Remove-Item -LiteralPath $testCacheEntry -Recurse -Force }
 
 foreach ($mode in @('nonzero', 'missing')) {
     $script:mockMode = $mode
@@ -75,7 +81,7 @@ foreach ($invalidLock in @('{"version":1,"skills":{"../outside":{}}}',
 }
 [IO.File]::WriteAllText($lockPath, '{"version":1,"skills":{}}')
 Sync-AgentSkills $fixture
-Assert-Result ($script:cliCalls -eq 4) 'Local-only synchronization unexpectedly used the CLI.'
+Assert-Result ($script:cliCalls -eq 3) 'Local-only synchronization unexpectedly used the CLI.'
 
 New-Item -ItemType Directory -Path (Join-Path $fixture 'skills/skills/duplicate/local') -Force | Out-Null
 Set-Content -LiteralPath (Join-Path $fixture 'skills/skills/duplicate/local/SKILL.md') -Value 'duplicate'
