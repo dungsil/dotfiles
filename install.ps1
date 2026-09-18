@@ -41,7 +41,6 @@ $Links = @(
     @{ Source = 'omp\agent\config.yml';             Dest = '.omp\agent\config.yml' }
     @{ Source = 'omp\agent\models.yml';             Dest = '.omp\agent\models.yml' }
     @{ Source = 'omp\agent\mcp.json';              Dest = '.omp\agent\mcp.json' }
-    @{ Source = 'omp\agent\extensions\vibe-prompt.ts'; Dest = '.omp\agent\extensions\vibe-prompt.ts' }
     @{ Source = 'omp\agent\extensions\session-header.ts'; Dest = '.omp\agent\extensions\session-header.ts' }
     @{ Source = 'omp\agent\extensions\eval-guard.ts'; Dest = '.omp\agent\extensions\eval-guard.ts' }
     @{ Source = 'omp\agent\i-have-adhd.json';          Dest = '.omp\agent\i-have-adhd.json' }
@@ -52,6 +51,7 @@ $Links = @(
     @{ Source = 'codex\models_tailscale.json';            Dest = '.codex\models_tailscale.json' }
     @{ Source = 'codex\tailscale.config.toml';             Dest = '.codex\tailscale.config.toml' }
     @{ Source = 'codex\config.toml';                       Dest = '.codex\config.toml'; Type = 'Patch' }
+    @{ Source = 'pi\agent\AGENTS.md';                      Dest = '.pi\agent\AGENTS.md' }
     @{ Source = 'pi\agent\models.json';                   Dest = '.pi\agent\models.json' }
     @{ Source = 'pi\agent\settings.json';                 Dest = '.pi\agent\settings.json' }
 )
@@ -247,11 +247,35 @@ function Test-UpToDate([string]$SourcePath, [string]$DestPath, [string]$LinkType
             (Test-Path $resolved))
 }
 
+# 스킬 디렉터리의 파일 경로/크기/수정 시각을 모아 지문 문자열을 만듭니다. 파일 내용을 읽지 않아 빠릅니다.
+function Get-DirectoryFingerprint([string]$Path) {
+    $root = [System.IO.Path]::GetFullPath($Path).TrimEnd([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar)
+    $prefixLength = $root.Length + 1
+    $options = [System.IO.EnumerationOptions]::new()
+    $options.RecurseSubdirectories = $true
+    $options.AttributesToSkip = [System.IO.FileAttributes]::None
+    $options.IgnoreInaccessible = $true
+    $entries = [System.Collections.Generic.List[string]]::new()
+    foreach ($file in [System.IO.Directory]::EnumerateFiles($root, '*', $options)) {
+        $info = [System.IO.FileInfo]::new($file)
+        $entries.Add($file.Substring($prefixLength) + '|' + $info.Length + '|' + $info.LastWriteTimeUtc.Ticks)
+    }
+    $entries.Sort([System.StringComparer]::Ordinal)
+    return [string]::Join("`n", $entries)
+}
+
+# 대상 스킬 디렉터리가 원본과 내용이 같은지(경로/크기/수정 시각) 비교합니다.
+function Test-DirectoryUpToDate([string]$SourcePath, [string]$DestPath) {
+    if (-not (Test-Path -LiteralPath $DestPath -PathType Container)) { return $false }
+    return ((Get-DirectoryFingerprint $SourcePath) -ceq (Get-DirectoryFingerprint $DestPath))
+}
+
 # 외부 스킬은 잠금 파일에서 복원하고 로컬 스킬은 한국어 원본 그대로 배포합니다.
 # 복원 결과는 잠금 파일 해시로 관리되는 캐시에 보관하며, 잠금 파일이 변하지 않고 캐시에
-# 필요한 스킬이 모두 있으면 네트워크 복원을 건너뛴 뒤 캐시에서 복제합니다.
+# 필요한 스킬이 모두 있으면 네트워크 복원을 건너뜁니다.
 # 임시 디렉터리에서 복원을 검증한 뒤 설치하므로 다운로드 실패 시 기존 스킬을 보존합니다.
-function Sync-AgentSkills([string]$RepositoryRoot) {
+# 내용이 같은 스킬은 다시 복사하지 않고 건너뛰어 매 실행 비용을 줄입니다.
+function Sync-AgentSkills([string]$RepositoryRoot, [switch]$Force) {
     $repositoryPath = [System.IO.Path]::GetFullPath($RepositoryRoot)
     $lockPath = Join-Path $repositoryPath 'skills-lock.json'
     $lock = Get-Content -LiteralPath $lockPath -Raw -Encoding utf8 | ConvertFrom-Json -AsHashtable
@@ -292,58 +316,66 @@ function Sync-AgentSkills([string]$RepositoryRoot) {
     }
 
     $tempRoot = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath())
-    $staging = Join-Path $tempRoot ('dotfiles-skills-' + [guid]::NewGuid())
-    New-Item -ItemType Directory -Path $staging | Out-Null
+    $cacheRoot = Join-Path $tempRoot 'dotfiles-external-skills-cache'
+
+    # 각 스킬의 배포 원본 경로를 결정합니다. 로컬 스킬은 서브모듈에서 직접 복사합니다.
+    $sources = [System.Collections.Specialized.OrderedDictionary]::new([System.StringComparer]::Ordinal)
+    foreach ($skill in $localSkills) {
+        $sources[$skill.Name] = $skill.FullName
+    }
+
+    $staging = $null
     try {
-        Copy-Item -LiteralPath $lockPath -Destination (Join-Path $staging 'skills-lock.json')
-        $stagedSkills = Join-Path $staging '.agents/skills'
-        New-Item -ItemType Directory -Path $stagedSkills -Force | Out-Null
-        $lockHash = (Get-FileHash -LiteralPath $lockPath -Algorithm SHA256).Hash
-        $cacheRoot = Join-Path $tempRoot 'dotfiles-external-skills-cache'
-        if ($lock.skills.Count -eq 0) {
+        if ($lock.skills.Count -gt 0) {
+            $lockHash = (Get-FileHash -LiteralPath $lockPath -Algorithm SHA256).Hash
+            $cachePath = Join-Path $cacheRoot $lockHash
+            $cacheValid = (Test-Path -LiteralPath $cachePath -PathType Container) -and
+                (@($lock.skills.Keys | Where-Object {
+                        (-not (Test-Path -LiteralPath (Join-Path $cachePath "$_") -PathType Container)) -or
+                        (-not (Test-Path -LiteralPath (Join-Path $cachePath "$_/SKILL.md") -PathType Leaf))
+                    })).Count -eq 0
+
+            if ($cacheValid) {
+                Write-Host ('외부 스킬 캐시를 사용합니다 (네트워크 복원 건너뜀): ' + $lockHash)
+            } else {
+                $staging = Join-Path $tempRoot ('dotfiles-skills-' + [guid]::NewGuid())
+                New-Item -ItemType Directory -Path $staging | Out-Null
+                Copy-Item -LiteralPath $lockPath -Destination (Join-Path $staging 'skills-lock.json')
+                $stagedSkills = Join-Path $staging '.agents/skills'
+                New-Item -ItemType Directory -Path $stagedSkills -Force | Out-Null
+                Push-Location -LiteralPath $staging
+                try {
+                    pnpm dlx skills experimental_install
+                    if ($LASTEXITCODE -ne 0) { throw "스킬 복원 명령이 실패했습니다: 종료 코드 $LASTEXITCODE" }
+                } finally {
+                    Pop-Location
+                }
+                # CLI가 일부 설치 실패에도 종료 코드 0을 반환할 수 있으므로 결과를 확인합니다.
+                foreach ($name in $lock.skills.Keys) {
+                    if (-not (Test-Path -LiteralPath (Join-Path $stagedSkills "$name/SKILL.md") -PathType Leaf)) {
+                        throw "잠금 파일에 등록된 스킬을 복원하지 못했습니다: $name"
+                    }
+                }
+                # 검증한 복원 결과를 캐시로 옮겨 다음 실행에서 재사용합니다(같은 볼륨이라 이동은 빠릅니다).
+                New-Item -ItemType Directory -Path $cachePath -Force | Out-Null
+                foreach ($name in $lock.skills.Keys) {
+                    $cachedSkill = Join-Path $cachePath $name
+                    $item = Get-Item -LiteralPath $cachedSkill -Force -ErrorAction SilentlyContinue
+                    if ($item -and (-not $item.PSIsContainer -or $item.LinkType)) {
+                        Remove-Item -LiteralPath $cachedSkill -Recurse -Force
+                    }
+                    Move-Item -LiteralPath (Join-Path $stagedSkills $name) -Destination $cachedSkill
+                }
+                foreach ($stale in (Get-ChildItem -LiteralPath $cacheRoot -Directory -ErrorAction SilentlyContinue)) {
+                    if ($stale.Name -cne $lockHash) { Remove-Item -LiteralPath $stale.FullName -Recurse -Force }
+                }
+                Write-Host ('외부 스킬을 복원했습니다 (캐시 기록 완료): ' + $lockHash)
+            }
+            foreach ($name in $lock.skills.Keys) {
+                $sources[$name] = Join-Path $cachePath $name
+            }
+        } else {
             Write-Host '외부 스킬이 없어 네트워크 복원을 건너뜁니다.'
-        } elseif ((Test-Path -LiteralPath (Join-Path $cacheRoot $lockHash)) -and
-            (@($lock.skills.Keys | Where-Object {
-                    $cachedSkillPath = Join-Path $cacheRoot $lockHash "$_"
-                    (-not (Test-Path -LiteralPath $cachedSkillPath -PathType Container)) -or
-                    (-not (Test-Path -LiteralPath (Join-Path $cachedSkillPath 'SKILL.md') -PathType Leaf))
-                })).Count -eq 0) {
-            $cachedSkills = Join-Path $cacheRoot $lockHash
-            foreach ($name in $lock.skills.Keys) {
-                Copy-Item -LiteralPath (Join-Path $cachedSkills $name) -Destination (Join-Path $stagedSkills $name) -Recurse
-            }
-            Write-Host ('외부 스킬 캐시를 사용합니다 (네트워크 복원 건너뜀): ' + $lockHash)
-        }
-        else {
-            Push-Location -LiteralPath $staging
-            try {
-                pnpm dlx skills experimental_install
-                if ($LASTEXITCODE -ne 0) { throw "스킬 복원 명령이 실패했습니다: 종료 코드 $LASTEXITCODE" }
-            } finally {
-                Pop-Location
-            }
-            # CLI가 일부 설치 실패에도 종료 코드 0을 반환할 수 있으므로 결과를 확인합니다.
-            foreach ($name in $lock.skills.Keys) {
-                if (-not (Test-Path -LiteralPath (Join-Path $stagedSkills "$name/SKILL.md") -PathType Leaf)) {
-                    throw "잠금 파일에 등록된 스킬을 복원하지 못했습니다: $name"
-                }
-            }
-            New-Item -ItemType Directory -Path (Join-Path $cacheRoot $lockHash) -Force | Out-Null
-            foreach ($name in $lock.skills.Keys) {
-                $cachedSkill = Join-Path $cacheRoot $lockHash $name
-                $item = Get-Item -LiteralPath $cachedSkill -Force -ErrorAction SilentlyContinue
-                if ($item -and (-not $item.PSIsContainer -or $item.LinkType)) {
-                    Remove-Item -LiteralPath $cachedSkill -Recurse -Force
-                }
-                Copy-Item -LiteralPath (Join-Path $stagedSkills $name) -Destination $cachedSkill -Recurse
-            }
-            foreach ($stale in (Get-ChildItem -LiteralPath $cacheRoot -Directory -ErrorAction SilentlyContinue)) {
-                if ($stale.Name -cne $lockHash) { Remove-Item -LiteralPath $stale.FullName -Recurse -Force }
-            }
-            Write-Host ('외부 스킬을 복원했습니다 (캐시 기록 완료): ' + $lockHash)
-        }
-        foreach ($skill in $localSkills) {
-            Copy-Item -LiteralPath $skill.FullName -Destination (Join-Path $stagedSkills $skill.Name) -Recurse
         }
 
         # 배포 대상 전체를 먼저 확인합니다. 별도로 설치된 다른 스킬은 건드리지 않습니다.
@@ -357,17 +389,29 @@ function Sync-AgentSkills([string]$RepositoryRoot) {
                 throw "기존 스킬 경로는 일반 디렉터리여야 합니다: $target"
             }
         }
+
         New-Item -ItemType Directory -Path $destination -Force | Out-Null
+        $updated = 0
+        $kept = 0
         foreach ($name in $skillNames) {
             $target = Join-Path $destination $name
+            $source = $sources[$name]
+            # 내용이 같은 스킬은 삭제/복사 없이 그대로 둡니다.
+            if (-not $Force -and (Test-DirectoryUpToDate -SourcePath $source -DestPath $target)) {
+                $kept++
+                continue
+            }
             if (Test-Path -LiteralPath $target) { Remove-Item -LiteralPath $target -Recurse -Force }
-            Copy-Item -LiteralPath (Join-Path $stagedSkills $name) -Destination $target -Recurse
+            Copy-Item -LiteralPath $source -Destination $target -Recurse
+            $updated++
         }
-        Write-Host "스킬 동기화 완료: 외부 $($lock.skills.Count) / 로컬 $($localSkills.Count)"
+        Write-Host "스킬 동기화 완료: 외부 $($lock.skills.Count) / 로컬 $($localSkills.Count) (갱신 $updated / 유지 $kept)"
     } finally {
-        $stagingPath = [System.IO.Path]::GetFullPath($staging)
-        if ($stagingPath.StartsWith($tempRoot.TrimEnd('\', '/') + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase)) {
-            Remove-Item -LiteralPath $stagingPath -Recurse -Force
+        if ($null -ne $staging) {
+            $stagingPath = [System.IO.Path]::GetFullPath($staging)
+            if ($stagingPath.StartsWith($tempRoot.TrimEnd('\', '/') + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase)) {
+                Remove-Item -LiteralPath $stagingPath -Recurse -Force
+            }
         }
     }
 }
@@ -449,7 +493,7 @@ if ($Capture) {
     exit 0
 }
 
-Sync-AgentSkills -RepositoryRoot $DotfilesRoot
+Sync-AgentSkills -RepositoryRoot $DotfilesRoot -Force:$Force
 if ($SkillsOnly) { return }
 
 $canCreateSymlinks = Test-CanCreateSymbolicLink
