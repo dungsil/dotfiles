@@ -20,7 +20,9 @@
   "enableAnalytics": false,
   "enableInstallTelemetry": false,
   "enabledModels": [
-    "deepseek-v4.1-flash"
+    "deepseek-v4.1-flash",
+    "gpt-6-astra:medium",
+    "gemini-3.8-flash:high"
   ],
   "externalEditor": "code --wait",
   "extensions": [
@@ -29,6 +31,10 @@
   "followUpMode": "all",
   "hideThinkingBlock": true,
   "lastChangelogVersion": "0.85.1",
+  "modelThinkingLevels": {
+    "tailscale/gpt-6-astra": "medium",
+    "tailscale/gemini-3.8-flash": "high"
+  },
   "npmCommand": [
     "pnpm"
   ],
