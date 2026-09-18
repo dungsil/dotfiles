@@ -1,0 +1,26 @@
+{
+  "providers": {
+    "tailscale": {
+      "baseUrl": "https://ai.gila-map.ts.net/v1",
+      "api": "openai-responses",
+      "apiKey": "1",
+      "models": [
+        {
+          "id": "deepseek-v4.1-flash",
+          "name": "DeepSeek V4.1 Flash",
+          "reasoning": true,
+          "thinkingLevelMap": {
+            "xhigh": "xhigh",
+            "max": "max"
+          },
+          "input": [
+            "text",
+            "image"
+          ],
+          "contextWindow": 1000000,
+          "maxTokens": 384000
+        }
+      ]
+    }
+  }
+}

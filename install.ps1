@@ -52,6 +52,8 @@ $Links = @(
     @{ Source = 'codex\models_tailscale.json';            Dest = '.codex\models_tailscale.json' }
     @{ Source = 'codex\tailscale.config.toml';             Dest = '.codex\tailscale.config.toml' }
     @{ Source = 'codex\config.toml';                       Dest = '.codex\config.toml'; Type = 'Patch' }
+    @{ Source = 'pi\agent\models.json';                   Dest = '.pi\agent\models.json' }
+    @{ Source = 'pi\agent\settings.json';                 Dest = '.pi\agent\settings.json' }
 )
 
 # OMP 마켓플레이스 및 플러그인 목록

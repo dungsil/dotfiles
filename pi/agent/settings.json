@@ -1,0 +1,49 @@
+{
+  "collapseChangelog": true,
+  "compaction": {
+    "keepRecentTokens": 60000
+  },
+  "defaultModel": "deepseek-v4.1-flash",
+  "defaultProvider": "tailscale",
+  "defaultProjectTrust": "ask",
+  "defaultThinkingLevel": "max",
+  "defaultTools": [
+    "read",
+    "powershell",
+    "edit",
+    "write",
+    "grep",
+    "find",
+    "ls"
+  ],
+  "doubleEscapeAction": "tree",
+  "enableAnalytics": false,
+  "enableInstallTelemetry": false,
+  "enabledModels": [
+    "deepseek-v4.1-flash"
+  ],
+  "externalEditor": "code --wait",
+  "extensions": [
+    "!orca-*"
+  ],
+  "followUpMode": "all",
+  "hideThinkingBlock": true,
+  "lastChangelogVersion": "0.85.1",
+  "npmCommand": [
+    "pnpm"
+  ],
+  "quietStartup": true,
+  "retry": {
+    "enabled": false,
+    "provider": {
+      "timeoutMs": 3600000
+    }
+  },
+  "showCacheMissNotices": true,
+  "steeringMode": "all",
+  "theme": "dark",
+  "treeFilterMode": "no-tools",
+  "warnings": {
+    "anthropicExtraUsage": false
+  }
+}
