@@ -1,4 +1,4 @@
-﻿symbolPreset: nerd
+symbolPreset: nerd
 composer:
   shape: band
 theme:
@@ -35,6 +35,7 @@ task:
     agentAdvisor:
       task: "on"
   showResolvedModelBadge: true
+  prewalk: false
 statusLine:
   preset: full
   separator: powerline-thin
@@ -144,7 +145,7 @@ advisor:
   syncBacklog: "off"
   immuneTurns: 3
 prewalk:
-  enabled: false
+  enabled: true
 model:
   loopGuard:
     enabled: true
@@ -193,7 +194,7 @@ hideThinkingBlock: true
 disabledExtensions:
   []
 tier:
-  openai: none
+  openai: priority
 bash:
   autoBackground:
     enabled: true
