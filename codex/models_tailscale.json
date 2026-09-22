@@ -276,7 +276,7 @@
       "shell_type": "unified_exec",
       "visibility": "list",
       "supported_in_api": true,
-      "priority": 3,
+      "priority": 1,
       "additional_speed_tiers": [
         "fast"
       ],
