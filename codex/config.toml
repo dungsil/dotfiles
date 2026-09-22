@@ -2,6 +2,7 @@
 service_tier = "default"
 approvals_reviewer = "user"
 model = "gpt-6-astra"
+model_catalog_json = "~/.codex/models_tailscale.json"
 
 sandbox_mode = "workspace-write"
 
