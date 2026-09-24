@@ -4,27 +4,6 @@ providers:
     api: openai-completions
     auth: none
     models:
-      - id: gpt-5.6-sol
-        name: GPT 5.6 Sol
-        reasoning: true
-        maxTokens: 128000
-        contextWindow: 1050000
-        api: openai-responses
-        input: [text, image]
-      - id: gpt-5.6-terra
-        name: GPT 5.6 Terra
-        reasoning: true
-        maxTokens: 128000
-        contextWindow: 1050000
-        api: openai-responses
-        input: [text, image]
-      - id: gpt-5.6-luna
-        name: GPT 5.6 Luna
-        reasoning: true
-        maxTokens: 128000
-        contextWindow: 1050000
-        api: openai-responses
-        input: [text, image]
       - id: gpt-6-astra
         name: GPT-6 Astra
         reasoning: true
@@ -32,23 +11,21 @@ providers:
         contextWindow: 1050000
         api: openai-responses
         input: [text, image]
-      - id: fable-5
-        name: Fable 5
+      - id: gpt-6-sol
+        name: GPT-6 Sol
         reasoning: true
         maxTokens: 128000
-        contextWindow: 1000000
-        api: anthropic-messages
+        contextWindow: 1050000
+        api: openai-responses
         input: [text, image]
-        cost:
-          input: 10
-          output: 50
-          cacheRead: 1
-          cacheWrite: 12.5
-        thinking:
-          mode: anthropic-adaptive
-          efforts: [low, medium, high, xhigh, max]
-          supportsDisplay: true
-      - id: fable-5.1
+      - id: gpt-6-luna
+        name: GPT-6 Luna
+        reasoning: true
+        maxTokens: 128000
+        contextWindow: 1050000
+        api: openai-responses
+        input: [text, image]
+      - id: claude-fable-5-1
         name: Fable 5.1
         reasoning: true
         maxTokens: 128000
@@ -69,8 +46,8 @@ providers:
           defaultLevel: high
           supportsDisplay: true
           requiresEffort: true
-      - id: opus-5
-        name: Opus 5
+      - id: claude-opus-5-5
+        name: Opus 5.5
         reasoning: true
         maxTokens: 128000
         contextWindow: 1000000
@@ -80,7 +57,17 @@ providers:
           mode: anthropic-adaptive
           efforts: [low, medium, high, xhigh, max]
           supportsDisplay: true
-      - id: sonnet-5
+      - id: claude-opus-4-6
+        name: Opus 4.6
+        reasoning: true
+        maxTokens: 128000
+        contextWindow: 1000000
+        api: anthropic-messages
+        input: [text, image]
+        thinking:
+          mode: anthropic-adaptive
+          efforts: [low, medium, high, max]
+      - id: claude-sonnet-5
         name: Sonnet 5
         reasoning: true
         maxTokens: 128000
@@ -91,27 +78,19 @@ providers:
           mode: anthropic-adaptive
           efforts: [low, medium, high, xhigh, max]
           supportsDisplay: true
-      - id: haiku-4.5
-        name: Haiku 4.5
+      - id: claude-sonnet-4-6
+        name: Sonnet 4.6
         reasoning: true
-        maxTokens: 64000
-        contextWindow: 200000
+        maxTokens: 128000
+        contextWindow: 1000000
         api: anthropic-messages
         input: [text, image]
-      - id: gemini-3.1-pro
-        name: Gemini Pro
-        reasoning: true
-        maxTokens: 65536
-        contextWindow: 1048576
-        input: [text, image]
+        thinking:
+          mode: anthropic-adaptive
+          efforts: [low, medium, high, xhigh, max]
+          supportsDisplay: true
       - id: gemini-3.8-flash
         name: Gemini 3.8 Flash
-        reasoning: true
-        maxTokens: 65536
-        contextWindow: 1048576
-        input: [text, image]
-      - id: gemini-3.7-flash
-        name: Gemini Flash
         reasoning: true
         maxTokens: 65536
         contextWindow: 1048576
@@ -122,34 +101,19 @@ providers:
         maxTokens: 65536
         contextWindow: 1048576
         input: [text, image]
-      - id: gemma-4-26b
-        name: Gemma 4 26B
+      - id: gemini-3.1-pro
+        name: Gemini Pro
         reasoning: true
-        maxTokens: 16384
-        contextWindow: 262144
-        api: openai-responses
+        maxTokens: 65536
+        contextWindow: 1048576
         input: [text, image]
-      - id: gemma-4-31b
-        name: Gemma 4 31B
-        reasoning: true
-        maxTokens: 16384
-        contextWindow: 262144
-        api: openai-responses
-        input: [text, image]
-      - id: deepseek-v4-flash
-        name: DeepSeek V4 Flash
+      - id: deepseek-v4.1-flash
+        name: DeepSeek V4.1 Flash
         reasoning: true
         maxTokens: 384000
-        contextWindow: 1048576
+        contextWindow: 1000000
         api: openai-completions
-        input: [text]
-      - id: deepseek-v4-pro
-        name: DeepSeek V4 Pro
-        reasoning: true
-        maxTokens: 384000
-        contextWindow: 1048576
-        api: openai-completions
-        input: [text]
+        input: [text, image]
       - id: glm-5.3
         name: GLM 5.3
         reasoning: true
@@ -164,147 +128,19 @@ providers:
         contextWindow: 1310720
         api: openai-completions
         input: [text]
-      - id: gpt-5.3-codex-spark
-        name: GPT 5.3 Codex Spark
-        reasoning: true
-        maxTokens: 32000
-        contextWindow: 128000
-        api: openai-responses
-        input: [text]
-      - id: opus-4.6
-        name: Opus 4.6
-        reasoning: true
-        maxTokens: 128000
-        contextWindow: 1000000
-        api: anthropic-messages
-        input: [text, image]
-        thinking:
-          mode: anthropic-adaptive
-          efforts: [low, medium, high, max]
-      - id: opus-4.8
-        name: Opus 4.8
-        reasoning: true
-        maxTokens: 128000
-        contextWindow: 1000000
-        api: anthropic-messages
-        input: [text, image]
-        thinking:
-          mode: anthropic-adaptive
-          efforts: [low, medium, high, xhigh, max]
-          supportsDisplay: true
-      - id: qwen3.8-flash-next
-        name: Qwen 3.8 Flash Next
-        reasoning: true
-        maxTokens: 1048576
-        contextWindow: 1048576
+      - id: ling-3.0-flash-sante:free
+        name: Ling 3.0 Flash Sante
         api: openai-completions
         input: [text]
-      - id: qwen3.8-27b-reasoning
-        name: Qwen 3.8 27B Reasoning
-        reasoning: true
-        maxTokens: 131072
-        contextWindow: 1000000
+      - id: space-bunny-alpha
+        name: Space Bunny Alpha
         api: openai-completions
         input: [text]
-      - id: solar-pro4
-        name: Solar Pro 4
-        reasoning: false
-        maxTokens: 131072
-        contextWindow: 524288
+      - id: space-bunny-free
+        name: Space Bunny Free
         api: openai-completions
         input: [text]
-      - id: big-pickle
-        name: Big Pickle
-        reasoning: true
-        maxTokens: 32000
-        contextWindow: 200000
-        api: openai-completions
-        input: [text, image]
-      - id: ling-3.0-flash-fin
-        name: Ling 3.0 Flash
-        reasoning: true
-        maxTokens: 235929
-        contextWindow: 262144
-        api: openai-completions
-        input: [text, image]
-      - id: mimo-v2.5
-        name: MiMo M2.5
-        reasoning: true
-        maxTokens: 131072
-        contextWindow: 1050000
-        api: openai-completions
-        input: [text, image]
-      - id: muse-spark-1.2-contributor
-        name: Muse Spark 1.2 Contributor
-        reasoning: true
-        maxTokens: 943718
-        contextWindow: 1048576
-        api: openai-completions
-        input: [text, image]
-      - id: muse-spark-1.3-contributor
-        name: Muse Spark 1.3 Contributor
-        reasoning: true
-        maxTokens: 943718
-        contextWindow: 1048576
-        api: openai-completions
-        input: [text, image]
-      - id: nemotron-3-ultra
-        name: Nemotron 3 Ultra
-        reasoning: true
-        maxTokens: 131072
-        contextWindow: 1048576
-        api: openai-completions
-        input: [text, image]
-      - id: nemotron-3.5-lightning
-        name: Nemotron 3.5 Lightning 30B
-        reasoning: true
-        maxTokens: 131072
-        contextWindow: 262144
-        api: openai-completions
-        input: [text, image]
-      - id: gpt-5.5
-        name: GPT 5.5
-        reasoning: true
-        maxTokens: 128000
-        contextWindow: 1050000
-        api: openai-responses
-        input: [text, image]
-      - id: glm-5.2
-        name: GLM 5.2
-        reasoning: true
-        maxTokens: 131072
-        contextWindow: 1000000
-        api: openai-responses
-        input: [text]
-      - id: qwen3.8-flash
-        name: Qwen 3.8 Flash
-        reasoning: true
-        maxTokens: 131072
-        contextWindow: 1000000
-        api: openai-responses
-        input: [text, image]
-      - id: qwen3.8-27b
-        name: Qwen 3.8 27B
-        reasoning: true
-        maxTokens: 32768
-        contextWindow: 262144
-        api: openai-responses
-        input: [text, image]
-      - id: gemini-3.1-pro-preview
-        name: Gemini 3.1 Pro Preview
-        reasoning: true
-        maxTokens: 65536
-        contextWindow: 1048576
-        api: openai-responses
-        input: [text, image]
-      - id: deepseek-v4.1-flash
-        name: DeepSeek V4.1 Flash
-        reasoning: true
-        maxTokens: 384000
-        contextWindow: 1000000
-        api: openai-completions
-        input: [text, image]
-      - id: union-alpha-free
-        name: Union Alpha
+      - id: laguna-s-2.1-free
+        name: Laguna S 2.1 Free
         api: openai-completions
         input: [text]

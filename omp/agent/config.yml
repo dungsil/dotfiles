@@ -26,7 +26,7 @@ task:
     enabled: true
   softRequestBudget: 200
   agentAdvisor:
-    designer: tailscale/gemini-flash-lite:high
+    designer: tailscale/gemini-3.5-flash-lite:high
   agentModelOverrides:
     scout: "@scout"
     librarian: "@research"
@@ -52,57 +52,83 @@ retry:
   fallbackRevertPolicy: cooldown-expiry
   fallbackChains:
     default:
-      - tailscale/opus-4.6:high
+      - tailscale/claude-opus-4-6:high
       - tailscale/gemini-3.8-flash:high
       - tailscale/glm-5.3:max
     smol:
       - tailscale/gemini-3.8-flash:high
-      - tailscale/opus-4.6:high
-      - tailscale/gpt-5.6-luna:max
+      - tailscale/claude-opus-4-6:high
+      - tailscale/gpt-6-luna:max
       - tailscale/deepseek-v4.1-flash:max
       - tailscale/glm-5.3-flash:max
     slow:
-      - tailscale/fable-5.1:max
+      - tailscale/claude-fable-5-1:max
       - tailscale/glm-5.3:max
-      - tailscale/deepseek-v4-pro:max
+      - tailscale/deepseek-v4.1-flash:max
     tiny:
       - tailscale/gemini-3.5-flash-lite:minimal
-      - tailscale/haiku-4.5:minimal
       - tailscale/glm-5.3-flash:low
       - tailscale/deepseek-v4.1-flash:low
     commit:
-      - tailscale/gpt-5.6-luna:medium
+      - tailscale/gpt-6-luna:medium
       - tailscale/gemini-3.5-flash-lite:low
       - tailscale/glm-5.3-flash:low
     vision:
-      - tailscale/gemma-4-31b:xhigh
+      - tailscale/gemini-3.5-flash-lite:xhigh
       - tailscale/gpt-6-astra:medium
     designer:
-      - tailscale/sonnet-5:high
-      - tailscale/gemma-4-31b:xhigh
+      - tailscale/claude-sonnet-5:high
+      - tailscale/gemini-3.5-flash-lite:xhigh
       - tailscale/glm-5.3:max
     task:
-      - tailscale/sonnet-5:high
+      - tailscale/claude-sonnet-5:high
       - tailscale/gemini-3.8-flash:high
       - tailscale/glm-5.3:max
-      - tailscale/deepseek-v4-pro:max
+      - tailscale/deepseek-v4.1-flash:max
     advisor:
-      - tailscale/gpt-5.6-luna:max
+      - tailscale/gpt-6-luna:max
       - tailscale/gemini-3.8-flash:high
-      - tailscale/deepseek-v4-pro:max
+      - tailscale/deepseek-v4.1-flash:max
     plan:
       - tailscale/gpt-6-astra:high
       - tailscale/glm-5.3:max
-      - tailscale/deepseek-v4-pro:max
+      - tailscale/deepseek-v4.1-flash:max
     scout:
       - tailscale/gemini-3.8-flash:medium
       - tailscale/glm-5.3-flash:high
-      - tailscale/sonnet-5:low
+      - tailscale/claude-sonnet-5:low
     research:
       - tailscale/gemini-3.5-flash-lite:low
-      - tailscale/haiku-4.5:low
-      - tailscale/gpt-5.6-luna:low
+      - tailscale/gpt-6-luna:low
       - tailscale/glm-5.3-flash:low
+    web:
+      - web/parallel
+      - web/perplexity
+      - google/gemini-2.5-flash
+      - google-antigravity/gemini-2.5-flash
+      - anthropic/claude-haiku-4-5
+      - openai-codex/gpt-5.6-luna
+      - openai-codex/gpt-5.6
+      - openai-codex/gpt-5.5
+      - xai/grok-4.5
+      - xai-oauth/grok-4.5
+      - web/zai
+      - web/exa
+      - web/tinyfish
+      - web/jina
+      - web/tavily
+      - web/firecrawl
+      - web/brave
+      - web/kimi
+      - web/synthetic
+      - web/ollama
+      - web/searxng
+      - web/startpage
+      - web/duckduckgo
+      - web/ecosia
+      - web/google
+      - web/public
+  maxRetries: 1
 modelRoleStorage: global
 browser:
   headless: true
@@ -112,11 +138,9 @@ providers:
   fetch: auto
   cacheRetention: auto
   webSearchTimeoutSeconds: 60
-  webSearchOrder:
-    - kagi
   autoThinkingMaxEffort: max
-  webSearchExclude:
-    - mojeek
+  anthropic:
+    serverSideFallback: true
 exa:
   enabled: true
 compaction:
@@ -127,15 +151,16 @@ modelRoles:
   default: tailscale/gpt-6-astra:medium
   smol: tailscale/gemini-3.8-flash:high
   slow: tailscale/gpt-6-astra:high
-  tiny: tailscale/gpt-5.6-luna:low
-  commit: tailscale/solar-pro4
+  tiny: tailscale/deepseek-v4.1-flash:high
+  commit: tailscale/deepseek-v4.1-flash
   vision: tailscale/gemini-3.8-flash:high
   designer: tailscale/gemini-3.8-flash:high
-  task: tailscale/gpt-5.6-terra:max
-  advisor: tailscale/opus-4.6:high
-  plan: tailscale/fable-5.1:max
-  scout: tailscale/gpt-5.6-luna:medium
-  research: tailscale/gpt-5.6-luna:low
+  task: tailscale/gpt-6-luna:max
+  advisor: tailscale/claude-opus-4-6:high
+  plan: tailscale/claude-fable-5-1:max
+  scout: tailscale/gpt-6-luna:medium
+  research: tailscale/gpt-6-luna:low
+  web: web/kagi
 cycleOrder:
   - default
   - smol
@@ -145,7 +170,7 @@ advisor:
   syncBacklog: "off"
   immuneTurns: 3
 prewalk:
-  enabled: true
+  enabled: false
 model:
   loopGuard:
     enabled: true
@@ -190,7 +215,7 @@ python:
   kernelMode: session
 power:
   sleepPrevention: idle
-hideThinkingBlock: true
+hideThinkingBlock: false
 disabledExtensions:
   []
 tier:
