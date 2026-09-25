@@ -12,11 +12,8 @@ $yamlFiles = @(
 )
 $requiredJsonFiles = @(
     'skills-lock.json',
-    'omp/agent/mcp.json',
     'omp/agent/i-have-adhd.json',
     'codex/models_tailscale.json',
-    'pi/agent/models.json',
-    'pi/agent/settings.json',
     'vscode/settings.json'
 )
 $script:passedCount = 0

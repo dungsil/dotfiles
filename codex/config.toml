@@ -18,9 +18,6 @@ sandbox = "elevated"
 [tui.model_availability_nux]
 gpt-6-astra = 4
 
-[mcp_servers.aperture]
-url = "https://ai.gila-map.ts.net/v1/mcp"
-
 [desktop]
 followUpQueueMode = "steer"
 show-context-window-usage = true

@@ -13,7 +13,7 @@ This repository manages personal dotfiles and settings for Windows. The executio
 ## Key Directories
 
 - `git/`, `vscode/`, `pwsh/`, `codex/`: User settings for each tool.
-- `omp/agent/`: Defines OMP behavior, models, MCP, language, and response rules.
+- `omp/agent/`: Defines OMP behavior, models, language, and response rules.
 - `skills/`: Git submodule for `dungsil/skills`; edit skill sources under `skills/skills/` and follow that repository's instructions. Keep `duninit` and its assets in Korean. Push submodule commits before pushing the parent repository's updated reference.
 - `skills-lock.json`: Records external skill sources and selected skills.
 - `.agents/skills/`: Generated installation output, excluded from Git. Do not edit it as source.

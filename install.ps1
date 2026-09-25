@@ -40,7 +40,6 @@ $Links = @(
     @{ Source = 'omp\agent\WATCHDOG.yml';           Dest = '.omp\agent\WATCHDOG.yml' }
     @{ Source = 'omp\agent\config.yml';             Dest = '.omp\agent\config.yml' }
     @{ Source = 'omp\agent\models.yml';             Dest = '.omp\agent\models.yml' }
-    @{ Source = 'omp\agent\mcp.json';              Dest = '.omp\agent\mcp.json' }
     @{ Source = 'omp\agent\extensions\session-header.ts'; Dest = '.omp\agent\extensions\session-header.ts' }
     @{ Source = 'omp\agent\extensions\eval-guard.ts'; Dest = '.omp\agent\extensions\eval-guard.ts' }
     @{ Source = 'omp\agent\i-have-adhd.json';          Dest = '.omp\agent\i-have-adhd.json' }
@@ -51,9 +50,6 @@ $Links = @(
     @{ Source = 'codex\models_tailscale.json';            Dest = '.codex\models_tailscale.json' }
     @{ Source = 'codex\tailscale.config.toml';             Dest = '.codex\tailscale.config.toml' }
     @{ Source = 'codex\config.toml';                       Dest = '.codex\config.toml'; Type = 'Patch' }
-    @{ Source = 'pi\agent\AGENTS.md';                      Dest = '.pi\agent\AGENTS.md' }
-    @{ Source = 'pi\agent\models.json';                   Dest = '.pi\agent\models.json' }
-    @{ Source = 'pi\agent\settings.json';                 Dest = '.pi\agent\settings.json' }
 )
 
 # OMP 마켓플레이스 및 플러그인 목록

@@ -186,9 +186,6 @@ tui:
   hyperlinks: auto
   renderMermaid: true
   tight: false
-mcp:
-  enableProjectConfig: true
-  notifications: false
 lsp:
   formatOnWrite: true
   diagnosticsOnWrite: true
