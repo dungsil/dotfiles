@@ -9,7 +9,7 @@ edit:
 tools:
   approvalMode: yolo
   abortOnFabricatedResult: true
-defaultThinkingLevel: auto
+defaultThinkingLevel: max
 memory:
   backend: mnemopi
 mnemopi:
@@ -212,7 +212,7 @@ python:
   kernelMode: session
 power:
   sleepPrevention: idle
-hideThinkingBlock: false
+hideThinkingBlock: true
 disabledExtensions:
   []
 tier:
