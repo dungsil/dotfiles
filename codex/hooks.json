@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "^Bash$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pwsh -NoLogo -NoProfile -NonInteractive -Command \"& (Join-Path ([Environment]::GetFolderPath('UserProfile')) '.agents/hooks/gg-guard.ps1')\"",
+            "timeout": 10,
+            "statusMessage": "Checking direct Git and Forge CLI usage"
+          }
+        ]
+      }
+    ]
+  }
+}

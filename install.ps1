@@ -33,6 +33,7 @@ $Links = @(
     @{ Source = 'git\.gitconfig';               Dest = '.gitconfig' }
     @{ Source = 'vscode\settings.json';         Dest = 'AppData\Roaming\Code\User\settings.json' }
     @{ Source = '.agents\skills';               Dest = '.agents\skills';                        Type = 'Junction' }
+    @{ Source = 'hooks\gg-guard.ps1';            Dest = '.agents\hooks\gg-guard.ps1' }
     @{ Source = 'omp\agent\TITLE_SYSTEM.md';   Dest = '.omp\agent\TITLE_SYSTEM.md' }
     @{ Source = 'omp\agent\APPEND_SYSTEM.md';       Dest = '.omp\agent\APPEND_SYSTEM.md' }
     @{ Source = 'omp\agent\PERSONALITY.md';         Dest = '.omp\agent\PERSONALITY.md' }
@@ -42,9 +43,11 @@ $Links = @(
     @{ Source = 'omp\agent\models.yml';             Dest = '.omp\agent\models.yml' }
     @{ Source = 'omp\agent\extensions\session-header.ts'; Dest = '.omp\agent\extensions\session-header.ts' }
     @{ Source = 'omp\agent\extensions\eval-guard.ts'; Dest = '.omp\agent\extensions\eval-guard.ts' }
+    @{ Source = 'omp\agent\extensions\gg-guard.ts'; Dest = '.omp\agent\extensions\gg-guard.ts' }
     @{ Source = 'omp\agent\i-have-adhd.json';          Dest = '.omp\agent\i-have-adhd.json' }
     @{ Source = 'pwsh\Microsoft.PowerShell_profile.ps1';  Dest = 'Documents\PowerShell\Microsoft.PowerShell_profile.ps1' }
     @{ Source = 'codex\AGENTS.md';                       Dest = '.codex\AGENTS.md' }
+    @{ Source = 'codex\hooks.json';                      Dest = '.codex\hooks.json' }
     @{ Source = 'codex\agents\researcher.toml';          Dest = '.codex\agents\researcher.toml' }
     @{ Source = 'codex\agents\planner.toml';             Dest = '.codex\agents\planner.toml' }
     @{ Source = 'codex\models_tailscale.json';            Dest = '.codex\models_tailscale.json' }

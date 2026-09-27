@@ -378,6 +378,26 @@ function Invoke-InstallSkillsTests {
     }
 }
 
+function Invoke-GgGuardTests {
+    $checks = @(
+        @{ Command = 'pwsh'; Arguments = @('-NoProfile', '-File'); File = 'tests/gg-guard.Tests.ps1' },
+        @{ Command = 'node'; Arguments = @('--test'); File = 'tests/gg-guard-extension.test.mjs' }
+    )
+    foreach ($check in $checks) {
+        try {
+            $arguments = @($check.Arguments) + (Get-RepositoryPath $check.File)
+            $output = @(& $check.Command @arguments 2>&1)
+            if ($LASTEXITCODE -ne 0) {
+                Add-Failure 'gg 훅 테스트' $check.File (($output | Out-String).Trim())
+            } else {
+                Add-Passed
+            }
+        } catch {
+            Add-Failure 'gg 훅 테스트' $check.File $_.Exception.Message
+        }
+    }
+}
+
 $trackedFiles = @()
 try {
     $trackedFiles = @(Get-GitTrackedFiles)
@@ -403,6 +423,7 @@ Test-EnglishDistributionHangul
 Test-JsonFiles $trackedFiles
 Test-YamlFiles
 Invoke-InstallSkillsTests
+Invoke-GgGuardTests
 
 Write-Host "검사 완료: 통과 $script:passedCount / 실패 $script:failedCount"
 if ($script:failedCount -eq 0) {
