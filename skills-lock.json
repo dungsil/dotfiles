@@ -17,19 +17,97 @@
       "source": "stablyai/orca",
       "sourceType": "github",
       "skillPath": "skills/orca-cli/SKILL.md",
-      "computedHash": "83ece910d035d0684195095bb9df5911a028002b2efba1ebbeb4ae66de5e0903"
+      "computedHash": "ccd717aed7b9866a059b0b31d9a009641a28f6db3201749943fbbb797af4a317"
     },
     "orca-per-workspace-env": {
       "source": "stablyai/orca",
       "sourceType": "github",
       "skillPath": "skills/orca-per-workspace-env/SKILL.md",
-      "computedHash": "0c4642c02480ed6219e3427475b5654fc6c06a84f2ce33fb8d7223baf2bdb17f"
+      "computedHash": "8dfa2ba97e64005771d9fe7af93e420e60a7e78e65ebb65a2f4681b09a716341"
     },
     "orchestration": {
       "source": "stablyai/orca",
       "sourceType": "github",
       "skillPath": "skills/orchestration/SKILL.md",
-      "computedHash": "e611e8065f08f308823d063bb3cd8d4e283242202456b8a3e80058b2f59f0c3a"
+      "computedHash": "0dc04a0a354974eed5c15115fc6cb7461d7423e95a5b19ee995796cf1383e7ed"
+    },
+    "vibe-debug": {
+      "source": "dungsil-ai/vibe",
+      "sourceType": "github",
+      "skillPath": "skills/vibe-debug/SKILL.md",
+      "computedHash": "84b066e07ac9bafe29dfe7285dce2b7aa8c7a484b07f33bf35a41116983027c9"
+    },
+    "vibe-deep-plan": {
+      "source": "dungsil-ai/vibe",
+      "sourceType": "github",
+      "skillPath": "skills/vibe-deep-plan/SKILL.md",
+      "computedHash": "c289a431cb528b7c064f48ed7fd9a9c28369b8c895434bae935ae0f3797c77c4"
+    },
+    "vibe-docs": {
+      "source": "dungsil-ai/vibe",
+      "sourceType": "github",
+      "skillPath": "skills/vibe-docs/SKILL.md",
+      "computedHash": "651c7837c34e7a78580082635cf9127ebdfbfc57809fe1ecf0eaeed8835b7979"
+    },
+    "vibe-goal": {
+      "source": "dungsil-ai/vibe",
+      "sourceType": "github",
+      "skillPath": "skills/vibe-goal/SKILL.md",
+      "computedHash": "3e9212bd8e7bd74a843c87b9c86adb093335f144db7ccd58f4d0ecc14f03de28"
+    },
+    "vibe-grilling": {
+      "source": "dungsil-ai/vibe",
+      "sourceType": "github",
+      "skillPath": "skills/vibe-grilling/SKILL.md",
+      "computedHash": "282f01fa49f846109ab66cb8a6882ee1998b67c24e15507417c6aa6e0037525e"
+    },
+    "vibe-handoff": {
+      "source": "dungsil-ai/vibe",
+      "sourceType": "github",
+      "skillPath": "skills/vibe-handoff/SKILL.md",
+      "computedHash": "0c93c96fb36133e2970c0e9d7891cb51224b1bb0165bb5ea477816a0014d2b6f"
+    },
+    "vibe-implement": {
+      "source": "dungsil-ai/vibe",
+      "sourceType": "github",
+      "skillPath": "skills/vibe-implement/SKILL.md",
+      "computedHash": "e6560de703ef5c099b4db0863c54de1c91ad02ad5b2391fc628c67f1f8d8e142"
+    },
+    "vibe-init": {
+      "source": "dungsil-ai/vibe",
+      "sourceType": "github",
+      "skillPath": "skills/vibe-init/SKILL.md",
+      "computedHash": "46a741feff7b35a040cb141ad625785733d85b5a5e733e20ddf814839bb408fc"
+    },
+    "vibe-modeling": {
+      "source": "dungsil-ai/vibe",
+      "sourceType": "github",
+      "skillPath": "skills/vibe-modeling/SKILL.md",
+      "computedHash": "4919258f624a0818a89f50e600e0fb1f80566d14cc7b580297a750bbbbcd2970"
+    },
+    "vibe-next-plan": {
+      "source": "dungsil-ai/vibe",
+      "sourceType": "github",
+      "skillPath": "skills/vibe-next-plan/SKILL.md",
+      "computedHash": "1c9369bce5a427c57286fec773ac6f3fb183046bf8ec6fe88d12ec19be92de6d"
+    },
+    "vibe-plan": {
+      "source": "dungsil-ai/vibe",
+      "sourceType": "github",
+      "skillPath": "skills/vibe-plan/SKILL.md",
+      "computedHash": "c5b29e9b214d558df999b9a4a19f9afffea41bb60b3d5fb5505518693cdb58e9"
+    },
+    "vibe-refactor": {
+      "source": "dungsil-ai/vibe",
+      "sourceType": "github",
+      "skillPath": "skills/vibe-refactor/SKILL.md",
+      "computedHash": "fb65afc541a252c3e2d630117417162c010c8d369c1cbb705251bc640db04858"
+    },
+    "vibe-review": {
+      "source": "dungsil-ai/vibe",
+      "sourceType": "github",
+      "skillPath": "skills/vibe-review/SKILL.md",
+      "computedHash": "2f4a7fd4249188952fd8af6c3e4e39033480799ca95d32f256ec82fa8795eadc"
     }
   }
 }
