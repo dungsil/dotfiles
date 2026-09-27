@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "gg": {
+      "source": "dungsil-ai/gg",
+      "sourceType": "github",
+      "skillPath": "skills/gg/SKILL.md",
+      "computedHash": "7ee5472f9ae97a23db5ce4ebd42de42064f761f6749de3e700e18ac371f85607"
+    },
     "improve": {
       "source": "shadcn/improve",
       "sourceType": "github",
