@@ -273,7 +273,7 @@ function Test-DirectoryUpToDate([string]$SourcePath, [string]$DestPath) {
 # 복원 결과는 잠금 파일 해시로 관리되는 캐시에 보관하며, 잠금 파일이 변하지 않고 캐시에
 # 필요한 스킬이 모두 있으면 네트워크 복원을 건너뜁니다.
 # 임시 디렉터리에서 복원을 검증한 뒤 설치하므로 다운로드 실패 시 기존 스킬을 보존합니다.
-# 내용이 같은 스킬은 다시 복사하지 않고 건너뛰어 매 실행 비용을 줄입니다.
+# 관리 대상 스킬을 새 디렉터리에 모은 뒤 전체 스킬 디렉터리를 한 번에 교체합니다.
 function Sync-AgentSkills([string]$RepositoryRoot, [switch]$Force) {
     $repositoryPath = [System.IO.Path]::GetFullPath($RepositoryRoot)
     $lockPath = Join-Path $repositoryPath 'skills-lock.json'
@@ -324,6 +324,8 @@ function Sync-AgentSkills([string]$RepositoryRoot, [switch]$Force) {
     }
 
     $staging = $null
+    $syncStaging = $null
+    $syncBackup = $null
     try {
         if ($lock.skills.Count -gt 0) {
             $lockHash = (Get-FileHash -LiteralPath $lockPath -Algorithm SHA256).Hash
@@ -377,7 +379,7 @@ function Sync-AgentSkills([string]$RepositoryRoot, [switch]$Force) {
             Write-Host '외부 스킬이 없어 네트워크 복원을 건너뜁니다.'
         }
 
-        # 배포 대상 전체를 먼저 확인합니다. 별도로 설치된 다른 스킬은 건드리지 않습니다.
+        # 모든 배포 대상이 스킬 디렉터리 안에 있고 일반 디렉터리인지 확인합니다.
         foreach ($name in $skillNames) {
             $target = [System.IO.Path]::GetFullPath((Join-Path $destination $name))
             if (-not $target.StartsWith($destination + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase)) {
@@ -389,23 +391,68 @@ function Sync-AgentSkills([string]$RepositoryRoot, [switch]$Force) {
             }
         }
 
-        New-Item -ItemType Directory -Path $destination -Force | Out-Null
+        # 전체 스킬 디렉터리를 구성한 뒤 한 번에 교체합니다.
         $updated = 0
-        $kept = 0
+        $needsSync = [bool]$Force -or -not (Test-Path -LiteralPath $destination -PathType Container)
         foreach ($name in $skillNames) {
-            $target = Join-Path $destination $name
             $source = $sources[$name]
-            # 내용이 같은 스킬은 삭제/복사 없이 그대로 둡니다.
+            $target = Join-Path $destination $name
             if (-not $Force -and (Test-DirectoryUpToDate -SourcePath $source -DestPath $target)) {
-                $kept++
                 continue
             }
-            if (Test-Path -LiteralPath $target) { Remove-Item -LiteralPath $target -Recurse -Force }
-            Copy-Item -LiteralPath $source -Destination $target -Recurse
             $updated++
+            $needsSync = $true
         }
-        Write-Host "스킬 동기화 완료: 외부 $($lock.skills.Count) / 로컬 $($localSkills.Count) (갱신 $updated / 유지 $kept)"
+
+        if ($needsSync) {
+            New-Item -ItemType Directory -Path $agentsPath -Force | Out-Null
+            $syncStaging = Join-Path $agentsPath ('.skills-sync-' + [guid]::NewGuid())
+            $syncBackup = Join-Path $agentsPath ('.skills-backup-' + [guid]::NewGuid())
+            New-Item -ItemType Directory -Path $syncStaging | Out-Null
+
+            $skillSources = @($skillNames | ForEach-Object { $sources[$_] })
+            if ($skillSources.Count -gt 0) {
+                Copy-Item -LiteralPath $skillSources -Destination $syncStaging -Recurse
+            }
+
+            # 별도로 설치한 스킬과 기타 항목은 새 디렉터리에도 그대로 보존합니다.
+            if (Test-Path -LiteralPath $destination -PathType Container) {
+                foreach ($item in (Get-ChildItem -LiteralPath $destination -Force)) {
+                    if ($skillNames -contains $item.Name) { continue }
+                    Copy-Item -LiteralPath $item.FullName -Destination $syncStaging -Recurse -Force
+                }
+
+                [System.IO.Directory]::Move($destination, $syncBackup)
+                try {
+                    [System.IO.Directory]::Move($syncStaging, $destination)
+                    $syncStaging = $null
+                } catch {
+                    if (Test-Path -LiteralPath $syncBackup -PathType Container) {
+                        [System.IO.Directory]::Move($syncBackup, $destination)
+                        $syncBackup = $null
+                    }
+                    throw
+                }
+                Remove-Item -LiteralPath $syncBackup -Recurse -Force
+                $syncBackup = $null
+            } else {
+                [System.IO.Directory]::Move($syncStaging, $destination)
+                $syncStaging = $null
+            }
+        }
+        $syncStatus = if ($needsSync) { '전체 디렉터리 동기화' } else { '변경 없음' }
+        Write-Host "스킬 동기화 완료: 외부 $($lock.skills.Count) / 로컬 $($localSkills.Count) (변경 감지 $updated / $syncStatus)"
     } finally {
+        if ($null -ne $syncBackup -and (Test-Path -LiteralPath $syncBackup -PathType Container)) {
+            if (-not (Test-Path -LiteralPath $destination -PathType Container)) {
+                [System.IO.Directory]::Move($syncBackup, $destination)
+            } else {
+                Remove-Item -LiteralPath $syncBackup -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+        if ($null -ne $syncStaging -and (Test-Path -LiteralPath $syncStaging -PathType Container)) {
+            Remove-Item -LiteralPath $syncStaging -Recurse -Force -ErrorAction SilentlyContinue
+        }
         if ($null -ne $staging) {
             $stagingPath = [System.IO.Path]::GetFullPath($staging)
             if ($stagingPath.StartsWith($tempRoot.TrimEnd('\', '/') + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase)) {
