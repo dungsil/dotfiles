@@ -27,4 +27,4 @@
 	helper = !gh auth git-credential
 
 [credential "https://gitlab.lsware.net"]
-	helper = glab auth git-credential
+	helper = !glab auth git-credential
