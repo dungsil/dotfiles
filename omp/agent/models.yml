@@ -1,7 +1,7 @@
 providers:
   tailscale:
     baseUrl: https://ai.gila-map.ts.net/v1
-    api: openai-completions
+    api: openai-responses
     auth: none
     models:
       - id: gpt-6-astra
@@ -115,6 +115,8 @@ providers:
         api: openai-completions
         input: [text, image]
         thinking:
+          mode: effort
+          efforts: [low, medium, high, max]
           defaultLevel: max
       - id: glm-5.3
         name: GLM 5.3
@@ -129,20 +131,3 @@ providers:
         maxTokens: 131072
         contextWindow: 1310720
         api: openai-completions
-        input: [text]
-      - id: ling-3.0-flash-sante:free
-        name: Ling 3.0 Flash Sante
-        api: openai-completions
-        input: [text]
-      - id: space-bunny-alpha
-        name: Space Bunny Alpha
-        api: openai-completions
-        input: [text]
-      - id: space-bunny-free
-        name: Space Bunny Free
-        api: openai-completions
-        input: [text]
-      - id: laguna-s-2.1-free
-        name: Laguna S 2.1 Free
-        api: openai-completions
-        input: [text]
