@@ -244,4 +244,6 @@ isolation:
 enabledProviders:
   []
 disabledProviders:
-  []
+  - codex
+  - claude-plugins
+  - claude
