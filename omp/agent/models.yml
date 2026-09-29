@@ -114,6 +114,8 @@ providers:
         contextWindow: 1000000
         api: openai-completions
         input: [text, image]
+        thinking:
+          defaultLevel: max
       - id: glm-5.3
         name: GLM 5.3
         reasoning: true
