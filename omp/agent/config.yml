@@ -77,11 +77,11 @@ retry:
       - tailscale/gemini-3.5-flash-lite:xhigh
       - tailscale/gpt-6-astra:medium
     designer:
-      - tailscale/claude-sonnet-5:high
+      - tailscale/claude-sonnet-5-5:high
       - tailscale/gemini-3.5-flash-lite:xhigh
       - tailscale/glm-5.3:max
     task:
-      - tailscale/claude-sonnet-5:high
+      - tailscale/claude-sonnet-5-5:high
       - tailscale/gemini-3.8-flash:high
       - tailscale/glm-5.3:max
       - tailscale/deepseek-v4.1-flash:max
@@ -96,7 +96,7 @@ retry:
     scout:
       - tailscale/gemini-3.8-flash:medium
       - tailscale/glm-5.3-flash:high
-      - tailscale/claude-sonnet-5:low
+      - tailscale/claude-sonnet-5-5:low
     research:
       - tailscale/gemini-3.5-flash-lite:low
       - tailscale/gpt-6-luna:low
