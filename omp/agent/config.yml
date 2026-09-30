@@ -216,7 +216,7 @@ hideThinkingBlock: true
 disabledExtensions:
   []
 tier:
-  openai: priority
+  openai: none
 bash:
   autoBackground:
     enabled: true
