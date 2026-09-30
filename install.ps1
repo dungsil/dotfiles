@@ -1,5 +1,8 @@
 # dotfiles 저장소의 설정 파일을 $HOME 하위 실제 경로로 심볼릭 링크, 정션, 복사(Copy) 또는 설정 병합 패치(Patch)로 연결합니다.
 # 심볼릭 링크 생성에는 관리자 권한 또는 개발자 모드가 필요하며, 권한이 없으면 정션, 복사, 패치 항목만 처리하고 심볼릭 링크는 건너뜁니다.
+# 각 항목은 소유한 응용 프로그램(git, vscode, pwsh, omp, codex)이 설치된 경우에만 처리하고 미설치 항목은 건너뜁니다.
+# CODEX_HOME, GIT_CONFIG_GLOBAL, VSCODE_PORTABLE, PI_CONFIG_DIR, PI_CODING_AGENT_DIR 같은 도구 홈 재정의 환경 변수가
+# 설정되어 있으면 $HOME 기본 경로 대신 해당 위치를 사용합니다.
 #
 # 사용법:
 #   ./install.ps1                 # 스킬 동기화 및 누락되었거나 대상이 다른 링크 (재)생성
@@ -28,31 +31,119 @@ if ($Capture -and $Force) {
 # 저장소 기준 경로
 $DotfilesRoot = $PSScriptRoot
 
+# 환경 변수로 재정의된 경로를 절대 경로로 반환합니다. 값이 비어 있으면 $null을 반환합니다.
+function Get-PathOverride([string]$Name) {
+    $value = [Environment]::GetEnvironmentVariable($Name)
+    if ([string]::IsNullOrWhiteSpace($value)) { return $null }
+    if ([System.IO.Path]::IsPathRooted($value)) { return $value }
+    return Join-Path $HOME $value
+}
+
+# 도구 홈 경로를 반환합니다. 재정의 환경 변수가 설정되지 않았으면 $HOME 기준 기본 상대 경로를 사용합니다.
+function Get-ToolHome([string]$HomeEnvironmentVariable, [string]$DefaultRelativePath) {
+    $override = Get-PathOverride $HomeEnvironmentVariable
+    if ($null -ne $override) { return $override }
+    return Join-Path $HOME $DefaultRelativePath
+}
+
+# omp 설정 루트(기본 .omp)를 반환합니다. PI_CONFIG_DIR은 홈 아래 루트 디렉터리 이름을 대체합니다.
+function Get-OmpHome {
+    return (Get-ToolHome 'PI_CONFIG_DIR' '.omp')
+}
+
+# omp agent 디렉터리를 반환합니다. PI_CODING_AGENT_DIR은 agent 디렉터리 전체 경로를 대체합니다.
+function Get-OmpAgentHome {
+    $agentOverride = Get-PathOverride 'PI_CODING_AGENT_DIR'
+    if ($null -ne $agentOverride) { return $agentOverride }
+    return Join-Path (Get-OmpHome) 'agent'
+}
+
+# 단일 환경 변수 재정의 목록을 만듭니다.
+function New-HomeEnv([string]$Name, [string]$RelativePath) {
+    return @(@{ Name = $Name; Dest = $RelativePath })
+}
+
+# omp agent 파일 항목의 재정의 목록을 만듭니다. agent 디렉터리 전체 경로 재정의를 홈 기준 루트 재정의보다 먼저 적용합니다.
+function New-OmpAgentEnv([string]$RelativePath) {
+    return @(
+        @{ Name = 'PI_CODING_AGENT_DIR'; Dest = $RelativePath }
+        @{ Name = 'PI_CONFIG_DIR';       Dest = "agent\$RelativePath" }
+    )
+}
+
+# 링크 항목의 실제 대상 경로와 표시용 경로를 결정합니다. Env 목록에서 값이 설정된 첫 번째 환경 변수를
+# 선택해 그 경로에 Dest 상대 경로를 조합하고, 설정된 것이 없으면 $HOME 기준 Dest를 사용합니다.
+function Resolve-LinkDestination([hashtable]$Link) {
+    $destPath = Join-Path $HOME $Link.Dest
+    $displayPath = $Link.Dest
+    foreach ($override in @($Link.Env | Where-Object { $_ })) {
+        $base = Get-PathOverride $override.Name
+        if ($null -eq $base) { continue }
+        if ([string]::IsNullOrEmpty($override.Dest)) {
+            $destPath = $base
+            $displayPath = $override.Name
+        } else {
+            $destPath = Join-Path $base $override.Dest
+            $displayPath = "$($override.Name)\$($override.Dest)"
+        }
+        break
+    }
+    return @{ Path = $destPath; Display = $displayPath }
+}
+
+# 링크 항목이 속한 응용 프로그램의 설치 여부를 감지합니다.
+$AppDetectors = @{
+    git    = { [bool](Get-Command git -ErrorAction SilentlyContinue) }
+    vscode = {
+        (Get-Command code -ErrorAction SilentlyContinue) -or
+        (Test-Path -LiteralPath (Join-Path $env:LOCALAPPDATA 'Programs\Microsoft VS Code\Code.exe')) -or
+        (Test-Path -LiteralPath (Join-Path $env:ProgramFiles 'Microsoft VS Code\Code.exe'))
+    }
+    pwsh   = { [bool](Get-Command pwsh -ErrorAction SilentlyContinue) }
+    omp    = { [bool](Get-Command omp -ErrorAction SilentlyContinue) }
+    codex  = { [bool](Get-Command codex -ErrorAction SilentlyContinue) }
+}
+
+$AppInstalledCache = @{}
+
+# 응용 프로그램 설치 여부를 판정합니다. App이 없는 항목은 설치된 것으로 간주합니다.
+function Test-AppInstalled([string]$AppName) {
+    if ([string]::IsNullOrEmpty($AppName)) { return $true }
+    if (-not $AppDetectors.ContainsKey($AppName)) { throw "알 수 없는 응용 프로그램 식별자입니다: $AppName" }
+    if (-not $AppInstalledCache.ContainsKey($AppName)) {
+        $AppInstalledCache[$AppName] = [bool](& $AppDetectors[$AppName])
+    }
+    return $AppInstalledCache[$AppName]
+}
+
 # 저장소 파일 -> 실제 설치 경로 매핑
+# App: 소유 응용 프로그램 식별자입니다. 미설치로 판정되면 항목을 건너뜁니다.
+# Env: 설정되었을 때 대상 경로를 대체하는 환경 변수 목록입니다. 앞쪽부터 적용하며, Dest는
+#      재정의 경로 기준 상대 경로이고 빈 문자열이면 재정의 경로 자체가 대상 파일이 됩니다.
 $Links = @(
-    @{ Source = 'git\.gitconfig';               Dest = '.gitconfig' }
-    @{ Source = 'vscode\settings.json';         Dest = 'AppData\Roaming\Code\User\settings.json' }
-    @{ Source = '.agents\skills';               Dest = '.agents\skills';                        Type = 'Junction' }
-    @{ Source = 'hooks\gg-guard.ps1';            Dest = '.agents\hooks\gg-guard.ps1' }
-    @{ Source = 'omp\agent\TITLE_SYSTEM.md';   Dest = '.omp\agent\TITLE_SYSTEM.md' }
-    @{ Source = 'omp\agent\APPEND_SYSTEM.md';       Dest = '.omp\agent\APPEND_SYSTEM.md' }
-    @{ Source = 'omp\agent\PERSONALITY.md';         Dest = '.omp\agent\PERSONALITY.md' }
-    @{ Source = 'omp\agent\RULES.md';               Dest = '.omp\agent\RULES.md' }
-    @{ Source = 'omp\agent\WATCHDOG.yml';           Dest = '.omp\agent\WATCHDOG.yml' }
-    @{ Source = 'omp\agent\config.yml';             Dest = '.omp\agent\config.yml' }
-    @{ Source = 'omp\agent\models.yml';             Dest = '.omp\agent\models.yml' }
-    @{ Source = 'omp\agent\extensions\session-header.ts'; Dest = '.omp\agent\extensions\session-header.ts' }
-    @{ Source = 'omp\agent\extensions\eval-guard.ts'; Dest = '.omp\agent\extensions\eval-guard.ts' }
-    @{ Source = 'omp\agent\extensions\gg-guard.ts'; Dest = '.omp\agent\extensions\gg-guard.ts' }
-    @{ Source = 'omp\agent\i-have-adhd.json';          Dest = '.omp\agent\i-have-adhd.json' }
-    @{ Source = 'pwsh\Microsoft.PowerShell_profile.ps1';  Dest = 'Documents\PowerShell\Microsoft.PowerShell_profile.ps1' }
-    @{ Source = 'codex\AGENTS.md';                       Dest = '.codex\AGENTS.md' }
-    @{ Source = 'codex\hooks.json';                      Dest = '.codex\hooks.json' }
-    @{ Source = 'codex\agents\researcher.toml';          Dest = '.codex\agents\researcher.toml' }
-    @{ Source = 'codex\agents\planner.toml';             Dest = '.codex\agents\planner.toml' }
-    @{ Source = 'codex\models_tailscale.json';            Dest = '.codex\models_tailscale.json' }
-    @{ Source = 'codex\tailscale.config.toml';             Dest = '.codex\tailscale.config.toml' }
-    @{ Source = 'codex\config.toml';                       Dest = '.codex\config.toml'; Type = 'Patch' }
+    @{ Source = 'git\.gitconfig';                         Dest = '.gitconfig';        App = 'git';     Env = (New-HomeEnv 'GIT_CONFIG_GLOBAL' '') }
+    @{ Source = 'vscode\settings.json';                   Dest = 'AppData\Roaming\Code\User\settings.json'; App = 'vscode'; Env = (New-HomeEnv 'VSCODE_PORTABLE' 'data\user-data\User\settings.json') }
+    @{ Source = '.agents\skills';                         Dest = '.agents\skills';    Type = 'Junction' }
+    @{ Source = 'hooks\gg-guard.ps1';                     Dest = '.agents\hooks\gg-guard.ps1' }
+    @{ Source = 'omp\agent\TITLE_SYSTEM.md';              Dest = '.omp\agent\TITLE_SYSTEM.md';              App = 'omp';   Env = (New-OmpAgentEnv 'TITLE_SYSTEM.md') }
+    @{ Source = 'omp\agent\APPEND_SYSTEM.md';             Dest = '.omp\agent\APPEND_SYSTEM.md';             App = 'omp';   Env = (New-OmpAgentEnv 'APPEND_SYSTEM.md') }
+    @{ Source = 'omp\agent\PERSONALITY.md';               Dest = '.omp\agent\PERSONALITY.md';               App = 'omp';   Env = (New-OmpAgentEnv 'PERSONALITY.md') }
+    @{ Source = 'omp\agent\RULES.md';                     Dest = '.omp\agent\RULES.md';                     App = 'omp';   Env = (New-OmpAgentEnv 'RULES.md') }
+    @{ Source = 'omp\agent\WATCHDOG.yml';                 Dest = '.omp\agent\WATCHDOG.yml';                 App = 'omp';   Env = (New-OmpAgentEnv 'WATCHDOG.yml') }
+    @{ Source = 'omp\agent\config.yml';                   Dest = '.omp\agent\config.yml';                   App = 'omp';   Env = (New-OmpAgentEnv 'config.yml') }
+    @{ Source = 'omp\agent\models.yml';                   Dest = '.omp\agent\models.yml';                   App = 'omp';   Env = (New-OmpAgentEnv 'models.yml') }
+    @{ Source = 'omp\agent\extensions\session-header.ts'; Dest = '.omp\agent\extensions\session-header.ts'; App = 'omp';   Env = (New-OmpAgentEnv 'extensions\session-header.ts') }
+    @{ Source = 'omp\agent\extensions\eval-guard.ts';     Dest = '.omp\agent\extensions\eval-guard.ts';     App = 'omp';   Env = (New-OmpAgentEnv 'extensions\eval-guard.ts') }
+    @{ Source = 'omp\agent\extensions\gg-guard.ts';       Dest = '.omp\agent\extensions\gg-guard.ts';       App = 'omp';   Env = (New-OmpAgentEnv 'extensions\gg-guard.ts') }
+    @{ Source = 'omp\agent\i-have-adhd.json';             Dest = '.omp\agent\i-have-adhd.json';             App = 'omp';   Env = (New-OmpAgentEnv 'i-have-adhd.json') }
+    @{ Source = 'pwsh\Microsoft.PowerShell_profile.ps1';  Dest = 'Documents\PowerShell\Microsoft.PowerShell_profile.ps1'; App = 'pwsh' }
+    @{ Source = 'codex\AGENTS.md';                        Dest = '.codex\AGENTS.md';                        App = 'codex'; Env = (New-HomeEnv 'CODEX_HOME' 'AGENTS.md') }
+    @{ Source = 'codex\hooks.json';                       Dest = '.codex\hooks.json';                       App = 'codex'; Env = (New-HomeEnv 'CODEX_HOME' 'hooks.json') }
+    @{ Source = 'codex\agents\researcher.toml';           Dest = '.codex\agents\researcher.toml';           App = 'codex'; Env = (New-HomeEnv 'CODEX_HOME' 'agents\researcher.toml') }
+    @{ Source = 'codex\agents\planner.toml';              Dest = '.codex\agents\planner.toml';              App = 'codex'; Env = (New-HomeEnv 'CODEX_HOME' 'agents\planner.toml') }
+    @{ Source = 'codex\models_tailscale.json';            Dest = '.codex\models_tailscale.json';            App = 'codex'; Env = (New-HomeEnv 'CODEX_HOME' 'models_tailscale.json') }
+    @{ Source = 'codex\tailscale.config.toml';            Dest = '.codex\tailscale.config.toml';            App = 'codex'; Env = (New-HomeEnv 'CODEX_HOME' 'tailscale.config.toml') }
+    @{ Source = 'codex\config.toml';                      Dest = '.codex\config.toml';                      Type = 'Patch'; App = 'codex'; Env = (New-HomeEnv 'CODEX_HOME' 'config.toml') }
 )
 
 # OMP 마켓플레이스 및 플러그인 목록
@@ -464,8 +555,8 @@ function Sync-AgentSkills([string]$RepositoryRoot, [switch]$Force) {
 
 if ($Capture) {
     $CapturePairs = @(
-        @{ Repo = 'omp\agent\config.yml'; Live = Join-Path $HOME '.omp\agent\config.yml' }
-        @{ Repo = 'codex\config.toml';     Live = Join-Path $HOME '.codex\config.toml' }
+        @{ Repo = 'omp\agent\config.yml'; Live = Join-Path (Get-OmpAgentHome) 'config.yml' }
+        @{ Repo = 'codex\config.toml';     Live = Join-Path (Get-ToolHome 'CODEX_HOME' '.codex') 'config.toml' }
     )
 
     $captured = 0
@@ -485,7 +576,7 @@ if ($Capture) {
     }
 
     $marketplaces = @()
-    $marketplacesPath = Join-Path $HOME '.omp\marketplaces.json'
+    $marketplacesPath = Join-Path (Get-OmpHome) 'marketplaces.json'
     if (Test-Path -LiteralPath $marketplacesPath -PathType Leaf) {
         $marketplacesText = Get-Content -LiteralPath $marketplacesPath -Raw -Encoding utf8
         if (-not [string]::IsNullOrWhiteSpace($marketplacesText)) {
@@ -502,7 +593,7 @@ if ($Capture) {
     }
 
     $plugins = @()
-    $installedPluginsPath = Join-Path $HOME '.omp\plugins\installed_plugins.json'
+    $installedPluginsPath = Join-Path (Get-OmpHome) 'plugins\installed_plugins.json'
     if (Test-Path -LiteralPath $installedPluginsPath -PathType Leaf) {
         $installedPluginsText = Get-Content -LiteralPath $installedPluginsPath -Raw -Encoding utf8
         if (-not [string]::IsNullOrWhiteSpace($installedPluginsText)) {
@@ -556,16 +647,23 @@ $backedUp = 0
 
 foreach ($link in $Links) {
     $sourcePath = Join-Path $DotfilesRoot $link.Source
-    $destPath = Join-Path $HOME $link.Dest
+    $resolved = Resolve-LinkDestination $link
+    $destPath = $resolved.Path
+    $displayPath = $resolved.Display
     $linkType = if ($link.ContainsKey('Type')) { $link.Type } else { 'SymbolicLink' }
 
+    if (-not (Test-AppInstalled $link.App)) {
+        Write-Host "건너뜀 (미설치: $($link.App))  $($link.Source)"
+        $skipped++
+        continue
+    }
     if ($linkType -eq 'SymbolicLink' -and -not $canCreateSymlinks) {
-        Write-Host "건너뜀 (권한 필요: SymbolicLink)  $($link.Dest)"
+        Write-Host "건너뜀 (권한 필요: SymbolicLink)  $displayPath"
         $skipped++
         continue
     }
     if (-not $Force -and (Test-UpToDate $sourcePath $destPath $linkType)) {
-        Write-Host "건너뜀 (이미 유효)  $($link.Dest)"
+        Write-Host "건너뜀 (이미 유효)  $displayPath"
         $skipped++
         continue
     }
@@ -578,7 +676,7 @@ foreach ($link in $Links) {
                 $backupDir = Join-Path ([System.IO.Path]::GetTempPath()) ("dotfiles-backup-" + $runTimestamp)
                 [System.IO.Directory]::CreateDirectory($backupDir) | Out-Null
             }
-            $backupPath = Join-Path $backupDir ($link.Dest -replace '[:/\\]', '_')
+            $backupPath = Join-Path $backupDir ($displayPath -replace '[:/\\]', '_')
             Copy-Item -LiteralPath $destPath -Destination $backupPath -Recurse -Force
             $backedUp++
         }
@@ -599,20 +697,20 @@ foreach ($link in $Links) {
         if ($linkType -eq 'Patch') {
             if (-not (Test-Path $destPath)) {
                 Copy-Item -Path $sourcePath -Destination $destPath -Force
-                Write-Host "생성됨          $($link.Dest) <- $($link.Source)"
+                Write-Host "생성됨          $displayPath <- $($link.Source)"
             } else {
                 $srcText = Get-Content -LiteralPath $sourcePath -Raw -Encoding utf8
                 $tgtText = Get-Content -LiteralPath $destPath -Raw -Encoding utf8
                 $merged = Merge-TomlContent -SourceText $srcText -TargetText $tgtText
                 [System.IO.File]::WriteAllText($destPath, $merged, [System.Text.Encoding]::UTF8)
-                Write-Host "패치됨          $($link.Dest) (로컬 설정 보존 및 변경점 반영)"
+                Write-Host "패치됨          $displayPath (로컬 설정 보존 및 변경점 반영)"
             }
         } elseif ($linkType -eq 'Copy') {
             Copy-Item -Path $sourcePath -Destination $destPath -Force
-            Write-Host "복사됨          $($link.Dest) <- $($link.Source)"
+            Write-Host "복사됨          $displayPath <- $($link.Source)"
         } else {
             New-Item -ItemType $linkType -Path $destPath -Value $sourcePath | Out-Null
-            Write-Host "생성됨          $($link.Dest) -> $($link.Source)"
+            Write-Host "생성됨          $displayPath -> $($link.Source)"
         }
         $created++
     } catch {
@@ -626,7 +724,7 @@ Write-Host "완료: 생성 $created / 건너뜀 $skipped / 실패 $failed"
 
 # OMP 플러그인 설치 및 등록 상태를 점검하여 미설치 항목을 설치합니다.
 function Install-OmpPlugins {
-    if (-not (Get-Command omp -ErrorAction SilentlyContinue)) {
+    if (-not (Test-AppInstalled 'omp')) {
         Write-Host '건너뜀 (omp 명령어를 찾을 수 없음)  OMP 플러그인 설치' -ForegroundColor Yellow
         return
     }
@@ -651,7 +749,7 @@ function Install-OmpPlugins {
     Write-Host ''
     Write-Host '--- OMP 플러그인 확인 및 설치 ---' -ForegroundColor Cyan
 
-    $mpFile = Join-Path $HOME '.omp\marketplaces.json'
+    $mpFile = Join-Path (Get-OmpHome) 'marketplaces.json'
     $existingMarketplaces = @()
     if (Test-Path $mpFile) {
         try {
@@ -668,7 +766,7 @@ function Install-OmpPlugins {
         }
     }
 
-    $pluginsFile = Join-Path $HOME '.omp\plugins\installed_plugins.json'
+    $pluginsFile = Join-Path (Get-OmpHome) 'plugins\installed_plugins.json'
     $installedPlugins = @()
     if (Test-Path $pluginsFile) {
         try {
@@ -692,7 +790,7 @@ function Install-OmpPlugins {
 function Install-CodexPlugins {
     $pluginsConfigPath = Join-Path $DotfilesRoot 'codex\plugins.json'
     if (-not (Test-Path -LiteralPath $pluginsConfigPath -PathType Leaf)) { return }
-    if (-not (Get-Command codex -ErrorAction SilentlyContinue)) {
+    if (-not (Test-AppInstalled 'codex')) {
         Write-Host '건너뜀 (codex 명령어를 찾을 수 없음)  Codex 플러그인 설치' -ForegroundColor Yellow
         return
     }
