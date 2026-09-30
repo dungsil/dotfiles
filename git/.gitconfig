@@ -28,3 +28,5 @@
 
 [credential "https://gitlab.lsware.net"]
 	helper = !glab auth git-credential
+[credential "helperselector"]
+	selected = wincred
