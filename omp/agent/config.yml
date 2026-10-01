@@ -148,7 +148,7 @@ compaction:
   autoContinue: true
   keepRecentTokens: 20000
 modelRoles:
-  default: tailscale/gpt-6-astra:medium
+  default: tailscale/gpt-6.1-sol:medium
   smol: tailscale/gemini-3.8-flash:high
   slow: tailscale/gpt-6-astra:high
   tiny: tailscale/deepseek-v4.1-flash:high
