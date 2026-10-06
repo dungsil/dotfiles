@@ -247,3 +247,5 @@ disabledProviders:
   - codex
   - claude-plugins
   - claude
+computer:
+  enabled: true
