@@ -52,9 +52,8 @@ retry:
   fallbackRevertPolicy: cooldown-expiry
   fallbackChains:
     default:
-      - tailscale/claude-opus-4-6:high
-      - tailscale/gemini-3.8-flash:high
-      - tailscale/glm-5.3:max
+      - tailscale/gpt-6-astra:low
+      - tailscale/deepseek-v4.1-flash:max
     smol:
       - tailscale/gemini-3.8-flash:high
       - tailscale/claude-opus-4-6:high
@@ -148,7 +147,7 @@ compaction:
   autoContinue: true
   keepRecentTokens: 20000
 modelRoles:
-  default: tailscale/gpt-6.1-sol:medium
+  default: tailscale/claude-opus-5-5:high
   smol: tailscale/gemini-3.8-flash:high
   slow: tailscale/gpt-6-astra:high
   tiny: tailscale/deepseek-v4.1-flash:high
