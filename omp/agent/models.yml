@@ -135,3 +135,59 @@ providers:
         contextWindow: 1310720
         api: openai-responses
         input: [text]
+      - id: ling-3.1-flash-free
+        name: Ling 3.1 Flash Free
+        reasoning: false
+        maxTokens: 32768
+        contextWindow: 262144
+        api: openai-responses
+        input: [text]
+      - id: ling-3.0-flash-sante:free
+        name: Ling 3.0 Flash Sante
+        reasoning: false
+        maxTokens: 32768
+        contextWindow: 262144
+        api: openai-responses
+        input: [text]
+      - id: mimo-v2.6-flash-free
+        name: MiMo 2.6 Flash Free
+        reasoning: false
+        maxTokens: 131072
+        contextWindow: 1050000
+        api: openai-responses
+        input: [text, image]
+      - id: nemotron-3.5-lightning-free
+        name: Nemotron 3.5 Lightning Free
+        reasoning: false
+        maxTokens: 131072
+        contextWindow: 262144
+        api: openai-responses
+        input: [text, image]
+      - id: big-pickle
+        name: Big Pickle
+        reasoning: true
+        maxTokens: 32000
+        contextWindow: 200000
+        api: openai-responses
+        input: [text, image]
+      - id: laguna-s-2.1-free
+        name: Laguna S 2.1 Free
+        reasoning: false
+        maxTokens: 131072
+        contextWindow: 524288
+        api: openai-responses
+        input: [text]
+      - id: space-bunny-alpha
+        name: Space Bunny Alpha
+        reasoning: false
+        maxTokens: 131072
+        contextWindow: 524288
+        api: openai-responses
+        input: [text]
+      - id: space-bunny-free
+        name: Space Bunny Free
+        reasoning: false
+        maxTokens: 131072
+        contextWindow: 524288
+        api: openai-responses
+        input: [text]

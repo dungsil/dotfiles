@@ -81,9 +81,8 @@ retry:
       - tailscale/glm-5.3:max
     task:
       - tailscale/claude-sonnet-5-5:high
-      - tailscale/gemini-3.8-flash:high
-      - tailscale/glm-5.3:max
       - tailscale/deepseek-v4.1-flash:max
+      - tailscale/glm-5.3-flash:max
     advisor:
       - tailscale/gpt-6-luna:max
       - tailscale/gemini-3.8-flash:high
