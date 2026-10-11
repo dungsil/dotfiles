@@ -11,12 +11,18 @@ function udall {
     omp plugin marketplace update
     omp plugin upgrade --scope user
   }
+  if (Get-Command pi -ErrorAction SilentlyContinue) {
+    pi update --extensions
+  }
 }
 
 function syncplugins {
   if (Get-Command omp -ErrorAction SilentlyContinue) {
     omp plugin marketplace update
     omp plugin upgrade --scope user
+  }
+  if (Get-Command pi -ErrorAction SilentlyContinue) {
+    pi update --extensions
   }
 }
 

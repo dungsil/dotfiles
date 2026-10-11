@@ -2,19 +2,21 @@
 
 ## Project Overview
 
-This repository manages personal dotfiles and settings for Windows. The execution script is `install.ps1`, and it includes Git, VS Code, PowerShell, OMP, Codex, and agent skills.
+This repository manages personal dotfiles and settings for Windows. The execution script is `install.ps1`, and it includes Git, VS Code, PowerShell, OMP, Pi, Codex, and agent skills.
 
 ## Architecture & Data Flow
 
 - Settings are stored in tool-specific directories. `install.ps1` links them to their actual usage paths under `$HOME`.
 - General settings are installed as Symbolic Links, generated `.agents/skills/` as a Directory Junction, and machine-dependent settings (such as `codex/config.toml`) as Patches (merging dotfiles changes while preserving local settings like `[projects]`). Existing valid targets are skipped, and `-Force` recreates them.
-- Entries are processed only when their owning application is installed (detected via the `git`, `code`, `pwsh`, `omp`, and `codex` commands or the VS Code install path). Destinations honor tool home overrides instead of the default `$HOME` path: `CODEX_HOME`, `GIT_CONFIG_GLOBAL`, `VSCODE_PORTABLE`, and omp's `PI_CONFIG_DIR` / `PI_CODING_AGENT_DIR`.
+- Entries are processed only when their owning application is installed (detected via the `git`, `code`, `pwsh`, `omp`, `pi`, and `codex` commands or the VS Code install path). Destinations honor tool home overrides instead of the default `$HOME` path: `CODEX_HOME`, `GIT_CONFIG_GLOBAL`, `VSCODE_PORTABLE`, and `PI_CODING_AGENT_DIR`. OMP paths are fixed at `$HOME/.omp` because `PI_CODING_AGENT_DIR` belongs to Pi, not to OMP.
+- Pi packages are declared in `pi/agent/settings.json`. Pi records no separate install state, so `install.ps1` runs `pi update --extensions` to reconcile the declared `packages` entries (which `pi list` and `pi install` also do implicitly, making a read-only existence check impossible).
 - Before linking settings, `install.ps1` initializes the `skills/` Git submodule when missing, restores external skills from `skills-lock.json` into a per-lock-hash cache under the temp directory, and copies skills from `skills/skills/` without translation into the ignored `.agents/skills/` directory. A changed lock file or an incomplete cache re-runs the network restore; it discovers nested language-specific skill folders as well.
 
 ## Key Directories
 
 - `git/`, `vscode/`, `pwsh/`, `codex/`: User settings for each tool.
 - `omp/agent/`: Defines OMP behavior, models, language, and response rules.
+- `pi/agent/`: Defines Pi settings, models, instructions, extensions, and package declarations. Migrated from `omp/agent/`; `pi/README.md` records what mapped and what was dropped because Pi has no equivalent.
 - `skills/`: Git submodule for `dungsil/skills`; edit skill sources under `skills/skills/` and follow that repository's instructions. Keep `duninit` and its assets in Korean. Push submodule commits before pushing the parent repository's updated reference.
 - `skills-lock.json`: Records external skill sources and selected skills.
 - `.agents/skills/`: Generated installation output, excluded from Git. Do not edit it as source.
@@ -26,8 +28,8 @@ pwsh .\install.ps1         # Keeps valid links and creates only missing links
 pwsh .\install.ps1 -Force  # Removes existing targets and recreates links
 pwsh .\install.ps1 -SkillsOnly # Synchronizes external and local skills only
 udcheck                    # Checks for Scoop and WinGet updates
-udall                      # Updates Scoop, WinGet packages, and OMP plugins
-syncplugins                # Updates OMP plugin marketplaces and installed plugins
+udall                      # Updates Scoop, WinGet packages, OMP plugins, and Pi packages
+syncplugins                # Updates OMP plugin marketplaces/plugins and Pi packages
 syncsk                     # Runs install.ps1 -SkillsOnly from the installed profile
 ```
 

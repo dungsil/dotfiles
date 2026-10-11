@@ -1,0 +1,279 @@
+{
+  "providers": {
+    "tailscale": {
+      "baseUrl": "https://ai.gila-map.ts.net/v1",
+      "api": "openai-responses",
+      "apiKey": "none",
+      "models": [
+        {
+          "id": "gpt-6-astra",
+          "name": "GPT-6 Astra",
+          "reasoning": true,
+          "maxTokens": 128000,
+          "contextWindow": 1050000,
+          "input": ["text", "image"],
+          "thinkingLevelMap": {
+            "minimal": null,
+            "xhigh": "xhigh",
+            "max": "max"
+          }
+        },
+        {
+          "id": "gpt-6.1-sol",
+          "name": "GPT-6.1 Sol",
+          "reasoning": true,
+          "maxTokens": 128000,
+          "contextWindow": 1050000,
+          "input": ["text", "image"],
+          "thinkingLevelMap": {
+            "minimal": null,
+            "xhigh": "xhigh",
+            "max": "max"
+          }
+        },
+        {
+          "id": "gpt-6-luna",
+          "name": "GPT-6 Luna",
+          "reasoning": true,
+          "maxTokens": 128000,
+          "contextWindow": 1050000,
+          "input": ["text", "image"],
+          "thinkingLevelMap": {
+            "minimal": null,
+            "xhigh": "xhigh",
+            "max": "max"
+          }
+        },
+        {
+          "id": "claude-fable-5-1",
+          "name": "Fable 5.1",
+          "reasoning": true,
+          "maxTokens": 128000,
+          "contextWindow": 1000000,
+          "api": "anthropic-messages",
+          "baseUrl": "https://ai.gila-map.ts.net",
+          "input": ["text", "image"],
+          "compat": {
+            "forceAdaptiveThinking": true
+          },
+          "cost": {
+            "input": 10,
+            "output": 50,
+            "cacheRead": 0.25,
+            "cacheWrite": 12.5
+          },
+          "thinkingLevelMap": {
+            "off": null,
+            "minimal": null,
+            "xhigh": "xhigh",
+            "max": "max"
+          }
+        },
+        {
+          "id": "claude-opus-5-5",
+          "name": "Opus 5.5",
+          "reasoning": true,
+          "maxTokens": 128000,
+          "contextWindow": 1000000,
+          "api": "anthropic-messages",
+          "baseUrl": "https://ai.gila-map.ts.net",
+          "input": ["text", "image"],
+          "compat": {
+            "forceAdaptiveThinking": true
+          },
+          "thinkingLevelMap": {
+            "minimal": null,
+            "xhigh": "xhigh",
+            "max": "max"
+          }
+        },
+        {
+          "id": "claude-opus-4-6",
+          "name": "Opus 4.6",
+          "reasoning": true,
+          "maxTokens": 128000,
+          "contextWindow": 1000000,
+          "api": "anthropic-messages",
+          "baseUrl": "https://ai.gila-map.ts.net",
+          "input": ["text", "image"],
+          "compat": {
+            "forceAdaptiveThinking": true
+          },
+          "thinkingLevelMap": {
+            "minimal": null,
+            "max": "max"
+          }
+        },
+        {
+          "id": "claude-sonnet-5-5",
+          "name": "Sonnet 5.5",
+          "reasoning": true,
+          "maxTokens": 128000,
+          "contextWindow": 1000000,
+          "api": "anthropic-messages",
+          "baseUrl": "https://ai.gila-map.ts.net",
+          "input": ["text", "image"],
+          "compat": {
+            "forceAdaptiveThinking": true
+          },
+          "thinkingLevelMap": {
+            "minimal": null,
+            "xhigh": "xhigh",
+            "max": "max"
+          }
+        },
+        {
+          "id": "claude-sonnet-4-6",
+          "name": "Sonnet 4.6",
+          "reasoning": true,
+          "maxTokens": 128000,
+          "contextWindow": 1000000,
+          "api": "anthropic-messages",
+          "baseUrl": "https://ai.gila-map.ts.net",
+          "input": ["text", "image"],
+          "compat": {
+            "forceAdaptiveThinking": true
+          },
+          "thinkingLevelMap": {
+            "minimal": null,
+            "xhigh": "xhigh",
+            "max": "max"
+          }
+        },
+        {
+          "id": "gemini-3.8-flash",
+          "name": "Gemini 3.8 Flash",
+          "reasoning": true,
+          "maxTokens": 65536,
+          "contextWindow": 1048576,
+          "input": ["text", "image"]
+        },
+        {
+          "id": "gemini-3.5-flash-lite",
+          "name": "Gemini Flash Lite",
+          "reasoning": true,
+          "maxTokens": 65536,
+          "contextWindow": 1048576,
+          "input": ["text", "image"]
+        },
+        {
+          "id": "gemini-3.1-pro",
+          "name": "Gemini Pro",
+          "reasoning": true,
+          "maxTokens": 65536,
+          "contextWindow": 1048576,
+          "input": ["text", "image"],
+          "thinkingLevelMap": {
+            "minimal": null,
+            "medium": null
+          }
+        },
+        {
+          "id": "deepseek-v4.1-flash",
+          "name": "DeepSeek V4.1 Flash",
+          "reasoning": true,
+          "maxTokens": 384000,
+          "contextWindow": 1000000,
+          "input": ["text", "image"],
+          "thinkingLevelMap": {
+            "xhigh": "xhigh",
+            "max": "max"
+          }
+        },
+        {
+          "id": "glm-5.3",
+          "name": "GLM 5.3",
+          "reasoning": true,
+          "maxTokens": 262144,
+          "contextWindow": 1310720,
+          "input": ["text"],
+          "thinkingLevelMap": {
+            "minimal": null,
+            "medium": null,
+            "max": "max"
+          }
+        },
+        {
+          "id": "glm-5.3-flash",
+          "name": "GLM 5.3 Flash",
+          "reasoning": true,
+          "maxTokens": 131072,
+          "contextWindow": 1310720,
+          "input": ["text"],
+          "thinkingLevelMap": {
+            "minimal": null,
+            "medium": null,
+            "max": "max"
+          }
+        },
+        {
+          "id": "ling-3.1-flash-free",
+          "name": "Ling 3.1 Flash Free",
+          "reasoning": false,
+          "maxTokens": 32768,
+          "contextWindow": 262144,
+          "input": ["text"]
+        },
+        {
+          "id": "ling-3.0-flash-sante:free",
+          "name": "Ling 3.0 Flash Sante",
+          "reasoning": false,
+          "maxTokens": 32768,
+          "contextWindow": 262144,
+          "input": ["text"]
+        },
+        {
+          "id": "mimo-v2.6-flash-free",
+          "name": "MiMo 2.6 Flash Free",
+          "reasoning": false,
+          "maxTokens": 131072,
+          "contextWindow": 1050000,
+          "input": ["text", "image"]
+        },
+        {
+          "id": "nemotron-3.5-lightning-free",
+          "name": "Nemotron 3.5 Lightning Free",
+          "reasoning": false,
+          "maxTokens": 131072,
+          "contextWindow": 262144,
+          "input": ["text", "image"]
+        },
+        {
+          "id": "big-pickle",
+          "name": "Big Pickle",
+          "reasoning": true,
+          "maxTokens": 32000,
+          "contextWindow": 200000,
+          "input": ["text", "image"],
+          "thinkingLevelMap": {
+            "xhigh": "xhigh"
+          }
+        },
+        {
+          "id": "laguna-s-2.1-free",
+          "name": "Laguna S 2.1 Free",
+          "reasoning": false,
+          "maxTokens": 131072,
+          "contextWindow": 524288,
+          "input": ["text"]
+        },
+        {
+          "id": "space-bunny-alpha",
+          "name": "Space Bunny Alpha",
+          "reasoning": false,
+          "maxTokens": 131072,
+          "contextWindow": 524288,
+          "input": ["text"]
+        },
+        {
+          "id": "space-bunny-free",
+          "name": "Space Bunny Free",
+          "reasoning": false,
+          "maxTokens": 131072,
+          "contextWindow": 524288,
+          "input": ["text"]
+        }
+      ]
+    }
+  }
+}
