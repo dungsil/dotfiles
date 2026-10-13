@@ -144,8 +144,6 @@ $Links = @(
     @{ Source = 'codex\hooks.json';                       Dest = '.codex\hooks.json';                       App = 'codex'; Env = (New-HomeEnv 'CODEX_HOME' 'hooks.json') }
     @{ Source = 'codex\agents\researcher.toml';           Dest = '.codex\agents\researcher.toml';           App = 'codex'; Env = (New-HomeEnv 'CODEX_HOME' 'agents\researcher.toml') }
     @{ Source = 'codex\agents\planner.toml';              Dest = '.codex\agents\planner.toml';              App = 'codex'; Env = (New-HomeEnv 'CODEX_HOME' 'agents\planner.toml') }
-    @{ Source = 'codex\models_tailscale.json';            Dest = '.codex\models_tailscale.json';            App = 'codex'; Env = (New-HomeEnv 'CODEX_HOME' 'models_tailscale.json') }
-    @{ Source = 'codex\tailscale.config.toml';            Dest = '.codex\tailscale.config.toml';            App = 'codex'; Env = (New-HomeEnv 'CODEX_HOME' 'tailscale.config.toml') }
     @{ Source = 'codex\config.toml';                      Dest = '.codex\config.toml';                      Type = 'Patch'; App = 'codex'; Env = (New-HomeEnv 'CODEX_HOME' 'config.toml') }
 )
 
