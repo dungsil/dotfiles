@@ -17,6 +17,8 @@
     "tailscale/deepseek-v4.1-flash": "max"
   },
   "defaultTools": [
+    "-bash",
+    "+powershell",
     "+grep",
     "+find"
   ],
@@ -34,5 +36,5 @@
   "retry": {
     "maxRetries": 1
   },
-  "lastChangelogVersion": "1.1.0"
+  "lastChangelogVersion": "1.2.0"
 }
