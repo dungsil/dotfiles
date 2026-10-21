@@ -7,113 +7,95 @@
       "skillPath": "skills/gg/SKILL.md",
       "computedHash": "f4c30eb659ee8bac2c3ab846000705a2f98f387561521c1d12c1921df663ae24"
     },
-    "improve": {
-      "source": "shadcn/improve",
-      "sourceType": "github",
-      "skillPath": "skills/improve/SKILL.md",
-      "computedHash": "39a9358732dcff385e9e4d3e60b4547856f834e54a58b35e455aa9bd49928c13"
-    },
-    "orca-cli": {
-      "source": "stablyai/orca",
-      "sourceType": "github",
-      "skillPath": "skills/orca-cli/SKILL.md",
-      "computedHash": "ccd717aed7b9866a059b0b31d9a009641a28f6db3201749943fbbb797af4a317"
-    },
-    "orca-per-workspace-env": {
-      "source": "stablyai/orca",
-      "sourceType": "github",
-      "skillPath": "skills/orca-per-workspace-env/SKILL.md",
-      "computedHash": "8dfa2ba97e64005771d9fe7af93e420e60a7e78e65ebb65a2f4681b09a716341"
-    },
-    "orchestration": {
-      "source": "stablyai/orca",
-      "sourceType": "github",
-      "skillPath": "skills/orchestration/SKILL.md",
-      "computedHash": "0dc04a0a354974eed5c15115fc6cb7461d7423e95a5b19ee995796cf1383e7ed"
-    },
     "vibe-audit": {
       "source": "dungsil-ai/vibe",
       "sourceType": "github",
       "skillPath": "skills/vibe-audit/SKILL.md",
-      "computedHash": "a35cd4cda98edc6cd7e0e00dbb2b62e946c244b51735e1162252896b7c7187a2"
+      "computedHash": "a605409b74c52293db957e6739f89f5f4eec3487c0b6a0a7250b140c79640ee9"
     },
     "vibe-debug": {
       "source": "dungsil-ai/vibe",
       "sourceType": "github",
       "skillPath": "skills/vibe-debug/SKILL.md",
-      "computedHash": "84b066e07ac9bafe29dfe7285dce2b7aa8c7a484b07f33bf35a41116983027c9"
+      "computedHash": "c4b84994ae58235ea902cc992e00511676f509fc133340e2fca687bf2c2e2322"
     },
     "vibe-deep-plan": {
       "source": "dungsil-ai/vibe",
       "sourceType": "github",
       "skillPath": "skills/vibe-deep-plan/SKILL.md",
-      "computedHash": "c289a431cb528b7c064f48ed7fd9a9c28369b8c895434bae935ae0f3797c77c4"
+      "computedHash": "3f40c2eb1693ecb5787c9abcca550583f81bb6be0033a47bd9a8e89fe799c3ce"
     },
     "vibe-docs": {
       "source": "dungsil-ai/vibe",
       "sourceType": "github",
       "skillPath": "skills/vibe-docs/SKILL.md",
-      "computedHash": "651c7837c34e7a78580082635cf9127ebdfbfc57809fe1ecf0eaeed8835b7979"
+      "computedHash": "bee2770c4e40cfbf624f02f1c737fd31135e6227873411acd7c26f2f7c4ec383"
     },
     "vibe-goal": {
       "source": "dungsil-ai/vibe",
       "sourceType": "github",
       "skillPath": "skills/vibe-goal/SKILL.md",
-      "computedHash": "3e9212bd8e7bd74a843c87b9c86adb093335f144db7ccd58f4d0ecc14f03de28"
+      "computedHash": "9cd35de6372c775ef23da9bb8997d5ff32ffd98381cfcda00efb1bc68c09c0ee"
     },
     "vibe-grilling": {
       "source": "dungsil-ai/vibe",
       "sourceType": "github",
       "skillPath": "skills/vibe-grilling/SKILL.md",
-      "computedHash": "282f01fa49f846109ab66cb8a6882ee1998b67c24e15507417c6aa6e0037525e"
+      "computedHash": "cc289198d561dd99f76a5d7e366737d59e0b209fd66989442047a568ad174086"
     },
     "vibe-handoff": {
       "source": "dungsil-ai/vibe",
       "sourceType": "github",
       "skillPath": "skills/vibe-handoff/SKILL.md",
-      "computedHash": "0c93c96fb36133e2970c0e9d7891cb51224b1bb0165bb5ea477816a0014d2b6f"
+      "computedHash": "bb6b6debfafd85a03df333961dbd0ef974c5f03378d2074dbfaedf7e354a7be1"
+    },
+    "vibe-hoego": {
+      "source": "dungsil-ai/vibe",
+      "sourceType": "github",
+      "skillPath": "skills/vibe-hoego/SKILL.md",
+      "computedHash": "70569bfdf78692fc8f707a6213d43679ed49439998eafa44c992a3d6629cbeac"
     },
     "vibe-implement": {
       "source": "dungsil-ai/vibe",
       "sourceType": "github",
       "skillPath": "skills/vibe-implement/SKILL.md",
-      "computedHash": "f02e1813d3815acc64dd87533677e62169eec7203155ae7df21ae2e99bfbf68c"
+      "computedHash": "8588006f1aba3146f8258745f10e32d1ee7dbc681097d883c8c547a87dcb8f33"
     },
     "vibe-init": {
       "source": "dungsil-ai/vibe",
       "sourceType": "github",
       "skillPath": "skills/vibe-init/SKILL.md",
-      "computedHash": "4574a5b42f98a7377424a56164103418e21c49623de9e951cfe5a774b8b3947a"
+      "computedHash": "91158c1fe47116c7bc0c1d835219c62dbf50dd47276ffc1efd4a91508af53a53"
     },
     "vibe-modeling": {
       "source": "dungsil-ai/vibe",
       "sourceType": "github",
       "skillPath": "skills/vibe-modeling/SKILL.md",
-      "computedHash": "4919258f624a0818a89f50e600e0fb1f80566d14cc7b580297a750bbbbcd2970"
+      "computedHash": "653e9fca4761f855ebd02d9408340f18b135631444818d60a57476cdfa08d1d4"
     },
     "vibe-next-plan": {
       "source": "dungsil-ai/vibe",
       "sourceType": "github",
       "skillPath": "skills/vibe-next-plan/SKILL.md",
-      "computedHash": "c0896d9fef1a05103f5685eb319b9d66ceb8067bb689797676de6b1eaa149191"
+      "computedHash": "8de8391855ef5492555032b1a9d40a1f9dcc767cfa38d39b92421c5e5aef81bf"
     },
     "vibe-plan": {
       "source": "dungsil-ai/vibe",
       "sourceType": "github",
       "skillPath": "skills/vibe-plan/SKILL.md",
-      "computedHash": "5475eef976055b8724f94ea5e9bab1fc9044fccec3ab22951c0d47c98473f18a"
+      "computedHash": "63c3936b996b0308154a34fb2003bad328eacfd863691a5700b860844c468444"
     },
     "vibe-refactor": {
       "source": "dungsil-ai/vibe",
       "sourceType": "github",
       "skillPath": "skills/vibe-refactor/SKILL.md",
-      "computedHash": "fb65afc541a252c3e2d630117417162c010c8d369c1cbb705251bc640db04858"
+      "computedHash": "e5c475ab9bff8ec0f677742da81fc64ee247c47091202afbd9d78d3cd57196a8"
     },
     "vibe-review": {
       "source": "dungsil-ai/vibe",
       "sourceType": "github",
       "skillPath": "skills/vibe-review/SKILL.md",
-      "computedHash": "2f4a7fd4249188952fd8af6c3e4e39033480799ca95d32f256ec82fa8795eadc"
+      "computedHash": "5cda9e303a0bc910d59d41c3b556eb9e74f5d487aec80e9b3c6991cb99dc7c0d"
     }
   }
 }

@@ -2,15 +2,8 @@
 service_tier = "default"
 approvals_reviewer = "user"
 model = "gpt-6-astra"
-model_catalog_json = "~/.codex/models_tailscale.json"
 
 sandbox_mode = "workspace-write"
-
-[model_providers.tailscale]
-name = "Tailscale AI Gateway"
-base_url = "https://ai.gila-map.ts.net/v1"
-wire_api = "responses"
-requires_openai_auth = false
 
 [windows]
 sandbox = "elevated"

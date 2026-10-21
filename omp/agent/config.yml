@@ -26,7 +26,7 @@ task:
     enabled: true
   softRequestBudget: 200
   agentAdvisor:
-    designer: tailscale/gemini-3.5-flash-lite:high
+    designer: tailscale/claude-opus-5-5:high
   agentModelOverrides:
     scout: "@scout"
     librarian: "@research"
@@ -52,13 +52,11 @@ retry:
   fallbackRevertPolicy: cooldown-expiry
   fallbackChains:
     default:
-      - tailscale/claude-opus-4-6:high
-      - tailscale/gemini-3.8-flash:high
-      - tailscale/glm-5.3:max
+      - tailscale/gpt-6-astra:low
+      - tailscale/deepseek-v4.1-flash:max
     smol:
-      - tailscale/gemini-3.8-flash:high
       - tailscale/claude-opus-4-6:high
-      - tailscale/gpt-6-luna:max
+      - tailscale/gpt-6-luna:high
       - tailscale/deepseek-v4.1-flash:max
       - tailscale/glm-5.3-flash:max
     slow:
@@ -66,46 +64,36 @@ retry:
       - tailscale/glm-5.3:max
       - tailscale/deepseek-v4.1-flash:max
     tiny:
-      - tailscale/gemini-3.5-flash-lite:minimal
       - tailscale/glm-5.3-flash:low
       - tailscale/deepseek-v4.1-flash:low
     commit:
       - tailscale/gpt-6-luna:medium
-      - tailscale/gemini-3.5-flash-lite:low
       - tailscale/glm-5.3-flash:low
     vision:
-      - tailscale/gemini-3.5-flash-lite:xhigh
       - tailscale/gpt-6-astra:medium
     designer:
       - tailscale/claude-sonnet-5-5:high
-      - tailscale/gemini-3.5-flash-lite:xhigh
       - tailscale/glm-5.3:max
     task:
       - tailscale/claude-sonnet-5-5:high
-      - tailscale/gemini-3.8-flash:high
-      - tailscale/glm-5.3:max
       - tailscale/deepseek-v4.1-flash:max
+      - tailscale/glm-5.3-flash:max
     advisor:
-      - tailscale/gpt-6-luna:max
-      - tailscale/gemini-3.8-flash:high
+      - tailscale/gpt-6-luna:high
       - tailscale/deepseek-v4.1-flash:max
     plan:
       - tailscale/gpt-6-astra:high
       - tailscale/glm-5.3:max
       - tailscale/deepseek-v4.1-flash:max
     scout:
-      - tailscale/gemini-3.8-flash:medium
       - tailscale/glm-5.3-flash:high
       - tailscale/claude-sonnet-5-5:low
     research:
-      - tailscale/gemini-3.5-flash-lite:low
       - tailscale/gpt-6-luna:low
       - tailscale/glm-5.3-flash:low
     web:
       - web/parallel
       - web/perplexity
-      - google/gemini-2.5-flash
-      - google-antigravity/gemini-2.5-flash
       - anthropic/claude-haiku-4-5
       - openai-codex/gpt-5.6-luna
       - openai-codex/gpt-5.6
@@ -148,14 +136,14 @@ compaction:
   autoContinue: true
   keepRecentTokens: 20000
 modelRoles:
-  default: tailscale/gpt-6-astra:medium
-  smol: tailscale/gemini-3.8-flash:high
+  default: tailscale/claude-opus-5-5:high
+  smol: tailscale/deepseek-v4.1-flash:high
   slow: tailscale/gpt-6-astra:high
   tiny: tailscale/deepseek-v4.1-flash:high
   commit: tailscale/deepseek-v4.1-flash
-  vision: tailscale/gemini-3.8-flash:high
-  designer: tailscale/gemini-3.8-flash:high
-  task: tailscale/gpt-6-luna:max
+  vision: tailscale/gemini-4-argon:high
+  designer: tailscale/claude-opus-5-5:high
+  task: tailscale/gpt-6-luna:high
   advisor: tailscale/claude-opus-4-6:high
   plan: tailscale/claude-fable-5-1:max
   scout: tailscale/gpt-6-luna:medium
@@ -216,7 +204,7 @@ hideThinkingBlock: true
 disabledExtensions:
   []
 tier:
-  openai: priority
+  openai: none
 bash:
   autoBackground:
     enabled: true
@@ -247,3 +235,5 @@ disabledProviders:
   - codex
   - claude-plugins
   - claude
+computer:
+  enabled: true

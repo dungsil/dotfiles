@@ -1,0 +1,40 @@
+{
+  "packages": [
+    "git:https://github.com/ayghri/i-have-adhd"
+  ],
+  "defaultProvider": "tailscale",
+  "defaultModel": "claude-opus-5-5",
+  "enabledModels": [
+    "tailscale/claude-opus-5-5",
+    "tailscale/gpt-6-astra",
+    "tailscale/deepseek-v4.1-flash"
+  ],
+  "defaultThinkingLevel": "max",
+  "modelThinkingLevels": {
+    "tailscale/claude-opus-5-5": "high",
+    "tailscale/claude-fable-5-1": "high",
+    "tailscale/gpt-6-astra": "medium",
+    "tailscale/deepseek-v4.1-flash": "max"
+  },
+  "defaultTools": [
+    "-bash",
+    "+powershell",
+    "+grep",
+    "+find"
+  ],
+  "hideThinkingBlock": true,
+  "steeringMode": "one-at-a-time",
+  "compaction": {
+    "keepRecentTokens": 20000
+  },
+  "images": {
+    "autoResize": true
+  },
+  "terminal": {
+    "showImages": true
+  },
+  "retry": {
+    "maxRetries": 1
+  },
+  "lastChangelogVersion": "1.3.0"
+}
