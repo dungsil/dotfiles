@@ -131,3 +131,10 @@ providers:
         maxTokens: 131072
         contextWindow: 1310720
         api: openai-completions
+      - id: kimi-k3
+        name: Kimi K3
+        reasoning: true
+        maxTokens: 262144
+        contextWindow: 1000000
+        api: openai-completions
+        input: [text, image]
