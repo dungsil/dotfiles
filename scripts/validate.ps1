@@ -8,7 +8,8 @@ $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
 $yamlFiles = @(
     'omp/agent/config.yml',
     'omp/agent/models.yml',
-    'omp/agent/WATCHDOG.yml'
+    'omp/agent/WATCHDOG.yml',
+    'dsh/cordis.patch.yml'
 )
 $requiredJsonFiles = @(
     'skills-lock.json',

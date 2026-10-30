@@ -1,7 +1,7 @@
 # dotfiles 저장소의 설정 파일을 $HOME 하위 실제 경로로 심볼릭 링크, 정션, 복사(Copy) 또는 설정 병합 패치(Patch)로 연결합니다.
 # 심볼릭 링크 생성에는 관리자 권한 또는 개발자 모드가 필요하며, 권한이 없으면 정션, 복사, 패치 항목만 처리하고 심볼릭 링크는 건너뜁니다.
-# 각 항목은 소유한 응용 프로그램(git, vscode, pwsh, omp, pi, codex)이 설치된 경우에만 처리하고 미설치 항목은 건너뜁니다.
-# CODEX_HOME, GIT_CONFIG_GLOBAL, VSCODE_PORTABLE, PI_CODING_AGENT_DIR 같은 도구 홈 재정의 환경 변수가
+# 각 항목은 소유한 응용 프로그램(git, vscode, pwsh, omp, pi, codex, dsh)이 설치된 경우에만 처리합니다.
+# CODEX_HOME, GIT_CONFIG_GLOBAL, VSCODE_PORTABLE, PI_CODING_AGENT_DIR, DSH_HOME, DSH_PROFILE_DIR 환경 변수가
 # 설정되어 있으면 $HOME 기본 경로 대신 해당 위치를 사용합니다.
 #
 # 사용법:
@@ -30,6 +30,7 @@ if ($Capture -and $Force) {
 
 # 저장소 기준 경로
 $DotfilesRoot = $PSScriptRoot
+. (Join-Path $DotfilesRoot 'scripts\dsh-settings.ps1')
 
 # 환경 변수로 재정의된 경로를 절대 경로로 반환합니다. 값이 비어 있으면 $null을 반환합니다.
 function Get-PathOverride([string]$Name) {
@@ -98,6 +99,11 @@ $AppDetectors = @{
     omp    = { [bool](Get-Command omp -ErrorAction SilentlyContinue) }
     pi     = { [bool](Get-Command pi -ErrorAction SilentlyContinue) }
     codex  = { [bool](Get-Command codex -ErrorAction SilentlyContinue) }
+    dsh    = {
+        (Get-Command dsh -ErrorAction SilentlyContinue) -or
+        (Test-Path -LiteralPath (Join-Path $env:LOCALAPPDATA 'Programs\DeepSeek Harness\DeepSeek Harness.exe')) -or
+        (Test-Path -LiteralPath (Join-Path $env:ProgramFiles 'DeepSeek Harness\DeepSeek Harness.exe'))
+    }
 }
 
 $AppInstalledCache = @{}
@@ -116,6 +122,7 @@ function Test-AppInstalled([string]$AppName) {
 # App: 소유 응용 프로그램 식별자입니다. 미설치로 판정되면 항목을 건너뜁니다.
 # Env: 설정되었을 때 대상 경로를 대체하는 환경 변수 목록입니다. 앞쪽부터 적용하며, Dest는
 #      재정의 경로 기준 상대 경로이고 빈 문자열이면 재정의 경로 자체가 대상 파일이 됩니다.
+$dshProfileName = Get-DshProfileName
 $Links = @(
     @{ Source = 'git\.gitconfig';                         Dest = '.gitconfig';        App = 'git';     Env = (New-HomeEnv 'GIT_CONFIG_GLOBAL' '') }
     @{ Source = 'vscode\settings.json';                   Dest = 'AppData\Roaming\Code\User\settings.json'; App = 'vscode'; Env = (New-HomeEnv 'VSCODE_PORTABLE' 'data\user-data\User\settings.json') }
@@ -145,6 +152,7 @@ $Links = @(
     @{ Source = 'codex\agents\researcher.toml';           Dest = '.codex\agents\researcher.toml';           App = 'codex'; Env = (New-HomeEnv 'CODEX_HOME' 'agents\researcher.toml') }
     @{ Source = 'codex\agents\planner.toml';              Dest = '.codex\agents\planner.toml';              App = 'codex'; Env = (New-HomeEnv 'CODEX_HOME' 'agents\planner.toml') }
     @{ Source = 'codex\config.toml';                      Dest = '.codex\config.toml';                      Type = 'Patch'; App = 'codex'; Env = (New-HomeEnv 'CODEX_HOME' 'config.toml') }
+    @{ Source = 'dsh\cordis.patch.yml'; Dest = ".dsh\profiles\$dshProfileName\cordis.patch.yml"; Type = 'Patch'; App = 'dsh'; Env = (New-HomeEnv 'DSH_PROFILE_DIR' 'cordis.patch.yml') + (New-HomeEnv 'DSH_HOME' "profiles\$dshProfileName\cordis.patch.yml") }
 )
 
 # OMP 마켓플레이스 및 플러그인 목록
@@ -325,10 +333,11 @@ function Test-UpToDate([string]$SourcePath, [string]$DestPath, [string]$LinkType
     if (-not (Test-Path $DestPath)) { return $false }
     if ($LinkType -eq 'Copy') { return $true }
     if ($LinkType -eq 'Patch') {
+        if ((Get-Item -LiteralPath $DestPath -Force).Attributes -band [System.IO.FileAttributes]::ReparsePoint) { return $false }
         $srcText = Get-Content -LiteralPath $SourcePath -Raw -Encoding utf8
         $tgtText = Get-Content -LiteralPath $DestPath -Raw -Encoding utf8
-        $merged = Merge-TomlContent -SourceText $srcText -TargetText $tgtText
-        return ($merged.Trim() -eq $tgtText.Trim())
+        $merged = Merge-PatchContent -SourcePath $SourcePath -SourceText $srcText -TargetText $tgtText
+        return ($merged.Trim() -ceq $tgtText.Trim())
     }
     $item = Get-Item $DestPath -Force
     if ($item.LinkType -ne $LinkType) { return $false }
@@ -559,6 +568,7 @@ if ($Capture) {
         @{ Repo = 'omp\agent\config.yml';     Live = Join-Path (Get-OmpAgentHome) 'config.yml' }
         @{ Repo = 'pi\agent\settings.json';   Live = Join-Path (Get-PiAgentHome) 'settings.json' }
         @{ Repo = 'codex\config.toml';        Live = Join-Path (Get-ToolHome 'CODEX_HOME' '.codex') 'config.toml' }
+        @{ Repo = 'dsh\cordis.patch.yml';      Live = Join-Path (Get-DshProfileHome) 'cordis.patch.yml' }
     )
 
     $captured = 0
@@ -664,9 +674,15 @@ foreach ($link in $Links) {
         $skipped++
         continue
     }
-    if (-not $Force -and (Test-UpToDate $sourcePath $destPath $linkType)) {
-        Write-Host "건너뜀 (이미 유효)  $displayPath"
-        $skipped++
+    try {
+        if (-not $Force -and (Test-UpToDate $sourcePath $destPath $linkType)) {
+            Write-Host "건너뜀 (이미 유효)  $displayPath"
+            $skipped++
+            continue
+        }
+    } catch {
+        Write-Warning "설정 검사 실패: $displayPath : $($_.Exception.Message)"
+        $failed++
         continue
     }
 
@@ -697,16 +713,8 @@ foreach ($link in $Links) {
 
     try {
         if ($linkType -eq 'Patch') {
-            if (-not (Test-Path $destPath)) {
-                Copy-Item -Path $sourcePath -Destination $destPath -Force
-                Write-Host "생성됨          $displayPath <- $($link.Source)"
-            } else {
-                $srcText = Get-Content -LiteralPath $sourcePath -Raw -Encoding utf8
-                $tgtText = Get-Content -LiteralPath $destPath -Raw -Encoding utf8
-                $merged = Merge-TomlContent -SourceText $srcText -TargetText $tgtText
-                [System.IO.File]::WriteAllText($destPath, $merged, [System.Text.Encoding]::UTF8)
-                Write-Host "패치됨          $displayPath (로컬 설정 보존 및 변경점 반영)"
-            }
+            Install-SettingsPatch -SourcePath $sourcePath -DestPath $destPath
+            Write-Host "패치됨          $displayPath (로컬 설정 보존 및 변경점 반영)"
         } elseif ($linkType -eq 'Copy') {
             Copy-Item -Path $sourcePath -Destination $destPath -Force
             Write-Host "복사됨          $displayPath <- $($link.Source)"
