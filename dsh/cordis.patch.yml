@@ -21,7 +21,7 @@
               - text
               - image
             reasoningEfforts:
-              off:
+              "off":
               minimal: minimal
               low: low
               medium: medium
@@ -35,7 +35,7 @@
             input:
               - text
             reasoningEfforts:
-              off:
+              "off":
               low: low
               high: high
               max: max
@@ -52,7 +52,7 @@
               - text
               - image
             reasoningEfforts:
-              off:
+              "off":
               low: low
               medium: medium
               high: high
@@ -68,7 +68,7 @@
               - text
               - image
             reasoningEfforts:
-              off:
+              "off":
               low: low
               medium: medium
               high: high
@@ -82,7 +82,7 @@
               - text
               - image
             reasoningEfforts:
-              off:
+              "off":
               low: low
               medium: medium
               high: high
@@ -116,7 +116,7 @@
               - text
               - image
             reasoningEfforts:
-              off:
+              "off":
               low: low
               medium: medium
               high: high
@@ -132,7 +132,7 @@
               - text
               - image
             reasoningEfforts:
-              off:
+              "off":
               low: low
               medium: medium
               high: high
