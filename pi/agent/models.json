@@ -231,14 +231,6 @@
           "input": ["text"]
         },
         {
-          "id": "mimo-v2.6-flash-free",
-          "name": "MiMo 2.6 Flash Free",
-          "reasoning": false,
-          "maxTokens": 131072,
-          "contextWindow": 1050000,
-          "input": ["text", "image"]
-        },
-        {
           "id": "laguna-s-2.1-free",
           "name": "Laguna S 2.1 Free",
           "reasoning": false,
@@ -249,14 +241,6 @@
         {
           "id": "space-bunny-alpha",
           "name": "Space Bunny Alpha",
-          "reasoning": false,
-          "maxTokens": 131072,
-          "contextWindow": 524288,
-          "input": ["text"]
-        },
-        {
-          "id": "space-bunny-free",
-          "name": "Space Bunny Free",
           "reasoning": false,
           "maxTokens": 131072,
           "contextWindow": 524288,
