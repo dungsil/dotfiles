@@ -163,20 +163,6 @@ providers:
         contextWindow: 1050000
         api: openai-responses
         input: [text, image]
-      - id: nemotron-3.5-lightning-free
-        name: Nemotron 3.5 Lightning Free
-        reasoning: false
-        maxTokens: 131072
-        contextWindow: 262144
-        api: openai-responses
-        input: [text, image]
-      - id: big-pickle
-        name: Big Pickle
-        reasoning: true
-        maxTokens: 32000
-        contextWindow: 200000
-        api: openai-responses
-        input: [text, image]
       - id: laguna-s-2.1-free
         name: Laguna S 2.1 Free
         reasoning: false
