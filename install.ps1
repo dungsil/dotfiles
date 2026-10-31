@@ -153,6 +153,7 @@ $Links = @(
     @{ Source = 'codex\agents\planner.toml';              Dest = '.codex\agents\planner.toml';              App = 'codex'; Env = (New-HomeEnv 'CODEX_HOME' 'agents\planner.toml') }
     @{ Source = 'codex\config.toml';                      Dest = '.codex\config.toml';                      Type = 'Patch'; App = 'codex'; Env = (New-HomeEnv 'CODEX_HOME' 'config.toml') }
     @{ Source = 'dsh\cordis.patch.yml'; Dest = ".dsh\profiles\$dshProfileName\cordis.patch.yml"; Type = 'Patch'; App = 'dsh'; Env = (New-HomeEnv 'DSH_PROFILE_DIR' 'cordis.patch.yml') + (New-HomeEnv 'DSH_HOME' "profiles\$dshProfileName\cordis.patch.yml") }
+    @{ Source = 'dsh\package.json'; Dest = ".dsh\profiles\$dshProfileName\package.json"; Type = 'Patch'; App = 'dsh'; Env = (New-HomeEnv 'DSH_PROFILE_DIR' 'package.json') + (New-HomeEnv 'DSH_HOME' "profiles\$dshProfileName\package.json") }
 )
 
 # OMP 마켓플레이스 및 플러그인 목록
@@ -569,6 +570,7 @@ if ($Capture) {
         @{ Repo = 'pi\agent\settings.json';   Live = Join-Path (Get-PiAgentHome) 'settings.json' }
         @{ Repo = 'codex\config.toml';        Live = Join-Path (Get-ToolHome 'CODEX_HOME' '.codex') 'config.toml' }
         @{ Repo = 'dsh\cordis.patch.yml';      Live = Join-Path (Get-DshProfileHome) 'cordis.patch.yml' }
+        @{ Repo = 'dsh\package.json';          Live = Join-Path (Get-DshProfileHome) 'package.json' }
     )
 
     $captured = 0

@@ -148,11 +148,41 @@ function Merge-CordisPatchContent([string]$SourceText, [string]$TargetText) {
     return $merged
 }
 
+# JSON 병합 함수: SourceText에 정의된 키를 TargetText에 패치합니다.
+# mappings는 재귀 병합하고, 일반 배열과 스칼라는 SourceText 값으로 교체합니다.
+# TargetText에만 존재하는 키는 보존합니다.
+function Merge-JsonNode($Source, $Target) {
+    foreach ($key in @($Source.Keys)) {
+        $sourceValue = $Source[$key]
+        if (-not $Target.Contains($key)) {
+            $Target.Add($key, $sourceValue)
+            continue
+        }
+        $targetValue = $Target[$key]
+        if ($sourceValue -is [System.Collections.IDictionary] -and $targetValue -is [System.Collections.IDictionary]) {
+            Merge-JsonNode $sourceValue $targetValue
+            continue
+        }
+        $Target[$key] = $sourceValue
+    }
+}
+
+function Merge-JsonContent([string]$SourceText, [string]$TargetText) {
+    $source = $SourceText | ConvertFrom-Json -AsHashtable
+    $target = $TargetText | ConvertFrom-Json -AsHashtable
+    if ($source -isnot [System.Collections.IDictionary] -or $target -isnot [System.Collections.IDictionary]) {
+        throw 'JSON 패치는 최상위 객체여야 합니다.'
+    }
+    Merge-JsonNode $source $target
+    return ($target | ConvertTo-Json -Depth 32).TrimEnd() + [Environment]::NewLine
+}
+
 function Merge-PatchContent([string]$SourcePath, [string]$SourceText, [string]$TargetText) {
     switch ([System.IO.Path]::GetExtension($SourcePath)) {
         '.toml' { return Merge-TomlContent -SourceText $SourceText -TargetText $TargetText }
         '.yml' { return Merge-CordisPatchContent -SourceText $SourceText -TargetText $TargetText }
         '.yaml' { return Merge-CordisPatchContent -SourceText $SourceText -TargetText $TargetText }
+        '.json' { return Merge-JsonContent -SourceText $SourceText -TargetText $TargetText }
         default { throw "지원하지 않는 패치 형식입니다: $SourcePath" }
     }
 }

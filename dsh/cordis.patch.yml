@@ -40,6 +40,18 @@
               high: high
               max: max
         apiKeyEnv: OPENCODE_GO_API_KEY
+      opencode-go-kimi:
+        baseURL: https://ai.gila-map.ts.net/v1
+        api: openai-completions
+        models:
+          - id: kimi-k3
+            name: Kimi K3
+            contextWindow: 1000000
+            maxTokens: 262144
+            input:
+              - text
+              - image
+        apiKeyEnv: OPENCODE_GO_API_KEY
       openai:
         baseURL: https://ai.gila-map.ts.net/v1
         api: openai-responses
@@ -89,6 +101,14 @@
               xhigh: xhigh
               max: max
         apiKeyEnv: OPENAI_API_KEY
+      google:
+        baseURL: https://ai.gila-map.ts.net/v1beta
+        models:
+          - id: gemini-4-argon
+            name: Gemini 4 Argon
+          - id: gemini-3.8-flash
+            name: Gemini 3.8 Flash
+        apiKeyEnv: GOOGLE_API_KEY
       anthropic:
         baseURL: https://ai.gila-map.ts.net/
         api: anthropic-messages
@@ -172,13 +192,20 @@
 - id: agent-default-model
   name: "@deepseek-ai/dsh-agent-default-model"
   config:
-    provider: openai
-    model: gpt-6.1-sol
-    reasoningEffort: high
+    provider: opencode-go
+    model: deepseek-v4.1-flash
+    reasoningEffort: max
 - id: ui-conversation
   name: "@deepseek-ai/dsh-client-ui-conversation"
   config:
     busyEnter: steer
+- id: ui-cordis
+  disabled: true
+- id: cot-translation
+  name: "@deepseek-ai/dsh-experimental-client-ui-cot-translation"
+  config:
+    provider: google
+    targetLanguage: auto
 - id: permission
   name: "@deepseek-ai/dsh-permission-presets"
   config:

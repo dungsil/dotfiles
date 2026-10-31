@@ -15,7 +15,7 @@ This repository manages personal dotfiles and settings for Windows. The executio
 ## Key Directories
 
 - `git/`, `vscode/`, `pwsh/`, `codex/`: User settings for each tool.
-- `dsh/`: Stores the Desktop Cordis patch. Installation merges YAML mappings and Cordis entry IDs, preserves local-only keys, and replaces ordinary arrays. It requires `powershell-yaml` 0.4.12 and never creates a settings symlink. Destinations use `DSH_PROFILE_DIR`, or `DSH_HOME` and `DSH_PROFILE`, with `desktop` as the default profile. Capture excludes credentials, sessions, and package state.
+- `dsh/`: Stores the Desktop Cordis patch and the profile package manifest. Installation merges YAML mappings and Cordis entry IDs and merges JSON objects, preserves local-only keys, and replaces ordinary arrays. It requires `powershell-yaml` 0.4.12 and never creates a settings symlink. Destinations use `DSH_PROFILE_DIR`, or `DSH_HOME` and `DSH_PROFILE`, with `desktop` as the default profile. Capture excludes credentials and sessions.
 - `omp/agent/`: Defines OMP behavior, models, language, and response rules.
 - `pi/agent/`: Defines Pi settings, models, instructions, extensions, and package declarations. Migrated from `omp/agent/`; `pi/README.md` records what mapped and what was dropped because Pi has no equivalent.
 - `skills/`: Git submodule for `dungsil/skills`; edit skill sources under `skills/skills/` and follow that repository's instructions. Keep `duninit` and its assets in Korean. Push submodule commits before pushing the parent repository's updated reference.
