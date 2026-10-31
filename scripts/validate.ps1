@@ -16,6 +16,10 @@ $requiredJsonFiles = @(
     'omp/agent/i-have-adhd.json',
     'vscode/settings.json'
 )
+# Pi가 설정을 갱신할 때 마지막 줄바꿈 없이 다시 쓰는 파일이라 끝줄 검사에서 제외합니다.
+$toolWrittenFiles = @(
+    'pi/agent/settings.json'
+)
 $script:passedCount = 0
 $script:failedCount = 0
 
@@ -207,6 +211,9 @@ function Test-TrailingNewlines {
 
     foreach ($relativePath in $TrackedFiles) {
         if ($relativePath -notmatch '(?i)(\.(md|json|yml|yaml|toml|ts|ps1)$|(^|/)\.editorconfig$|(^|/)\.gitconfig$)') {
+            continue
+        }
+        if ($toolWrittenFiles -contains $relativePath) {
             continue
         }
 
