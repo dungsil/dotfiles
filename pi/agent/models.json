@@ -213,38 +213,6 @@
             "medium": null,
             "max": "max"
           }
-        },
-        {
-          "id": "ling-3.1-flash-free",
-          "name": "Ling 3.1 Flash Free",
-          "reasoning": false,
-          "maxTokens": 32768,
-          "contextWindow": 262144,
-          "input": ["text"]
-        },
-        {
-          "id": "ling-3.0-flash-sante:free",
-          "name": "Ling 3.0 Flash Sante",
-          "reasoning": false,
-          "maxTokens": 32768,
-          "contextWindow": 262144,
-          "input": ["text"]
-        },
-        {
-          "id": "laguna-s-2.1-free",
-          "name": "Laguna S 2.1 Free",
-          "reasoning": false,
-          "maxTokens": 131072,
-          "contextWindow": 524288,
-          "input": ["text"]
-        },
-        {
-          "id": "space-bunny-alpha",
-          "name": "Space Bunny Alpha",
-          "reasoning": false,
-          "maxTokens": 131072,
-          "contextWindow": 524288,
-          "input": ["text"]
         }
       ]
     }
