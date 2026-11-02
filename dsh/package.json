@@ -16,12 +16,14 @@
         "@deepseek-ai/dsh-experimental-session-titles-bundle",
         "@deepseek-ai/dsh-experimental-ralph-bundle",
         "@deepseek-ai/dsh-subagent-codex",
-        "@dungsil/dsh-plugin-locale-ko"
+        "@dungsil/dsh-plugin-locale-ko",
+        "@dungsil/dsh-plugin-i-have-adhd"
       ]
     }
   },
   "dependencies": {
     "@deepseek-ai/dsh-subagent-codex": "0.2.1-rc.5",
-    "@dungsil/dsh-plugin-locale-ko": "^0.2.0"
+    "@dungsil/dsh-plugin-i-have-adhd": "^0.2.0",
+    "@dungsil/dsh-plugin-locale-ko": "^0.5.0"
   }
 }

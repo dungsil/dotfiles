@@ -169,6 +169,7 @@ $OmpPlugins = @(
 
 $DshPlugins = @(
     '@dungsil/dsh-plugin-locale-ko'
+    '@dungsil/dsh-plugin-i-have-adhd'
 )
 
 # 심볼릭 링크 생성이 가능한 환경(관리자 권한 또는 개발자 모드)인지 판정합니다.
