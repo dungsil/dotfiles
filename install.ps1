@@ -165,6 +165,10 @@ $OmpPlugins = @(
     @{ Target = 'i-have-adhd@i-have-adhd'; Scope = 'user' }
 )
 
+$DshPlugins = @(
+    '@dungsil/dsh-plugin-locale-ko'
+)
+
 # 심볼릭 링크 생성이 가능한 환경(관리자 권한 또는 개발자 모드)인지 판정합니다.
 function Test-CanCreateSymbolicLink {
     $identity = [Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()
@@ -866,6 +870,7 @@ if ($failed -eq 0) {
     Install-OmpPlugins
     Install-PiPackages
     Install-CodexPlugins
+    Install-DshPlugins -Packages $DshPlugins
 }
 if ($backedUp -gt 0) {
     Write-Host "백업 위치: $backupDir"

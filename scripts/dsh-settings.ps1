@@ -1,16 +1,4 @@
-# DSH 프로필의 YAML 노드를 병합하여 로컬 항목과 !!js 태그를 보존합니다.
-function Import-DshYaml {
-    $loaded = Get-Module powershell-yaml
-    if ($loaded -and $loaded.Version -ne [version]'0.4.12') {
-        throw '새 PowerShell에서 powershell-yaml 0.4.12를 사용하십시오.'
-    }
-    if (-not $loaded) {
-        if (-not (Get-Module -ListAvailable powershell-yaml)) {
-            throw 'DSH 설정 패치에는 powershell-yaml이 필요합니다. Install-Module powershell-yaml -RequiredVersion 0.4.12 -Scope CurrentUser 명령을 실행하십시오.'
-        }
-        Import-Module powershell-yaml -RequiredVersion 0.4.12 -ErrorAction Stop
-    }
-}
+$script:CordisMergeScript = Join-Path $PSScriptRoot 'merge-cordis-patch.cjs'
 
 function Get-DshProfileName {
     if ([string]::IsNullOrWhiteSpace($env:DSH_PROFILE)) { return 'desktop' }
@@ -24,128 +12,63 @@ function Get-DshProfileHome {
     return Join-Path (Get-ToolHome 'DSH_HOME' '.dsh') ('profiles\' + (Get-DshProfileName))
 }
 
-function Read-CordisPatch([string]$Text) {
-    Import-DshYaml
-    $stream = [YamlDotNet.RepresentationModel.YamlStream]::new()
-    $reader = [System.IO.StringReader]::new($Text)
-    try { $stream.Load($reader) } finally { $reader.Dispose() }
-    if ($stream.Documents.Count -ne 1 -or
-        $stream.Documents[0].RootNode -isnot [YamlDotNet.RepresentationModel.YamlSequenceNode]) {
-        throw 'Cordis 패치는 단일 YAML 배열이어야 합니다. 빈 패치는 []로 작성하십시오.'
-    }
-    return ,$stream.Documents[0].RootNode
-}
-
-function Get-CordisField($Node, [string]$Name) {
-    if ($Node -isnot [YamlDotNet.RepresentationModel.YamlMappingNode]) { return $null }
-    $key = [YamlDotNet.RepresentationModel.YamlScalarNode]::new($Name)
-    if ($Node.Children.ContainsKey($key)) { return ,$Node.Children[$key] }
-    return $null
-}
-
-function Get-CordisIdentity($Node) {
-    if ($Node -isnot [YamlDotNet.RepresentationModel.YamlMappingNode]) {
-        throw 'Cordis 패치의 각 항목은 YAML 매핑이어야 합니다.'
-    }
-    $id = Get-CordisField $Node 'id'
-    $insert = Get-CordisField $Node 'insert'
-    if ($null -ne $id -and $id -isnot [YamlDotNet.RepresentationModel.YamlScalarNode]) {
-        throw 'Cordis 항목의 id는 문자열이어야 합니다.'
-    }
-    if ($null -ne $insert) {
-        if ($insert -isnot [YamlDotNet.RepresentationModel.YamlSequenceNode]) {
-            throw 'Cordis 항목의 insert는 배열이어야 합니다.'
-        }
-        return 'insert:' + $id.Value
-    }
-    if ([string]::IsNullOrWhiteSpace($id.Value)) { throw 'Cordis 항목에는 id 또는 insert가 필요합니다.' }
-    return 'id:' + $id.Value
-}
-
-function Assert-CordisEntries($Entries) {
-    $identities = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
-    foreach ($entry in $Entries.Children) {
-        $identity = Get-CordisIdentity $entry
-        if (-not $identities.Add($identity)) {
-            throw "동일한 Cordis 패치 항목이 여러 개여서 병합할 수 없습니다: $identity"
-        }
-        $insert = Get-CordisField $entry 'insert'
-        if ($null -ne $insert) { Assert-CordisEntries $insert }
-        $group = Get-CordisField $entry 'group'
-        $config = Get-CordisField $entry 'config'
-        if ($group.Value -ceq 'true' -and $config -is [YamlDotNet.RepresentationModel.YamlSequenceNode]) {
-            Assert-CordisEntries $config
-        }
-    }
-}
-
-function Merge-CordisEntries($Source, $Target) {
-    foreach ($sourceEntry in $Source.Children) {
-        $identity = Get-CordisIdentity $sourceEntry
-        $targetEntry = $null
-        foreach ($entry in $Target.Children) {
-            if ((Get-CordisIdentity $entry) -ceq $identity) { $targetEntry = $entry; break }
-        }
-        if ($null -eq $targetEntry) {
-            $Target.Add($sourceEntry)
-        } else {
-            $sourceName = Get-CordisField $sourceEntry 'name'
-            $targetName = Get-CordisField $targetEntry 'name'
-            if ($null -ne $sourceName -and $null -ne $targetName -and $sourceName.Value -cne $targetName.Value) {
-                throw "동일한 Cordis id가 다른 플러그인을 가리킵니다: $identity"
+# 설치된 DSH의 실행 환경과 YAML 라이브러리를 재사용합니다.
+function Get-DshYamlRuntime {
+    foreach ($root in @(
+        (Join-Path $env:LOCALAPPDATA 'Programs\DeepSeek Harness'),
+        (Join-Path $env:ProgramFiles 'DeepSeek Harness')
+    )) {
+        $executable = Join-Path $root 'DeepSeek Harness.exe'
+        if (Test-Path -LiteralPath $executable -PathType Leaf) {
+            return @{
+                Executable = $executable
+                Anchor = Join-Path $root 'resources\app.asar\dsh\node_modules\@deepseek-ai\dsh\package.json'
+                Electron = $true
             }
-            Merge-CordisMapping $sourceEntry $targetEntry -IsEntry $true
         }
     }
-}
-
-function Merge-CordisMapping($Source, $Target, [bool]$IsEntry = $false) {
-    foreach ($pair in $Source.Children.GetEnumerator()) {
-        $key = $pair.Key
-        $sourceValue = $pair.Value
-        if ($Target.Children.ContainsKey($key)) {
-            $targetValue = $Target.Children[$key]
-            if ($sourceValue -is [YamlDotNet.RepresentationModel.YamlMappingNode] -and
-                $targetValue -is [YamlDotNet.RepresentationModel.YamlMappingNode]) {
-                Merge-CordisMapping $sourceValue $targetValue
-                continue
-            }
-            $group = Get-CordisField $Source 'group'
-            if ($IsEntry -and ($key.Value -ceq 'insert' -or ($key.Value -ceq 'config' -and $group.Value -ceq 'true')) -and
-                $sourceValue -is [YamlDotNet.RepresentationModel.YamlSequenceNode] -and
-                $targetValue -is [YamlDotNet.RepresentationModel.YamlSequenceNode]) {
-                Merge-CordisEntries $sourceValue $targetValue
-                continue
-            }
-            $Target.Children[$key] = $sourceValue
-        } else {
-            $Target.Add($key, $sourceValue)
-        }
+    $dsh = Get-Command dsh -ErrorAction SilentlyContinue
+    $node = Get-Command node -ErrorAction SilentlyContinue
+    if ($dsh -and $node) {
+        return @{ Executable = $node.Source; Anchor = $dsh.Source; Electron = $false }
     }
-}
-
-function ConvertTo-CordisText($Root) {
-    $stream = [YamlDotNet.RepresentationModel.YamlStream]::new()
-    $stream.Add([YamlDotNet.RepresentationModel.YamlDocument]::new($Root))
-    $writer = [System.IO.StringWriter]::new()
-    try {
-        $stream.Save($writer, $false)
-        $merged = $writer.ToString().TrimEnd() + [Environment]::NewLine
-    } finally { $writer.Dispose() }
-    return $merged
+    throw 'DSH 설정 병합에 필요한 실행 환경을 찾지 못했습니다. DeepSeek Harness 설치를 확인하십시오.'
 }
 
 function Merge-CordisPatchContent([string]$SourceText, [string]$TargetText) {
-    $source = Read-CordisPatch $SourceText
-    $target = Read-CordisPatch $TargetText
-    Assert-CordisEntries $source
-    Assert-CordisEntries $target
-    $original = ConvertTo-CordisText $target
-    Merge-CordisEntries $source $target
-    $merged = ConvertTo-CordisText $target
-    # 따옴표와 태그까지 비교하여 문자열과 불리언의 구분을 보존합니다.
-    if ($merged -ceq $original) { return $TargetText }
-    return $merged
+    $runtime = Get-DshYamlRuntime
+    $start = [Diagnostics.ProcessStartInfo]::new()
+    $start.FileName = $runtime.Executable
+    $start.UseShellExecute = $false
+    $start.CreateNoWindow = $true
+    $start.RedirectStandardInput = $true
+    $start.RedirectStandardOutput = $true
+    $start.RedirectStandardError = $true
+    $start.StandardInputEncoding = [Text.UTF8Encoding]::new($false)
+    $start.StandardOutputEncoding = [Text.UTF8Encoding]::new($false)
+    $start.StandardErrorEncoding = [Text.UTF8Encoding]::new($false)
+    if ($runtime.Electron) {
+        $start.Environment['ELECTRON_RUN_AS_NODE'] = '1'
+        $start.ArgumentList.Add('--expose-internals')
+    }
+    $start.ArgumentList.Add($script:CordisMergeScript)
+    $start.ArgumentList.Add($runtime.Anchor)
+    $process = [Diagnostics.Process]::new()
+    $process.StartInfo = $start
+    try {
+        $null = $process.Start()
+        $output = $process.StandardOutput.ReadToEndAsync()
+        $errorOutput = $process.StandardError.ReadToEndAsync()
+        $process.StandardInput.Write((@{ source = $SourceText; target = $TargetText } | ConvertTo-Json -Compress))
+        $process.StandardInput.Close()
+        $process.WaitForExit()
+        $merged = $output.GetAwaiter().GetResult()
+        $details = $errorOutput.GetAwaiter().GetResult()
+        if ($process.ExitCode -ne 0) { throw "DSH 설정 병합에 실패했습니다: $($details.Trim())" }
+        return $merged
+    } finally {
+        $process.Dispose()
+    }
 }
 
 # JSON 병합 함수: SourceText에 정의된 키를 TargetText에 패치합니다.
@@ -213,5 +136,65 @@ function Install-SettingsPatch([string]$SourcePath, [string]$DestPath) {
         [System.IO.File]::Move($temporary, $destination, [bool]$item)
     } finally {
         if ([System.IO.File]::Exists($temporary)) { [System.IO.File]::Delete($temporary) }
+    }
+}
+
+# Desktop의 예약 프로필을 관리할 수 있는 설치본 CLI를 우선 사용합니다.
+function Get-DshCliCommand {
+    foreach ($root in @(
+        (Join-Path $env:LOCALAPPDATA 'Programs\DeepSeek Harness'),
+        (Join-Path $env:ProgramFiles 'DeepSeek Harness')
+    )) {
+        $launcher = Join-Path $root 'resources\runtime\cli\bin\dsh.cmd'
+        if (Test-Path -LiteralPath $launcher -PathType Leaf) { return $launcher }
+    }
+    return (Get-Command dsh -ErrorAction SilentlyContinue)
+}
+
+# 프로필의 패키지 상태는 직접 쓰지 않고 DSH CLI로 누락된 플러그인을 설치합니다.
+function Install-DshPlugins([string[]]$Packages) {
+    if ($Packages.Count -eq 0 -or -not (Test-AppInstalled 'dsh')) { return }
+
+    $profile = Get-DshProfileName
+    $profileHome = Get-DshProfileHome
+    $manifestPath = Join-Path $profileHome 'package.json'
+    $manifest = if (Test-Path -LiteralPath $manifestPath -PathType Leaf) {
+        Get-Content -LiteralPath $manifestPath -Raw -Encoding utf8 | ConvertFrom-Json
+    }
+    $pending = @(
+        foreach ($package in $Packages) {
+            $installedManifest = Join-Path $profileHome "node_modules/$package/package.json"
+            if ($manifest.dependencies.PSObject.Properties.Name -ccontains $package -and
+                (Test-Path -LiteralPath $installedManifest -PathType Leaf)) {
+                Write-Host "건너뜀 (이미 설치됨)  DSH 플러그인: $package"
+            } else {
+                $package
+            }
+        }
+    )
+    if ($pending.Count -eq 0) { return }
+
+    # CLI는 DSH_PROFILE_DIR을 읽지 않으므로 다른 프로필에 설치하지 않도록 검사합니다.
+    $dshHome = Get-ToolHome 'DSH_HOME' '.dsh'
+    $cliProfileHome = Join-Path $dshHome "profiles/$profile"
+    $targetPath = [IO.Path]::GetFullPath($profileHome).TrimEnd('\', '/')
+    $cliTargetPath = [IO.Path]::GetFullPath($cliProfileHome).TrimEnd('\', '/')
+    if ($targetPath -ine $cliTargetPath) {
+        throw 'DSH CLI는 임의의 DSH_PROFILE_DIR 경로를 지원하지 않습니다. DSH_HOME/profiles/DSH_PROFILE과 같은 경로를 지정하십시오.'
+    }
+    $command = Get-DshCliCommand
+    if ($null -eq $command) { throw 'DSH 플러그인 설치에 필요한 CLI를 찾지 못했습니다. DeepSeek Harness 설치를 확인하십시오.' }
+
+    Write-Host ''
+    Write-Host '--- DSH 플러그인 설치 ---' -ForegroundColor Cyan
+    $previousHome = $env:DSH_HOME
+    try {
+        $env:DSH_HOME = $dshHome
+        foreach ($package in $pending) {
+            & $command plugin --profile $profile add --yes --ignore-scripts $package
+            if ($LASTEXITCODE -ne 0) { throw "DSH 플러그인 설치에 실패했습니다: $package (종료 코드 $LASTEXITCODE)" }
+        }
+    } finally {
+        $env:DSH_HOME = $previousHome
     }
 }
