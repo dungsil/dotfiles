@@ -222,8 +222,12 @@
     defaultPreset: danger-full-access
 - id: session-log-deepseek
   name: "@deepseek-ai/dsh-session-log-deepseek"
+  disabled: true
   config:
     enabled: false
+- id: ui-settings-session-log
+  name: "@deepseek-ai/dsh-client-ui-settings-session-log"
+  disabled: true
 - id: entry-customization
   disabled: true
 - id: ui-schedule
