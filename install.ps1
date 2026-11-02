@@ -63,8 +63,10 @@ function Get-PiAgentHome {
 }
 
 # 단일 환경 변수 재정의 목록을 만듭니다.
+# PowerShell은 함수 출력에서 단일 요소 배열을 풀어 버리므로, 호출부에서 `+`로 목록을 합칠 수 있도록
+# 쉼표 연산자로 감싸 배열 자체를 반환합니다. 감싸지 않으면 해시테이블 병합이 되어 키가 중복됩니다.
 function New-HomeEnv([string]$Name, [string]$RelativePath) {
-    return @(@{ Name = $Name; Dest = $RelativePath })
+    return ,@(@{ Name = $Name; Dest = $RelativePath })
 }
 
 # 링크 항목의 실제 대상 경로와 표시용 경로를 결정합니다. Env 목록에서 값이 설정된 첫 번째 환경 변수를
