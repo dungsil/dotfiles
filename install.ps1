@@ -509,7 +509,7 @@ function Sync-AgentSkills([string]$RepositoryRoot, [switch]$Force) {
         }
 
         # 전체 스킬 디렉터리를 구성한 뒤 한 번에 교체합니다.
-        $updated = 0
+        $changedSkills = [System.Collections.Generic.List[string]]::new()
         $needsSync = [bool]$Force -or -not (Test-Path -LiteralPath $destination -PathType Container)
         foreach ($name in $skillNames) {
             $source = $sources[$name]
@@ -517,9 +517,10 @@ function Sync-AgentSkills([string]$RepositoryRoot, [switch]$Force) {
             if (-not $Force -and (Test-DirectoryUpToDate -SourcePath $source -DestPath $target)) {
                 continue
             }
-            $updated++
+            $changedSkills.Add($name)
             $needsSync = $true
         }
+        $updated = $changedSkills.Count
 
         if ($needsSync) {
             New-Item -ItemType Directory -Path $agentsPath -Force | Out-Null
@@ -543,20 +544,35 @@ function Sync-AgentSkills([string]$RepositoryRoot, [switch]$Force) {
                 }
             }
 
-            # 별도로 설치한 스킬과 기타 항목은 새 디렉터리에도 그대로 보존합니다.
+            # 실행 중인 에이전트(Codex, Pi 등)가 스킬 디렉터리 자체를 감시하면 디렉터리 이름을 바꿀 수 없으므로,
+            # 기존 디렉터리는 유지하고 변경된 스킬 하위 디렉터리만 교체합니다. 별도로 설치한 항목은 그대로 남습니다.
             if (Test-Path -LiteralPath $destination -PathType Container) {
-                foreach ($item in (Get-ChildItem -LiteralPath $destination -Force)) {
-                    if ($skillNames -contains $item.Name) { continue }
-                    Copy-Item -LiteralPath $item.FullName -Destination $syncStaging -Recurse -Force
-                }
-
-                [System.IO.Directory]::Move($destination, $syncBackup)
+                New-Item -ItemType Directory -Path $syncBackup | Out-Null
+                $replaced = [System.Collections.Generic.List[string]]::new()
                 try {
-                    [System.IO.Directory]::Move($syncStaging, $destination)
-                    $syncStaging = $null
+                    foreach ($name in $changedSkills) {
+                        $target = Join-Path $destination $name
+                        if (Test-Path -LiteralPath $target -PathType Container) {
+                            [System.IO.Directory]::Move($target, (Join-Path $syncBackup $name))
+                        }
+                        $replaced.Add($name)
+                        [System.IO.Directory]::Move((Join-Path $syncStaging $name), $target)
+                    }
                 } catch {
-                    if (Test-Path -LiteralPath $syncBackup -PathType Container) {
-                        [System.IO.Directory]::Move($syncBackup, $destination)
+                    $rollbackFailed = $false
+                    foreach ($name in $replaced) {
+                        $target = Join-Path $destination $name
+                        $backup = Join-Path $syncBackup $name
+                        if (-not (Test-Path -LiteralPath $backup -PathType Container)) { continue }
+                        try {
+                            if (Test-Path -LiteralPath $target) { Remove-Item -LiteralPath $target -Recurse -Force }
+                            [System.IO.Directory]::Move($backup, $target)
+                        } catch {
+                            $rollbackFailed = $true
+                        }
+                    }
+                    if ($rollbackFailed) {
+                        Write-Warning "일부 스킬을 되돌리지 못했습니다. 백업 위치: $syncBackup"
                         $syncBackup = $null
                     }
                     throw
@@ -568,7 +584,7 @@ function Sync-AgentSkills([string]$RepositoryRoot, [switch]$Force) {
                 $syncStaging = $null
             }
         }
-        $syncStatus = if ($needsSync) { '전체 디렉터리 동기화' } else { '변경 없음' }
+        $syncStatus = if ($needsSync) { '변경된 스킬 교체' } else { '변경 없음' }
         Write-Host "스킬 동기화 완료: 외부 $($lock.skills.Count) / 로컬 $($localSkills.Count) (변경 감지 $updated / $syncStatus)"
     } finally {
         if ($null -ne $syncBackup -and (Test-Path -LiteralPath $syncBackup -PathType Container)) {
