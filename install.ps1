@@ -31,6 +31,7 @@ if ($Capture -and $Force) {
 # 저장소 기준 경로
 $DotfilesRoot = $PSScriptRoot
 . (Join-Path $DotfilesRoot 'scripts\dsh-settings.ps1')
+. (Join-Path $DotfilesRoot 'scripts\native-skill-cli.ps1')
 
 # 환경 변수로 재정의된 경로를 절대 경로로 반환합니다. 값이 비어 있으면 $null을 반환합니다.
 function Get-PathOverride([string]$Name) {
@@ -129,7 +130,6 @@ $Links = @(
     @{ Source = 'git\.gitconfig';                         Dest = '.gitconfig';        App = 'git';     Env = (New-HomeEnv 'GIT_CONFIG_GLOBAL' '') }
     @{ Source = 'vscode\settings.json';                   Dest = 'AppData\Roaming\Code\User\settings.json'; App = 'vscode'; Env = (New-HomeEnv 'VSCODE_PORTABLE' 'data\user-data\User\settings.json') }
     @{ Source = '.agents\skills';                         Dest = '.agents\skills';    Type = 'Junction' }
-    @{ Source = 'hooks\gg-guard.ps1';                     Dest = '.agents\hooks\gg-guard.ps1' }
     @{ Source = 'omp\agent\TITLE_SYSTEM.md';              Dest = '.omp\agent\TITLE_SYSTEM.md';              App = 'omp' }
     @{ Source = 'omp\agent\APPEND_SYSTEM.md';             Dest = '.omp\agent\APPEND_SYSTEM.md';             App = 'omp' }
     @{ Source = 'omp\agent\PERSONALITY.md';               Dest = '.omp\agent\PERSONALITY.md';               App = 'omp' }
@@ -139,7 +139,6 @@ $Links = @(
     @{ Source = 'omp\agent\models.yml';                   Dest = '.omp\agent\models.yml';                   App = 'omp' }
     @{ Source = 'omp\agent\extensions\session-header.ts'; Dest = '.omp\agent\extensions\session-header.ts'; App = 'omp' }
     @{ Source = 'omp\agent\extensions\eval-guard.ts';     Dest = '.omp\agent\extensions\eval-guard.ts';     App = 'omp' }
-    @{ Source = 'omp\agent\extensions\gg-guard.ts';       Dest = '.omp\agent\extensions\gg-guard.ts';       App = 'omp' }
     @{ Source = 'omp\agent\i-have-adhd.json';             Dest = '.omp\agent\i-have-adhd.json';             App = 'omp' }
     @{ Source = 'pi\agent\APPEND_SYSTEM.md';             Dest = '.pi\agent\APPEND_SYSTEM.md';             App = 'pi'; Env = (New-HomeEnv 'PI_CODING_AGENT_DIR' 'APPEND_SYSTEM.md') }
     @{ Source = 'pi\agent\AGENTS.md';                    Dest = '.pi\agent\AGENTS.md';                    App = 'pi'; Env = (New-HomeEnv 'PI_CODING_AGENT_DIR' 'AGENTS.md') }
@@ -147,10 +146,8 @@ $Links = @(
     @{ Source = 'pi\agent\models.json';                  Dest = '.pi\agent\models.json';                  App = 'pi'; Env = (New-HomeEnv 'PI_CODING_AGENT_DIR' 'models.json') }
     @{ Source = 'pi\agent\i-have-adhd.json';             Dest = '.pi\agent\i-have-adhd.json';             App = 'pi'; Env = (New-HomeEnv 'PI_CODING_AGENT_DIR' 'i-have-adhd.json') }
     @{ Source = 'pi\agent\extensions\session-header.ts'; Dest = '.pi\agent\extensions\session-header.ts'; App = 'pi'; Env = (New-HomeEnv 'PI_CODING_AGENT_DIR' 'extensions\session-header.ts') }
-    @{ Source = 'pi\agent\extensions\gg-guard.ts';       Dest = '.pi\agent\extensions\gg-guard.ts';       App = 'pi'; Env = (New-HomeEnv 'PI_CODING_AGENT_DIR' 'extensions\gg-guard.ts') }
     @{ Source = 'pwsh\Microsoft.PowerShell_profile.ps1';  Dest = 'Documents\PowerShell\Microsoft.PowerShell_profile.ps1'; App = 'pwsh' }
     @{ Source = 'codex\AGENTS.md';                        Dest = '.codex\AGENTS.md';                        App = 'codex'; Env = (New-HomeEnv 'CODEX_HOME' 'AGENTS.md') }
-    @{ Source = 'codex\hooks.json';                       Dest = '.codex\hooks.json';                       App = 'codex'; Env = (New-HomeEnv 'CODEX_HOME' 'hooks.json') }
     @{ Source = 'codex\agents\researcher.toml';           Dest = '.codex\agents\researcher.toml';           App = 'codex'; Env = (New-HomeEnv 'CODEX_HOME' 'agents\researcher.toml') }
     @{ Source = 'codex\agents\planner.toml';              Dest = '.codex\agents\planner.toml';              App = 'codex'; Env = (New-HomeEnv 'CODEX_HOME' 'agents\planner.toml') }
     @{ Source = 'codex\config.toml';                      Dest = '.codex\config.toml';                      Type = 'Patch'; App = 'codex'; Env = (New-HomeEnv 'CODEX_HOME' 'config.toml') }
@@ -355,8 +352,8 @@ function Test-UpToDate([string]$SourcePath, [string]$DestPath, [string]$LinkType
             (Test-Path $resolved))
 }
 
-# 스킬 디렉터리의 파일 경로/크기/수정 시각을 모아 지문 문자열을 만듭니다. 파일 내용을 읽지 않아 빠릅니다.
-function Get-DirectoryFingerprint([string]$Path) {
+# 스킬 파일의 경로와 수정 시각을 비교합니다. 문서와 JSON은 CLI 변환 결과의 해시로 비교합니다.
+function Get-DirectoryFingerprint([string]$Path, [switch]$NormalizeSkillCli) {
     $root = [System.IO.Path]::GetFullPath($Path).TrimEnd([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar)
     $prefixLength = $root.Length + 1
     $options = [System.IO.EnumerationOptions]::new()
@@ -366,16 +363,27 @@ function Get-DirectoryFingerprint([string]$Path) {
     $entries = [System.Collections.Generic.List[string]]::new()
     foreach ($file in [System.IO.Directory]::EnumerateFiles($root, '*', $options)) {
         $info = [System.IO.FileInfo]::new($file)
-        $entries.Add($file.Substring($prefixLength) + '|' + $info.Length + '|' + $info.LastWriteTimeUtc.Ticks)
+        $relativePath = $file.Substring($prefixLength)
+        $signature = [string]$info.Length
+        if ($info.Extension -in @('.md', '.json')) {
+            $content = [System.IO.File]::ReadAllText($file)
+            if ($NormalizeSkillCli) {
+                $skillRelativePath = (Split-Path $root -Leaf) + '/' + $relativePath
+                $content = Get-NativeSkillCliContent -Content $content -RelativePath $skillRelativePath
+            }
+            $bytes = [System.Text.Encoding]::UTF8.GetBytes($content)
+            $signature = [Convert]::ToHexString([System.Security.Cryptography.SHA256]::HashData($bytes))
+        }
+        $entries.Add($relativePath + '|' + $signature + '|' + $info.LastWriteTimeUtc.Ticks)
     }
     $entries.Sort([System.StringComparer]::Ordinal)
     return [string]::Join("`n", $entries)
 }
 
-# 대상 스킬 디렉터리가 원본과 내용이 같은지(경로/크기/수정 시각) 비교합니다.
+# 원본의 CLI 변환 결과와 대상 스킬 디렉터리가 같은지 확인합니다.
 function Test-DirectoryUpToDate([string]$SourcePath, [string]$DestPath) {
     if (-not (Test-Path -LiteralPath $DestPath -PathType Container)) { return $false }
-    return ((Get-DirectoryFingerprint $SourcePath) -ceq (Get-DirectoryFingerprint $DestPath))
+    return ((Get-DirectoryFingerprint $SourcePath -NormalizeSkillCli) -ceq (Get-DirectoryFingerprint $DestPath))
 }
 
 # 외부 스킬은 잠금 파일에서 복원하고 로컬 스킬은 한국어 원본 그대로 배포합니다.
@@ -522,6 +530,17 @@ function Sync-AgentSkills([string]$RepositoryRoot, [switch]$Force) {
             $skillSources = @($skillNames | ForEach-Object { $sources[$_] })
             if ($skillSources.Count -gt 0) {
                 Copy-Item -LiteralPath $skillSources -Destination $syncStaging -Recurse
+            }
+            foreach ($file in (Get-ChildItem -LiteralPath $syncStaging -File -Recurse |
+                    Where-Object Extension -in @('.md', '.json'))) {
+                $content = [System.IO.File]::ReadAllText($file.FullName)
+                $relativePath = [System.IO.Path]::GetRelativePath($syncStaging, $file.FullName)
+                $nativeContent = Get-NativeSkillCliContent -Content $content -RelativePath $relativePath
+                if ($nativeContent -cne $content) {
+                    $modifiedTime = $file.LastWriteTimeUtc
+                    [System.IO.File]::WriteAllText($file.FullName, $nativeContent, [System.Text.UTF8Encoding]::new($false))
+                    [System.IO.File]::SetLastWriteTimeUtc($file.FullName, $modifiedTime)
+                }
             }
 
             # 별도로 설치한 스킬과 기타 항목은 새 디렉터리에도 그대로 보존합니다.

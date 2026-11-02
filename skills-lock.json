@@ -1,12 +1,6 @@
 {
   "version": 1,
   "skills": {
-    "gg": {
-      "source": "dungsil-ai/gg",
-      "sourceType": "github",
-      "skillPath": "skills/gg/SKILL.md",
-      "computedHash": "f4c30eb659ee8bac2c3ab846000705a2f98f387561521c1d12c1921df663ae24"
-    },
     "vibe-audit": {
       "source": "dungsil-ai/vibe",
       "sourceType": "github",

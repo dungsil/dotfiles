@@ -13,7 +13,6 @@ OMP 설정을 기준으로 옮겼으므로, omp(oh-my-pi)와 pi를 병행해서 
 | `agent/settings.json` | `omp/agent/config.yml`의 Pi 지원 항목 | 아래 "옮긴 설정" 참고. |
 | `agent/models.json` | `omp/agent/models.yml` | `tailscale` 엔드포인트와 모델 22개를 옮겼습니다. |
 | `agent/i-have-adhd.json` | `omp/agent/i-have-adhd.json` | i-have-adhd 확장이 `getAgentDir()` 아래에서 읽습니다. |
-| `agent/extensions/gg-guard.ts` | `omp/agent/extensions/gg-guard.ts` | Pi의 셸 도구는 `bash`, `powershell`입니다. |
 | `agent/extensions/session-header.ts` | `omp/agent/extensions/session-header.ts` | Pi에는 `session_switch`/`session_branch` 이벤트가 없어 `session_start`/`session_tree`만 처리하고, 세션 ID는 세션 파일 이름에서 얻습니다. |
 
 ## 옮긴 설정

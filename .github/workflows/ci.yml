@@ -15,6 +15,9 @@ jobs:
       - name: Install powershell-yaml
         shell: pwsh
         run: Install-Module powershell-yaml -Force -Scope CurrentUser
+      - name: Test native skill CLI commands
+        shell: pwsh
+        run: pwsh -NoProfile -File scripts/test-native-skill-cli.ps1 -UnitOnly
       - name: Validate repo
         shell: pwsh
         run: pwsh -NoProfile -File scripts/validate.ps1
