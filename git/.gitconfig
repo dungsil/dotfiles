@@ -29,4 +29,6 @@
 [credential "https://gitlab.lsware.net"]
 	helper = !glab auth git-credential
 [credential "helperselector"]
-	selected = wincred
+	selected = manager
+[credential "https://git.gila-map.ts.net"]
+	provider = generic
