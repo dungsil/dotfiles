@@ -164,10 +164,8 @@ $OmpPlugins = @(
     @{ Target = 'i-have-adhd@i-have-adhd'; Scope = 'user' }
 )
 
-$DshPlugins = @(
-    '@dungsil/dsh-plugin-locale-ko'
-    '@dungsil/dsh-plugin-i-have-adhd'
-)
+$DshPlugins = (Get-Content -LiteralPath (Join-Path $DotfilesRoot 'dsh\package.json') -Raw -Encoding utf8 |
+    ConvertFrom-Json -AsHashtable).dependencies
 
 # 심볼릭 링크 생성이 가능한 환경(관리자 권한 또는 개발자 모드)인지 판정합니다.
 function Test-CanCreateSymbolicLink {
@@ -622,6 +620,9 @@ if ($Capture) {
         if (Test-Path -LiteralPath $pair.Live -PathType Leaf) {
             [System.IO.Directory]::CreateDirectory((Split-Path -Parent $repoPath)) | Out-Null
             $liveText = Get-Content -LiteralPath $pair.Live -Raw -Encoding utf8
+            if ($pair.Repo -ceq 'dsh\package.json') {
+                $liveText = ConvertTo-DshPackageContent $liveText
+            }
             [System.IO.File]::WriteAllText($repoPath, $liveText, [System.Text.Encoding]::UTF8)
             Write-Host "캡처됨          $($pair.Repo) <- $($pair.Live)"
             $captured++

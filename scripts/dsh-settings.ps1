@@ -151,8 +151,19 @@ function Get-DshCliCommand {
     return (Get-Command dsh -ErrorAction SilentlyContinue)
 }
 
-# 프로필의 패키지 상태는 직접 쓰지 않고 DSH CLI로 누락된 플러그인을 설치합니다.
-function Install-DshPlugins([string[]]$Packages) {
+# 캡처한 버전과 로컬 개발 경로 대신 개인 플러그인의 최신 배포판을 사용합니다.
+function ConvertTo-DshPackageContent([string]$Text) {
+    $manifest = $Text | ConvertFrom-Json -AsHashtable
+    foreach ($package in @($manifest.dependencies.Keys)) {
+        if ($package -clike '@dungsil/dsh-plugin-*') {
+            $manifest.dependencies[$package] = 'latest'
+        }
+    }
+    return ($manifest | ConvertTo-Json -Depth 32).TrimEnd() + [Environment]::NewLine
+}
+
+# latest는 매번 갱신하고, 고정 버전은 누락되었거나 설치 버전이 다를 때 설치합니다.
+function Install-DshPlugins([System.Collections.IDictionary]$Packages) {
     if ($Packages.Count -eq 0 -or -not (Test-AppInstalled 'dsh')) { return }
 
     $profile = Get-DshProfileName
@@ -162,13 +173,18 @@ function Install-DshPlugins([string[]]$Packages) {
         Get-Content -LiteralPath $manifestPath -Raw -Encoding utf8 | ConvertFrom-Json
     }
     $pending = @(
-        foreach ($package in $Packages) {
+        foreach ($package in $Packages.Keys) {
+            $version = $Packages[$package]
             $installedManifest = Join-Path $profileHome "node_modules/$package/package.json"
-            if ($manifest.dependencies.PSObject.Properties.Name -ccontains $package -and
-                (Test-Path -LiteralPath $installedManifest -PathType Leaf)) {
-                Write-Host "건너뜀 (이미 설치됨)  DSH 플러그인: $package"
+            $installed = if (Test-Path -LiteralPath $installedManifest -PathType Leaf) {
+                Get-Content -LiteralPath $installedManifest -Raw -Encoding utf8 | ConvertFrom-Json
+            }
+            if ($version -cne 'latest' -and
+                $manifest.dependencies.PSObject.Properties.Name -ccontains $package -and
+                $installed.version -ceq $version) {
+                Write-Host "건너뜀 (설치 버전 일치)  DSH 플러그인: ${package}@${version}"
             } else {
-                $package
+                "${package}@${version}"
             }
         }
     )

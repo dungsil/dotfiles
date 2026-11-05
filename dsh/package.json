@@ -8,22 +8,43 @@
         "@deepseek-ai/dsh-web-app",
         "@deepseek-ai/dsh-experimental-inspector-profile",
         "@deepseek-ai/dsh-experimental-agent-team-profile",
-        "@deepseek-ai/dsh-experimental-auto-review",
-        "@deepseek-ai/dsh-experimental-tool-worktree",
         "@deepseek-ai/dsh-experimental-cot-translation-bundle",
         "@deepseek-ai/dsh-experimental-terminal-bundle",
         "@deepseek-ai/dsh-experimental-session-search",
         "@deepseek-ai/dsh-experimental-session-titles-bundle",
         "@deepseek-ai/dsh-experimental-ralph-bundle",
         "@deepseek-ai/dsh-subagent-codex",
+        "@deepseek-ai/dsh-experimental-plugin-market-bundle",
+        "@dungsil/dsh-plugin-i-have-adhd",
+        "@dungsil/dsh-plugin-ui-sidebar-inbox",
+        "@dungsil/dsh-plugin-ui-setting-skills",
+        "@dungsil/dsh-plugin-ui-vcs",
+        "@dungsil/dsh-plugin-ui-usage",
+        "@dungsil/dsh-plugin-tool-diff-note",
         "@dungsil/dsh-plugin-locale-ko",
-        "@dungsil/dsh-plugin-i-have-adhd"
+        "@dungsil/dsh-plugin-tool-secret-request",
+        "@dungsil/dsh-plugin-ui-model-settings",
+        "@dungsil/dsh-plugin-ui-worktree",
+        "@dungsil/dsh-plugin-ui-model-picker",
+        "@dungsil/dsh-plugin-cli-proxy-api",
+        "@dungsil/dsh-plugin-ui-turn-rail-left"
       ]
     }
   },
   "dependencies": {
     "@deepseek-ai/dsh-subagent-codex": "0.2.1-rc.5",
-    "@dungsil/dsh-plugin-i-have-adhd": "^0.2.0",
-    "@dungsil/dsh-plugin-locale-ko": "^0.5.0"
+    "@dungsil/dsh-plugin-cli-proxy-api": "latest",
+    "@dungsil/dsh-plugin-i-have-adhd": "latest",
+    "@dungsil/dsh-plugin-locale-ko": "latest",
+    "@dungsil/dsh-plugin-tool-diff-note": "latest",
+    "@dungsil/dsh-plugin-tool-secret-request": "latest",
+    "@dungsil/dsh-plugin-ui-model-picker": "latest",
+    "@dungsil/dsh-plugin-ui-model-settings": "latest",
+    "@dungsil/dsh-plugin-ui-setting-skills": "latest",
+    "@dungsil/dsh-plugin-ui-sidebar-inbox": "latest",
+    "@dungsil/dsh-plugin-ui-turn-rail-left": "latest",
+    "@dungsil/dsh-plugin-ui-usage": "latest",
+    "@dungsil/dsh-plugin-ui-vcs": "latest",
+    "@dungsil/dsh-plugin-ui-worktree": "latest"
   }
 }
