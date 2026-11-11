@@ -96,6 +96,13 @@ providers:
         contextWindow: 1048576
         api: openai-responses
         input: [text, image]
+      - id: gemini-4-carbon
+        name: Gemini 4 Carbon
+        reasoning: true
+        maxTokens: 32768
+        contextWindow: 1048576
+        api: openai-responses
+        input: [text, image]
       - id: gemini-3.8-flash
         name: Gemini 3.8 Flash
         reasoning: true
