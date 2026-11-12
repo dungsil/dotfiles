@@ -14,7 +14,8 @@
     "tailscale/claude-opus-5-5": "high",
     "tailscale/claude-fable-5-1": "high",
     "tailscale/gpt-6-astra": "medium",
-    "tailscale/deepseek-v4.1-flash": "max"
+    "tailscale/deepseek-v4.1-flash": "max",
+    "tailscale/gemini-4-hydrogen": "low"
   },
   "defaultTools": [
     "-bash",

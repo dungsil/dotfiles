@@ -103,6 +103,17 @@ providers:
         contextWindow: 1048576
         api: openai-responses
         input: [text, image]
+      - id: gemini-4-hydrogen
+        name: Gemini 4 Hydrogen
+        reasoning: true
+        maxTokens: 65536
+        contextWindow: 1048576
+        api: openai-responses
+        input: [text, image]
+        thinking:
+          mode: effort
+          efforts: [low, medium, high, xhigh]
+          defaultLevel: low
       - id: gemini-3.8-flash
         name: Gemini 3.8 Flash
         reasoning: true

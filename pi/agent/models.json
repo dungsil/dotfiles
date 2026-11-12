@@ -157,6 +157,19 @@
           "input": ["text", "image"]
         },
         {
+          "id": "gemini-4-hydrogen",
+          "name": "Gemini 4 Hydrogen",
+          "reasoning": true,
+          "maxTokens": 65536,
+          "contextWindow": 1048576,
+          "input": ["text", "image"],
+          "thinkingLevelMap": {
+            "off": null,
+            "minimal": null,
+            "xhigh": "xhigh"
+          }
+        },
+        {
           "id": "gemini-3.8-flash",
           "name": "Gemini 3.8 Flash",
           "reasoning": true,
