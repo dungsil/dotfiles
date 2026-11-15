@@ -25,6 +25,27 @@ providers:
         contextWindow: 1050000
         api: openai-responses
         input: [text, image]
+      - id: claude-mythos-5-2
+        name: Mythos 5.2
+        reasoning: true
+        maxTokens: 128000
+        contextWindow: 1000000
+        api: anthropic-messages
+        input: [text, image]
+        tokenizer: claude-v5
+        compat:
+          supportsForcedToolChoice: false
+        cost:
+          input: 8
+          output: 40
+          cacheRead: 0.2
+          cacheWrite: 10
+        thinking:
+          mode: anthropic-adaptive
+          efforts: [low, medium, high, xhigh, max]
+          defaultLevel: high
+          supportsDisplay: true
+          requiresEffort: true
       - id: claude-fable-5-1
         name: Fable 5.1
         reasoning: true

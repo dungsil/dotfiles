@@ -11,7 +11,7 @@ OMP 설정을 기준으로 옮겼으므로, omp(oh-my-pi)와 pi를 병행해서 
 | `agent/AGENTS.md` | `omp/agent/RULES.md` + `omp/agent/PERSONALITY.md` | Pi에는 별도 규칙 파일이 없어 사용자 지침 파일 하나로 합쳤습니다. |
 | `agent/APPEND_SYSTEM.md` | `omp/agent/APPEND_SYSTEM.md` | 동일합니다. |
 | `agent/settings.json` | `omp/agent/config.yml`의 Pi 지원 항목 | 아래 "옮긴 설정" 참고. |
-| `agent/models.json` | `omp/agent/models.yml` | `tailscale` 엔드포인트와 모델 17개를 옮겼습니다. |
+| `agent/models.json` | `omp/agent/models.yml` | `tailscale` 엔드포인트와 모델 18개를 등록했습니다. |
 | `agent/i-have-adhd.json` | `omp/agent/i-have-adhd.json` | i-have-adhd 확장이 `getAgentDir()` 아래에서 읽습니다. |
 | `agent/extensions/session-header.ts` | `omp/agent/extensions/session-header.ts` | Pi에는 `session_switch`/`session_branch` 이벤트가 없어 `session_start`/`session_tree`만 처리하고, 세션 ID는 세션 파일 이름에서 얻습니다. |
 
@@ -40,6 +40,12 @@ omp `models.yml`의 `thinking` 블록은 아래와 같이 옮겼습니다. 이 �
 `thinking` 블록이 없는 모델은 omp가 모델 ID를 보고 정한 추론 레벨 목록을 기준으로 삼았습니다. 이 목록은 `omp models tailscale --json` 출력에 있는 `thinking` 필드로 확인합니다.
 
 Claude 모델에는 `baseUrl`을 `https://ai.gila-map.ts.net`으로 따로 지정했습니다. Pi는 이 값을 Anthropic SDK에 그대로 넘깁니다. SDK는 이 값 뒤에 `/v1/messages`를 붙여 요청합니다. 공급자의 `baseUrl`(`https://ai.gila-map.ts.net/v1`)을 그대로 쓰면 SDK가 `/v1/v1/messages`로 요청하고, 게이트웨이가 404를 반환합니다. omp는 `baseUrl` 끝의 `/v1`을 지운 뒤 경로를 붙이므로 같은 값으로도 동작합니다.
+
+## Mythos 5.2 선등록
+
+`claude-mythos-5-2`를 OMP·Pi·DSH 카탈로그에 추가했습니다. [Anthropic 공식 문서](https://platform.claude.com/docs/en/models/mythos-5-2/overview)를 기준으로 컨텍스트 1,000,000, 최대 출력 128,000, text/image 입력과 adaptive thinking을 설정했습니다. 추론은 끌 수 없으므로 `off`와 `minimal`을 숨기고 low/medium/high/xhigh/max를 노출합니다. Pi와 OMP의 기본 effort는 high입니다. [공식 가격표](https://platform.claude.com/docs/en/about-claude/pricing)에 따라 백만 토큰당 입력 $8, 출력 $40, 캐시 읽기 $0.20, 5분 캐시 쓰기 $10을 적용했습니다. Pi에서 강제 도구 선택과 tokenizer 설정을 옮기지 않는 기존 제약은 그대로 적용됩니다.
+
+2026-11-15 기준 models.dev와 CPA의 일반·grok·Anthropic `/v1/models`에 이 모델이 없습니다. 따라서 이번 등록은 클라이언트 메타데이터를 준비한 것이며, CPA를 통한 실제 사용은 검증되지 않았습니다. 다른 모델로 우회하는 별칭은 추가하지 않았습니다. 사용하려면 CPA 모델 노출과 계정 접근 권한을 먼저 확인해야 합니다. Mythos 5.2는 검증된 조직 전용이며, 명시적 허가가 없는 경우 ZDR을 지원하지 않고 30일 데이터 보관이 필수입니다.
 
 ## 옮기지 않은 항목
 
