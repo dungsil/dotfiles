@@ -6,6 +6,34 @@
       "apiKey": "none",
       "models": [
         {
+          "id": "gpt-6.2-astra",
+          "name": "GPT-6.2 Astra",
+          "reasoning": true,
+          "maxTokens": 128000,
+          "contextWindow": 272000,
+          "input": ["text", "image"],
+          "thinkingLevelMap": {
+            "off": null,
+            "minimal": null,
+            "xhigh": "xhigh",
+            "max": "max"
+          }
+        },
+        {
+          "id": "gpt-6.2-sol",
+          "name": "GPT-6.2 Sol",
+          "reasoning": true,
+          "maxTokens": 128000,
+          "contextWindow": 500000,
+          "input": ["text", "image"],
+          "thinkingLevelMap": {
+            "off": null,
+            "minimal": null,
+            "xhigh": "xhigh",
+            "max": "max"
+          }
+        },
+        {
           "id": "gpt-6-astra",
           "name": "GPT-6 Astra",
           "reasoning": true,

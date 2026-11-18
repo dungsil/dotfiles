@@ -4,6 +4,28 @@ providers:
     api: openai-responses
     auth: none
     models:
+      - id: gpt-6.2-astra
+        name: GPT-6.2 Astra
+        reasoning: true
+        maxTokens: 128000
+        contextWindow: 272000
+        api: openai-responses
+        input: [text, image]
+        thinking:
+          mode: effort
+          efforts: [low, medium, high, xhigh, max]
+          defaultLevel: high
+      - id: gpt-6.2-sol
+        name: GPT-6.2 Sol
+        reasoning: true
+        maxTokens: 128000
+        contextWindow: 500000
+        api: openai-responses
+        input: [text, image]
+        thinking:
+          mode: effort
+          efforts: [low, medium, high, xhigh, max]
+          defaultLevel: high
       - id: gpt-6-astra
         name: GPT-6 Astra
         reasoning: true
