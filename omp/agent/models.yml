@@ -136,6 +136,17 @@ providers:
           mode: effort
           efforts: [low, medium, high, xhigh]
           defaultLevel: low
+      - id: gemini-4-neon
+        name: Gemini 4 Neon
+        reasoning: true
+        maxTokens: 65536
+        contextWindow: 1048576
+        api: openai-responses
+        input: [text, image]
+        thinking:
+          mode: effort
+          efforts: [low, medium, high, xhigh]
+          defaultLevel: low
       - id: gemini-3.8-flash
         name: Gemini 3.8 Flash
         reasoning: true
