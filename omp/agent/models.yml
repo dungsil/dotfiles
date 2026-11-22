@@ -200,3 +200,7 @@ providers:
         contextWindow: 1000000
         api: openai-completions
         input: [text, image]
+        thinking:
+          mode: effort
+          efforts: [max]
+          defaultLevel: max

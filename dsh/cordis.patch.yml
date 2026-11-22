@@ -51,6 +51,8 @@
             input:
               - text
               - image
+            reasoningEfforts:
+              max: max
         apiKeyEnv: OPENCODE_GO_API_KEY
       openai:
         baseURL: https://ai.gila-map.ts.net/v1
